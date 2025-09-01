@@ -1,10 +1,17 @@
-<div class="layout">
-  <app-topbar class="layout-topbar"></app-topbar>
-  <app-sidebar class="layout-sidebar"></app-sidebar>
-  <main class="layout-main">
-    <app-dashboard></app-dashboard>
-  </main>
-  <app-sidebar-right class="layout-sidebar-right"></app-sidebar-right>
+<div class="app-container">
+  <!-- Topbar générique sur toute la largeur -->
+  <app-topbar class="app-topbar"></app-topbar>
+
+  <!-- Cadre unifié pour le contenu principal -->
+  <div class="unified-frame">
+    <div class="layout">
+      <app-sidebar class="layout-sidebar"></app-sidebar>
+      <main class="layout-main">
+        <app-dashboard></app-dashboard>
+      </main>
+      <app-sidebar-right class="layout-sidebar-right"></app-sidebar-right>
+    </div>
+  </div>
 </div>
 
 <router-outlet />

@@ -3,8 +3,61 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
+  padding: 0 var(--spacing-xl);
   background: transparent;
+  width: 100%;
+}
+
+/* Brand/Logo à gauche */
+.topbar-brand {
+  .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(
+        135deg,
+        var(--color-primary),
+        var(--color-orange)
+      );
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 2px 8px rgba(44, 111, 255, 0.2);
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+
+      .brand-title {
+        font-size: var(--font-size-xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1;
+        margin: 0;
+      }
+
+      .brand-subtitle {
+        font-size: var(--font-size-xs);
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        line-height: 1;
+      }
+    }
+  }
 }
 
 /* Container de recherche centré */
@@ -13,7 +66,7 @@
   display: flex;
   justify-content: center;
   max-width: 520px;
-  margin: 0 auto;
+  margin: 0 var(--spacing-xl);
 
   .search-input-wrapper {
     position: relative;
@@ -32,7 +85,7 @@
     .search-input {
       width: 100%;
       height: 40px;
-      background: var(--bg-card);
+      background: var(--bg-app);
       border: 1px solid var(--border-light);
       border-radius: var(--radius-pill);
       padding: 0 16px 0 48px;
@@ -49,6 +102,7 @@
         outline: none;
         border-color: var(--color-primary);
         box-shadow: 0 0 0 3px rgba(44, 111, 255, 0.1);
+        background: white;
       }
     }
   }
