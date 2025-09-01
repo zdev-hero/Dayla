@@ -9,7 +9,7 @@
     margin-bottom: var(--spacing-md);
 
     .leave-status {
-      background: #E0ECFF;
+      background: #e0ecff;
       color: var(--color-primary);
       font-weight: 500;
     }
@@ -70,7 +70,11 @@
           width: 32px;
           height: 32px;
           border-radius: 50%;
-          background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+          background: linear-gradient(
+            135deg,
+            var(--color-primary-light),
+            var(--color-primary)
+          );
           display: flex;
           align-items: center;
           justify-content: center;
@@ -104,11 +108,11 @@
 
         &.empty {
           .contact-icon {
-            background: #F1F5F9;
+            background: #f1f5f9;
             color: var(--text-secondary);
 
             &.empty-icon {
-              background: #E5E7EB;
+              background: #e5e7eb;
             }
           }
 

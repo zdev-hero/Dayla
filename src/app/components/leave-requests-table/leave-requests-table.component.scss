@@ -23,7 +23,7 @@
       font-size: var(--font-size-base);
 
       thead {
-        background: #F8FAFC;
+        background: #f8fafc;
         position: sticky;
         top: 0;
         z-index: 1;
@@ -35,12 +35,25 @@
           color: var(--text-primary);
           border-bottom: 1px solid var(--border-separator);
 
-          &.col-user { width: 40%; }
-          &.col-type { width: 16%; }
-          &.col-date { width: 16%; }
-          &.col-duration { width: 12%; }
-          &.col-status { width: 10%; }
-          &.col-action { width: 6%; text-align: center; }
+          &.col-user {
+            width: 40%;
+          }
+          &.col-type {
+            width: 16%;
+          }
+          &.col-date {
+            width: 16%;
+          }
+          &.col-duration {
+            width: 12%;
+          }
+          &.col-status {
+            width: 10%;
+          }
+          &.col-action {
+            width: 6%;
+            text-align: center;
+          }
         }
       }
 
@@ -50,7 +63,7 @@
           transition: background-color 0.2s ease;
 
           &:hover {
-            background: #F8FAFC;
+            background: #f8fafc;
           }
 
           &:last-child {
@@ -108,7 +121,7 @@
               justify-content: center;
 
               &:hover {
-                background: #F1F5F9;
+                background: #f1f5f9;
                 color: var(--text-primary);
               }
             }
@@ -153,7 +166,7 @@
         height: 36px;
 
         &:hover:not(:disabled) {
-          background: #F1F5F9;
+          background: #f1f5f9;
           color: var(--text-primary);
         }
 
@@ -180,7 +193,7 @@
     .table-container {
       .leave-table {
         min-width: 600px; // Force horizontal scroll sur mobile
-        
+
         thead th {
           padding: 12px 8px;
           font-size: var(--font-size-sm);
@@ -188,10 +201,10 @@
 
         tbody td {
           padding: 12px 8px;
-          
+
           &.user-cell .user-info {
             gap: 8px;
-            
+
             .user-avatar {
               width: 28px;
               height: 28px;

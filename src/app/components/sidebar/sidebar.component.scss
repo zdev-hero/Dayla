@@ -19,7 +19,11 @@
     .logo-icon {
       width: 28px;
       height: 28px;
-      background: linear-gradient(135deg, var(--color-primary), var(--color-orange));
+      background: linear-gradient(
+        135deg,
+        var(--color-primary),
+        var(--color-orange)
+      );
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -46,7 +50,7 @@
       .logo-subtitle {
         font-size: var(--font-size-xs);
         font-weight: 500;
-        color: #94A3B8;
+        color: #94a3b8;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         line-height: 1;
@@ -100,7 +104,7 @@
       &.active {
         background: var(--bg-card);
         color: var(--color-primary);
-        border: 1px solid #DDE6F6;
+        border: 1px solid #dde6f6;
         box-shadow: 0 2px 4px rgba(44, 111, 255, 0.08);
 
         .nav-icon {
@@ -132,7 +136,7 @@
 
     .info-tabs {
       display: flex;
-      background: #F8FAFC;
+      background: #f8fafc;
       border-radius: var(--radius-pill);
       padding: 2px;
       gap: 2px;
@@ -197,7 +201,7 @@
           .donut-date {
             font-size: var(--font-size-xs);
             color: var(--text-secondary);
-            background: #F1F5F9;
+            background: #f1f5f9;
             padding: 4px 8px;
             border-radius: 12px;
             display: inline-block;
@@ -224,7 +228,7 @@
         justify-content: center;
 
         &:hover {
-          background: #F1F5F9;
+          background: #f1f5f9;
           color: var(--text-primary);
         }
       }

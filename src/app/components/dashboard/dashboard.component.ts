@@ -10,11 +10,9 @@ import { BalanceChartComponent } from '../balance-chart/balance-chart.component'
     LeaveRequestsTableComponent,
     EmployeeProfileComponent,
     LeaveAnalysisComponent,
-    BalanceChartComponent
+    BalanceChartComponent,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrl: './dashboard.component.scss',
 })
-export class DashboardComponent {
-
-}
+export class DashboardComponent {}

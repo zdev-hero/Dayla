@@ -12,10 +12,10 @@ import { SidebarRightComponent } from './components/sidebar-right/sidebar-right.
     DashboardComponent,
     SidebarComponent,
     TopbarComponent,
-    SidebarRightComponent
+    SidebarRightComponent,
   ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
 export class AppComponent {
   title = 'Dayla';

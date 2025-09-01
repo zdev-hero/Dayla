@@ -38,38 +38,113 @@
         <svg class="chart-svg" viewBox="0 0 800 240" preserveAspectRatio="none">
           <!-- Grille horizontale -->
           <g class="grid-lines">
-            <line x1="0" y1="48" x2="800" y2="48" stroke="#F1F5F9" stroke-width="1"/>
-            <line x1="0" y1="96" x2="800" y2="96" stroke="#F1F5F9" stroke-width="1"/>
-            <line x1="0" y1="144" x2="800" y2="144" stroke="#F1F5F9" stroke-width="1"/>
-            <line x1="0" y1="192" x2="800" y2="192" stroke="#F1F5F9" stroke-width="1"/>
+            <line
+              x1="0"
+              y1="48"
+              x2="800"
+              y2="48"
+              stroke="#F1F5F9"
+              stroke-width="1"
+            />
+            <line
+              x1="0"
+              y1="96"
+              x2="800"
+              y2="96"
+              stroke="#F1F5F9"
+              stroke-width="1"
+            />
+            <line
+              x1="0"
+              y1="144"
+              x2="800"
+              y2="144"
+              stroke="#F1F5F9"
+              stroke-width="1"
+            />
+            <line
+              x1="0"
+              y1="192"
+              x2="800"
+              y2="192"
+              stroke="#F1F5F9"
+              stroke-width="1"
+            />
           </g>
 
           <!-- Définition des dégradés -->
           <defs>
-            <linearGradient id="congésGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style="stop-color:#2C6FFF;stop-opacity:0.3"/>
-              <stop offset="100%" style="stop-color:#2C6FFF;stop-opacity:0"/>
+            <linearGradient
+              id="congésGradient"
+              x1="0%"
+              y1="0%"
+              x2="0%"
+              y2="100%"
+            >
+              <stop
+                offset="0%"
+                style="stop-color: #2c6fff; stop-opacity: 0.3"
+              />
+              <stop
+                offset="100%"
+                style="stop-color: #2c6fff; stop-opacity: 0"
+              />
             </linearGradient>
-            <linearGradient id="présentsGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style="stop-color:#6366F1;stop-opacity:0.3"/>
-              <stop offset="100%" style="stop-color:#6366F1;stop-opacity:0"/>
+            <linearGradient
+              id="présentsGradient"
+              x1="0%"
+              y1="0%"
+              x2="0%"
+              y2="100%"
+            >
+              <stop
+                offset="0%"
+                style="stop-color: #6366f1; stop-opacity: 0.3"
+              />
+              <stop
+                offset="100%"
+                style="stop-color: #6366f1; stop-opacity: 0"
+              />
             </linearGradient>
           </defs>
 
           <!-- Zones de remplissage -->
-          <path d="M 0 192 L 67 172 L 133 158 L 200 145 L 267 138 L 333 142 L 400 155 L 467 165 L 533 152 L 600 148 L 667 142 L 733 158 L 800 165 L 800 240 L 0 240 Z" fill="url(#congésGradient)"/>
-          <path d="M 0 168 L 67 148 L 133 142 L 200 128 L 267 115 L 333 125 L 400 118 L 467 132 L 533 125 L 600 118 L 667 112 L 733 125 L 800 135 L 800 240 L 0 240 Z" fill="url(#présentsGradient)"/>
+          <path
+            d="M 0 192 L 67 172 L 133 158 L 200 145 L 267 138 L 333 142 L 400 155 L 467 165 L 533 152 L 600 148 L 667 142 L 733 158 L 800 165 L 800 240 L 0 240 Z"
+            fill="url(#congésGradient)"
+          />
+          <path
+            d="M 0 168 L 67 148 L 133 142 L 200 128 L 267 115 L 333 125 L 400 118 L 467 132 L 533 125 L 600 118 L 667 112 L 733 125 L 800 135 L 800 240 L 0 240 Z"
+            fill="url(#présentsGradient)"
+          />
 
           <!-- Lignes de données -->
-          <path d="M 0 192 L 67 172 L 133 158 L 200 145 L 267 138 L 333 142 L 400 155 L 467 165 L 533 152 L 600 148 L 667 142 L 733 158 L 800 165" stroke="#2C6FFF" stroke-width="2.5" fill="none"/>
-          <path d="M 0 168 L 67 148 L 133 142 L 200 128 L 267 115 L 333 125 L 400 118 L 467 132 L 533 125 L 600 118 L 667 112 L 733 125 L 800 135" stroke="#6366F1" stroke-width="2.5" fill="none"/>
+          <path
+            d="M 0 192 L 67 172 L 133 158 L 200 145 L 267 138 L 333 142 L 400 155 L 467 165 L 533 152 L 600 148 L 667 142 L 733 158 L 800 165"
+            stroke="#2C6FFF"
+            stroke-width="2.5"
+            fill="none"
+          />
+          <path
+            d="M 0 168 L 67 148 L 133 142 L 200 128 L 267 115 L 333 125 L 400 118 L 467 132 L 533 125 L 600 118 L 667 112 L 733 125 L 800 135"
+            stroke="#6366F1"
+            stroke-width="2.5"
+            fill="none"
+          />
 
           <!-- Point mis en évidence (Juillet) -->
-          <circle cx="400" cy="118" r="6" fill="#6366F1" stroke="white" stroke-width="2"/>
+          <circle
+            cx="400"
+            cy="118"
+            r="6"
+            fill="#6366F1"
+            stroke="white"
+            stroke-width="2"
+          />
         </svg>
 
         <!-- Tooltip pour Juillet -->
-        <div class="tooltip" style="left: 50%; top: 45%;">
+        <div class="tooltip" style="left: 50%; top: 45%">
           <div class="tooltip-content">
             <div class="tooltip-value">50/100</div>
             <div class="tooltip-date">12 Juillet 2025</div>
