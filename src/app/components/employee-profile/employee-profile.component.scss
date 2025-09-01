@@ -1,0 +1,159 @@
+.employee-profile-card {
+  padding: var(--spacing-md);
+  height: fit-content;
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: var(--spacing-md);
+
+    .leave-status {
+      background: #E0ECFF;
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+
+    .return-date {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+    }
+  }
+
+  .profile-main {
+    .profile-identity {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 24px;
+
+      .profile-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+      }
+
+      .profile-info {
+        flex: 1;
+        min-width: 0;
+
+        .profile-name {
+          font-size: var(--font-size-lg);
+          font-weight: 600;
+          color: var(--text-primary);
+          margin: 0 0 12px 0;
+          line-height: 1.3;
+        }
+
+        .modify-btn {
+          height: 36px;
+          padding: 0 16px;
+          font-size: var(--font-size-sm);
+          border-radius: 10px;
+        }
+      }
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+
+      .contact-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+
+        .contact-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          flex-shrink: 0;
+
+          svg {
+            width: 16px;
+            height: 16px;
+          }
+        }
+
+        .contact-details {
+          flex: 1;
+          min-width: 0;
+
+          .contact-label {
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+            line-height: 1.3;
+            margin-bottom: 2px;
+          }
+
+          .contact-value {
+            font-size: var(--font-size-sm);
+            color: var(--text-primary);
+            line-height: 1.3;
+            word-break: break-all;
+          }
+        }
+
+        &.empty {
+          .contact-icon {
+            background: #F1F5F9;
+            color: var(--text-secondary);
+
+            &.empty-icon {
+              background: #E5E7EB;
+            }
+          }
+
+          .contact-value {
+            color: var(--text-secondary);
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .employee-profile-card {
+    .status-badge {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .profile-main {
+      .profile-identity {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+
+        .profile-avatar {
+          align-self: center;
+        }
+      }
+
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+  }
+}
+
+@media (max-width: 1200px) {
+  .employee-profile-card {
+    .contact-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+  }
+}

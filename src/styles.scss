@@ -1,1 +1,223 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global styles pour le dashboard Dayla */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Reset et variables CSS */
+:root {
+  /* Couleurs principales */
+  --bg-app: #eef2f7;
+  --bg-card: #ffffff;
+  --text-primary: #121826;
+  --text-secondary: #6B7280;
+  --border-light: #E5E7EB;
+  --border-separator: #F1F5F9;
+  
+  /* Couleurs thématiques */
+  --color-primary: #2C6FFF;
+  --color-primary-light: #5FA0FF;
+  --color-orange: #FF8C42;
+  --color-green: #22C55E;
+  --color-red: #EF4444;
+  --color-amber: #F59E0B;
+  --color-badge: #E11D48;
+  --color-status-dot: #10B981;
+  
+  /* Fond sidebar */
+  --bg-sidebar: #E8EEF7;
+  --bg-sidebar-item-hover: rgba(255, 255, 255, 0.6);
+  
+  /* Ombres */
+  --shadow-card: 0 10px 24px rgba(17, 24, 39, 0.06);
+  --shadow-card-hover: 0 12px 28px rgba(17, 24, 39, 0.10);
+  
+  /* Rayons */
+  --radius-card: 16px;
+  --radius-pill: 9999px;
+  --radius-button: 12px;
+  
+  /* Espacements */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  
+  /* Typographie */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 32px;
+  
+  /* Tailles spécifiques */
+  --sidebar-width: 260px;
+  --sidebar-right-width: 300px;
+  --topbar-height: 64px;
+  --container-max-width: 1280px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Utilitaires de base */
+.container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-1px);
+}
+
+.pill {
+  border-radius: var(--radius-pill);
+}
+
+.btn {
+  border: none;
+  border-radius: var(--radius-button);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Layout principal */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr var(--sidebar-right-width);
+  grid-template-rows: var(--topbar-height) 1fr;
+  gap: var(--spacing-xl);
+  min-height: 100vh;
+  padding: var(--spacing-xl);
+}
+
+.layout-topbar {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+}
+
+.layout-sidebar {
+  grid-column: 1 / 2;
+  grid-row: 1 / 3;
+}
+
+.layout-main {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+}
+
+.layout-sidebar-right {
+  grid-column: 3 / 4;
+  grid-row: 1 / 3;
+}
+
+/* Status chips */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.status-chip.validated {
+  background: #DCFCE7;
+  color: #166534;
+}
+
+.status-chip.rejected {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.status-chip.pending {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .layout {
+    grid-template-columns: var(--sidebar-width) 1fr;
+    grid-template-rows: var(--topbar-height) 1fr auto;
+  }
+  
+  .layout-sidebar-right {
+    grid-column: 1 / 3;
+    grid-row: 3 / 4;
+  }
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 64px 1fr;
+  }
+  
+  .layout-topbar {
+    grid-column: 1 / 3;
+  }
+}
+
+/* Scrollbar personnalisé */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--border-separator);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-secondary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-primary);
+}

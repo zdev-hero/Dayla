@@ -1,0 +1,96 @@
+.leave-analysis-card {
+  padding: var(--spacing-md);
+  height: fit-content;
+
+  .card-header {
+    margin-bottom: var(--spacing-md);
+
+    .card-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+  }
+
+  .analysis-content {
+    .donut-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: var(--spacing-md);
+
+      .donut-chart {
+        position: relative;
+        width: 160px;
+        height: 160px;
+
+        .donut-center {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          text-align: center;
+
+          .donut-period {
+            font-size: var(--font-size-base);
+            color: var(--text-secondary);
+            font-weight: 500;
+          }
+        }
+      }
+    }
+
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .legend-color {
+          width: 12px;
+          height: 12px;
+          border-radius: 2px;
+          flex-shrink: 0;
+
+          &.taken {
+            background: var(--color-primary);
+          }
+
+          &.remaining {
+            background: var(--color-orange);
+          }
+        }
+
+        .legend-label {
+          flex: 1;
+          font-size: var(--font-size-sm);
+          color: var(--text-secondary);
+        }
+
+        .legend-value {
+          font-size: var(--font-size-sm);
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+      }
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .leave-analysis-card {
+    .analysis-content {
+      .donut-container {
+        .donut-chart {
+          width: 140px;
+          height: 140px;
+        }
+      }
+    }
+  }
+}

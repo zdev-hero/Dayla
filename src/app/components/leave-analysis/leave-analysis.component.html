@@ -1,0 +1,67 @@
+<div class="leave-analysis-card card">
+  <div class="card-header">
+    <h3 class="card-title" id="analyse-conges">Analyse des congés</h3>
+  </div>
+
+  <div class="analysis-content">
+    <!-- Graphique donut -->
+    <div class="donut-container">
+      <div class="donut-chart">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <!-- Cercle de fond -->
+          <circle
+            cx="80"
+            cy="80"
+            r="72"
+            stroke="#F1F5F9"
+            stroke-width="16"
+            fill="none"
+          />
+          <!-- Arc des congés pris (bleu) -->
+          <circle
+            cx="80"
+            cy="80"
+            r="72"
+            stroke="#2C6FFF"
+            stroke-width="16"
+            fill="none"
+            stroke-dasharray="90 360"
+            stroke-dashoffset="0"
+            transform="rotate(-90 80 80)"
+            stroke-linecap="round"
+          />
+          <!-- Arc des congés restants (orange) -->
+          <circle
+            cx="80"
+            cy="80"
+            r="72"
+            stroke="#FF8C42"
+            stroke-width="16"
+            fill="none"
+            stroke-dasharray="270 360"
+            stroke-dashoffset="-90"
+            transform="rotate(-90 80 80)"
+            stroke-linecap="round"
+          />
+        </svg>
+        <div class="donut-center">
+          <div class="donut-period">04/2025</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Légende -->
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color taken"></div>
+        <span class="legend-label">Congés pris</span>
+        <span class="legend-value">5</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color remaining"></div>
+        <span class="legend-label">Congés restants</span>
+        <span class="legend-value">15</span>
+      </div>
+    </div>
+  </div>
+</div>
