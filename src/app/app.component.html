@@ -1,15 +1,17 @@
 <div class="app-container">
   <!-- Topbar générique sur toute la largeur -->
-  <app-topbar class="app-topbar"></app-topbar>
+  <app-header-navigation class="app-topbar"></app-header-navigation>
 
   <!-- Cadre unifié pour le contenu principal -->
   <div class="unified-frame">
     <div class="layout">
-      <app-sidebar class="layout-sidebar"></app-sidebar>
+      <app-navigation-menu class="layout-sidebar"></app-navigation-menu>
       <main class="layout-main">
-        <app-dashboard></app-dashboard>
+        <app-main-dashboard></app-main-dashboard>
       </main>
-      <app-sidebar-right class="layout-sidebar-right"></app-sidebar-right>
+      <app-quick-actions-panel
+        class="layout-sidebar-right"
+      ></app-quick-actions-panel>
     </div>
   </div>
 </div>

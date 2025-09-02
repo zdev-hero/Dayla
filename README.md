@@ -1,59 +1,115 @@
-# Dayla
+# Dayla - Leave Management System for Small Businesses
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.15.
+Dayla is a modern, Angular-based leave management system designed specifically for small businesses to simplify employee leave tracking and management.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- **Employee Dashboard**: Complete employee profile and leave balance overview
+- **Leave Requests Management**: Easy submission and tracking of leave requests
+- **Leave Analytics**: Comprehensive analytics and reporting for leave patterns
+- **Team Overview**: Manager view of team leave schedules
+- **Leave Calendar**: Visual calendar for planning and scheduling
+- **Quick Actions Panel**: Fast access to common leave management tasks
+
+## Project Structure
+
+### Components
+
+#### Core Dashboard Components
+
+- `main-dashboard`: Main dashboard container
+- `header-navigation`: Top navigation bar
+- `navigation-menu`: Side navigation menu
+- `quick-actions-panel`: Right panel for quick actions
+
+#### Leave Management Components
+
+- `leave-requests`: Table view of all leave requests
+- `leave-request-form`: Form for submitting new leave requests
+- `leave-analytics`: Analytics and reporting dashboard
+- `leave-balance-overview`: Visual overview of leave balances
+- `leave-calendar`: Calendar view of leave schedules
+
+#### Employee Management Components
+
+- `employee-dashboard`: Employee profile and personal dashboard
+- `team-overview`: Manager view of team members and their leave status
+
+### Services
+
+- `leave-management.service`: Core service for leave operations
+- `employee.service`: Employee data management
+
+### Models
+
+- `employee.model`: Employee and leave balance interfaces
+- `leave-request.model`: Leave request, types, and status definitions
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- Angular CLI (v19)
+
+### Installation
+
+1. Clone the repository
 
 ```bash
-ng serve
+git clone https://github.com/zdev-hero/Dayla.git
+cd Dayla
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+2. Install dependencies
 
 ```bash
-ng generate component component-name
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+3. Start the development server
 
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
+4. Open your browser and navigate to `http://localhost:4200`
 
-To build the project run:
+### Building for Production
 
 ```bash
-ng build
+npm run build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Development
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+### Running Tests
 
 ```bash
-ng test
+npm test
 ```
 
-## Running end-to-end tests
+### Code Structure
 
-For end-to-end (e2e) testing, run:
+The project follows Angular best practices with:
 
-```bash
-ng e2e
-```
+- Feature-based component organization
+- Reactive programming with RxJS
+- TypeScript interfaces for type safety
+- SCSS for styling with component-scoped styles
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Contributing
 
-## Additional Resources
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support and questions, please open an issue in the GitHub repository.

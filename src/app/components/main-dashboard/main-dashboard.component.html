@@ -4,7 +4,7 @@
     class="dashboard-section full-width"
     aria-labelledby="titre-demandes"
   >
-    <app-leave-requests-table></app-leave-requests-table>
+    <app-leave-requests></app-leave-requests>
   </section>
 
   <!-- Section 2: Profil employé + Analyse des congés -->
@@ -13,10 +13,10 @@
     aria-label="Profil et analyse congés"
   >
     <div class="column-left">
-      <app-employee-profile></app-employee-profile>
+      <app-employee-dashboard></app-employee-dashboard>
     </div>
     <div class="column-right">
-      <app-leave-analysis></app-leave-analysis>
+      <app-leave-analytics></app-leave-analytics>
     </div>
   </section>
 
@@ -25,6 +25,6 @@
     class="dashboard-section full-width"
     aria-labelledby="analyse-balances"
   >
-    <app-balance-chart></app-balance-chart>
+    <app-leave-balance-overview></app-leave-balance-overview>
   </section>
 </div>

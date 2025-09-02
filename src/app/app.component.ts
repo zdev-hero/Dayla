@@ -1,18 +1,18 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { SidebarComponent } from './components/sidebar/sidebar.component';
-import { TopbarComponent } from './components/topbar/topbar.component';
-import { SidebarRightComponent } from './components/sidebar-right/sidebar-right.component';
+import { MainDashboardComponent } from './components/main-dashboard/main-dashboard.component';
+import { NavigationMenuComponent } from './components/navigation-menu/navigation-menu.component';
+import { HeaderNavigationComponent } from './components/header-navigation/header-navigation.component';
+import { QuickActionsPanelComponent } from './components/quick-actions-panel/quick-actions-panel.component';
 
 @Component({
   selector: 'app-root',
   imports: [
     RouterOutlet,
-    DashboardComponent,
-    SidebarComponent,
-    TopbarComponent,
-    SidebarRightComponent,
+    MainDashboardComponent,
+    NavigationMenuComponent,
+    HeaderNavigationComponent,
+    QuickActionsPanelComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
