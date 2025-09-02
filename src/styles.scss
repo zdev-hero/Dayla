@@ -1,7 +1,9 @@
-/* Global styles pour le dashboard Dayla */
+/* Global styles pour le dashboard Dayla avec Bootstrap */
+
+/* Import Google Fonts */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
-/* Reset et variables CSS */
+/* Reset et variables CSS personnalisées */
 :root {
   /* Couleurs principales */
   --bg-app: #eef2f7;
@@ -11,7 +13,7 @@
   --border-light: #e5e7eb;
   --border-separator: #f1f5f9;
 
-  /* Couleurs thématiques */
+  /* Couleurs thématiques - harmonisées avec Bootstrap */
   --color-primary: #2c6fff;
   --color-primary-light: #5fa0ff;
   --color-orange: #ff8c42;
@@ -20,6 +22,13 @@
   --color-amber: #f59e0b;
   --color-badge: #e11d48;
   --color-status-dot: #10b981;
+
+  /* Variables Bootstrap personnalisées */
+  --bs-primary: #2c6fff;
+  --bs-secondary: #6b7280;
+  --bs-success: #22c55e;
+  --bs-warning: #f59e0b;
+  --bs-danger: #ef4444;
 
   /* Fond sidebar */
   --bg-sidebar: #e8eef7;
@@ -52,7 +61,7 @@
   --font-size-2xl: 32px;
 
   /* Tailles spécifiques */
-  --sidebar-width: 220px; /* Réduit de 260px à 220px */
+  --sidebar-width: 260px;
   --sidebar-right-width: 300px;
   --topbar-height: 64px;
   --container-max-width: 1280px;

@@ -1,1 +1,139 @@
-<p>leave-request-form works!</p>
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-title mb-0">Nouvelle demande de congé</h5>
+  </div>
+  <div class="card-body">
+    <form>
+      <div class="row g-3">
+        <!-- Type de congé -->
+        <div class="col-md-6">
+          <label for="leaveType" class="form-label">Type de congé</label>
+          <select id="leaveType" class="form-select">
+            <option selected disabled>Choisir un type...</option>
+            <option value="annual">Congé annuel</option>
+            <option value="sick">Congé maladie</option>
+            <option value="personal">Congé personnel</option>
+            <option value="family">Congé familial</option>
+          </select>
+        </div>
+
+        <!-- Durée -->
+        <div class="col-md-6">
+          <label class="form-label">Durée</label>
+          <div class="d-flex gap-2">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="duration"
+                id="fullDay"
+                value="full"
+                checked
+              />
+              <label class="form-check-label" for="fullDay">
+                Journée complète
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="duration"
+                id="halfDay"
+                value="half"
+              />
+              <label class="form-check-label" for="halfDay">
+                Demi-journée
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Date de début -->
+        <div class="col-md-6">
+          <label for="startDate" class="form-label">Date de début</label>
+          <input type="date" class="form-control" id="startDate" />
+        </div>
+
+        <!-- Date de fin -->
+        <div class="col-md-6">
+          <label for="endDate" class="form-label">Date de fin</label>
+          <input type="date" class="form-control" id="endDate" />
+        </div>
+
+        <!-- Motif -->
+        <div class="col-12">
+          <label for="reason" class="form-label">Motif (optionnel)</label>
+          <textarea
+            class="form-control"
+            id="reason"
+            rows="3"
+            placeholder="Décrivez le motif de votre demande..."
+          ></textarea>
+        </div>
+
+        <!-- Fichiers joints -->
+        <div class="col-12">
+          <label for="attachments" class="form-label"
+            >Pièces justificatives</label
+          >
+          <input class="form-control" type="file" id="attachments" multiple />
+          <div class="form-text">
+            Formats acceptés: PDF, JPG, PNG (max 5MB par fichier)
+          </div>
+        </div>
+
+        <!-- Remplaçant -->
+        <div class="col-12">
+          <label for="replacement" class="form-label">Remplaçant suggéré</label>
+          <select id="replacement" class="form-select">
+            <option selected disabled>Sélectionner un collègue...</option>
+            <option value="john">John Doe</option>
+            <option value="jane">Jane Smith</option>
+            <option value="mike">Mike Johnson</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-secondary">Annuler</button>
+        <button type="button" class="btn btn-outline-primary">
+          Enregistrer comme brouillon
+        </button>
+        <button type="submit" class="btn btn-primary">
+          Soumettre la demande
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Résumé de la demande -->
+<div class="card mt-4">
+  <div class="card-header">
+    <h6 class="card-title mb-0">Résumé</h6>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-sm-6">
+        <div class="d-flex justify-content-between">
+          <span class="text-muted">Jours demandés:</span>
+          <span class="fw-semibold">3 jours</span>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <div class="d-flex justify-content-between">
+          <span class="text-muted">Solde restant:</span>
+          <span class="fw-semibold text-success">22 jours</span>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="alert alert-info mb-0" role="alert">
+          <i class="bi bi-info-circle me-2"></i>
+          Votre demande sera envoyée à votre responsable pour validation.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

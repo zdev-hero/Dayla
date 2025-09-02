@@ -1,41 +1,22 @@
+// Dashboard utilisant Bootstrap Grid System
 .dashboard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xl);
-  padding: 0;
-}
+  // Bootstrap gère le spacing et la responsivité
+  // Styles personnalisés uniquement si nécessaire
 
-.dashboard-section {
-  &.full-width {
-    width: 100%;
-  }
-
-  &.two-columns {
-    display: grid;
-    grid-template-columns: 60% 40%;
-    gap: var(--spacing-xl);
-
-    .column-left,
-    .column-right {
-      height: fit-content;
+  .row {
+    // Espacement supplémentaire si nécessaire
+    &:last-child {
+      margin-bottom: 0;
     }
   }
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .dashboard-section {
-    &.two-columns {
-      grid-template-columns: 1fr;
-      gap: var(--spacing-md);
-
-      .column-left {
-        order: 1;
-      }
-
-      .column-right {
-        order: 2;
-      }
+/* Customisations spécifiques au dashboard */
+@media (max-width: 576px) {
+  .dashboard {
+    .container-fluid {
+      padding-left: 15px;
+      padding-right: 15px;
     }
   }
 }

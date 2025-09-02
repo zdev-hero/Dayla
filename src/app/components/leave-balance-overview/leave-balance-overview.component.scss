@@ -1,76 +1,24 @@
+// Styles spécifiques au composant de balance des congés avec Bootstrap
 .balance-chart-card {
-  padding: var(--spacing-lg);
+  // Utilise les styles Bootstrap par défaut pour .card
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 24px;
+  .header-right {
+    .period-selector {
+      max-width: 120px;
+    }
+  }
 
-    .header-left {
-      .card-title {
-        font-size: var(--font-size-lg);
-        font-weight: 600;
-        color: var(--text-primary);
-        margin: 0 0 4px 0;
-      }
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
 
-      .card-subtitle {
-        font-size: var(--font-size-sm);
-        color: var(--text-secondary);
-        margin: 0;
-      }
+    &.congés {
+      background: var(--bs-primary, #2c6fff);
     }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-
-      .chart-legend {
-        display: flex;
-        gap: 16px;
-
-        .legend-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: var(--font-size-sm);
-          color: var(--text-secondary);
-
-          .legend-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-
-            &.congés {
-              background: var(--color-primary);
-            }
-
-            &.présents {
-              background: #6366f1;
-            }
-          }
-        }
-      }
-
-      .period-selector {
-        height: 32px;
-        padding: 0 12px;
-        background: var(--bg-card);
-        border: 1px solid var(--border-light);
-        border-radius: var(--radius-pill);
-        font-size: var(--font-size-sm);
-        color: var(--text-primary);
-        cursor: pointer;
-        font-family: var(--font-family);
-
-        &:focus {
-          outline: none;
-          border-color: var(--color-primary);
-          box-shadow: 0 0 0 2px rgba(44, 111, 255, 0.1);
-        }
-      }
+    &.présents {
+      background: #6366f1;
     }
   }
 
@@ -93,8 +41,6 @@
         padding-right: 8px;
 
         .y-label {
-          font-size: var(--font-size-xs);
-          color: var(--text-secondary);
           line-height: 1;
         }
       }
@@ -111,13 +57,7 @@
         }
 
         .tooltip {
-          position: absolute;
           transform: translate(-50%, -100%);
-          background: var(--bg-card);
-          border: 1px solid var(--border-light);
-          border-radius: 8px;
-          padding: 8px 12px;
-          box-shadow: 0 4px 12px rgba(17, 24, 39, 0.15);
           pointer-events: none;
           z-index: 10;
 
@@ -131,23 +71,18 @@
             height: 0;
             border-left: 6px solid transparent;
             border-right: 6px solid transparent;
-            border-top: 6px solid var(--bg-card);
+            border-top: 6px solid white;
           }
 
           .tooltip-content {
             text-align: center;
 
             .tooltip-value {
-              font-size: var(--font-size-base);
-              font-weight: 600;
-              color: var(--text-primary);
               line-height: 1.2;
               margin-bottom: 2px;
             }
 
             .tooltip-date {
-              font-size: var(--font-size-xs);
-              color: var(--text-secondary);
               line-height: 1.2;
             }
           }
@@ -161,71 +96,20 @@
         gap: 4px;
 
         .x-label {
-          font-size: var(--font-size-xs);
-          color: var(--text-secondary);
           text-align: center;
           line-height: 1;
-
-          &.highlighted {
-            color: var(--text-primary);
-            font-weight: 600;
-          }
         }
       }
     }
   }
 }
 
-/* Responsive */
+/* Responsive avec Bootstrap breakpoints */
 @media (max-width: 768px) {
   .balance-chart-card {
-    padding: var(--spacing-md);
-
-    .card-header {
-      flex-direction: column;
-      gap: 16px;
-      align-items: stretch;
-
-      .header-right {
-        justify-content: space-between;
-
-        .chart-legend {
-          gap: 12px;
-        }
-      }
-    }
-
     .chart-container {
       .chart-area {
         grid-template-rows: 200px 20px;
-
-        .y-axis {
-          .y-label {
-            font-size: 10px;
-          }
-        }
-
-        .x-axis {
-          .x-label {
-            font-size: 10px;
-          }
-        }
-
-        .chart-plot {
-          .tooltip {
-            padding: 6px 8px;
-
-            .tooltip-content {
-              .tooltip-value {
-                font-size: var(--font-size-sm);
-              }
-
-              .tooltip-date {
-                font-size: 10px;
-              }
-            }
-          }
-        }
       }
     }
   }
