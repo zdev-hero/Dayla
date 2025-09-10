@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Calque_2" data-name="Calque 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 59.25 59.25">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        fill: url(#radial-gradient);
+        stroke: #fff;
+        stroke-width: 2.6px;
+      }
+    </style>
+    <radialGradient id="radial-gradient" cx="27.63" cy="-27.03" fx="27.63" fy="-27.03" r="65.91" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#54c5eb"/>
+    </radialGradient>
+  </defs>
+  <g id="Calque_1-2" data-name="Calque 1">
+    <path class="cls-2" d="M29.63,1.3h0c15.64,0,28.33,12.68,28.33,28.33h0c0,15.64-12.68,28.33-28.33,28.33h0c-15.64,0-28.33-12.68-28.33-28.33h0C1.3,13.98,13.98,1.3,29.63,1.3Z"/>
+    <path class="cls-1" d="M39.63,19.63h-20c-.99,0-1.95.4-2.65,1.1-.7.7-1.1,1.66-1.1,2.65v12.5c0,.99.4,1.95,1.1,2.65.7.7,1.66,1.1,2.65,1.1h20c.99,0,1.95-.4,2.65-1.1.7-.7,1.1-1.66,1.1-2.65v-12.5c0-.99-.4-1.95-1.1-2.65-.7-.7-1.66-1.1-2.65-1.1ZM40.88,35.56l-6.12-5.5,6.12-4.29v9.79ZM18.38,25.78l6.12,4.29-6.12,5.5v-9.79ZM26.6,31.54l2.31,1.61c.21.14.46.22.71.22s.5-.08.71-.22l2.31-1.61,6.25,5.59h-18.53l6.22-5.59ZM19.63,22.13h20c.23,0,.46.07.66.19.2.12.35.3.46.51l-11.11,7.77-11.11-7.77c.1-.21.26-.38.46-.51.2-.12.42-.19.66-.19Z"/>
+  </g>
+</svg>
