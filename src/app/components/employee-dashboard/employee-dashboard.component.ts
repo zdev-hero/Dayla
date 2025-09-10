@@ -6,4 +6,6 @@ import { Component } from '@angular/core';
   templateUrl: './employee-dashboard.component.html',
   styleUrl: './employee-dashboard.component.scss',
 })
-export class EmployeeDashboardComponent {}
+export class EmployeeDashboardComponent {
+  returnDate: string = '21/07/2025';
+}

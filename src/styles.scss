@@ -6,7 +6,7 @@
 /* Reset et variables CSS personnalisées */
 :root {
   /* Couleurs principales */
-  --bg-app: #eef2f7;
+  --bg-app: #f5f6f7;
   --bg-card: #ffffff;
   --text-primary: #121826;
   --text-secondary: #6b7280;
@@ -198,8 +198,41 @@ body {
 }
 
 @media (max-width: 900px) {
+  :root {
+    --sidebar-width: 200px;
+    --sidebar-right-width: 250px;
+  }
+
   .layout {
-    grid-template-columns: 64px 1fr;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 64px;
+    --spacing-xl: 16px;
+    --spacing-lg: 12px;
+  }
+
+  .layout {
+    grid-template-columns: var(--sidebar-width) 1fr;
+    gap: var(--spacing-sm);
+    min-height: calc(100vh - 150px);
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --spacing-xl: 12px;
+    --spacing-lg: 8px;
+    --spacing-md: 8px;
+  }
+
+  .layout {
+    gap: var(--spacing-xs);
+    min-height: calc(100vh - 120px);
   }
 }
 
@@ -221,4 +254,22 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-primary);
+}
+
+.user-avatar {
+  .avatar-image {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+}
+
+.icon {
+  img {
+    width: 32px;
+    height: 32px;
+  }
 }

@@ -9,6 +9,33 @@
       margin-bottom: 0;
     }
   }
+
+  // Séparation verticale entre les colonnes
+  .border-end-section {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    @media (min-width: 992px) {
+      &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: 0;
+        height: 80%;
+        width: 2px;
+        background-color: #cdcfd1;
+        opacity: 0.8;
+        transform: translateY(-50%);
+      }
+    }
+  }
+
+  // Centrage vertical pour la colonne des analytics
+  .analytics-column {
+    display: flex;
+    align-items: center;
+  }
 }
 
 /* Customisations spécifiques au dashboard */

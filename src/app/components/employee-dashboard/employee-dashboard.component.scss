@@ -21,30 +21,39 @@
   }
 
   .profile-main {
-    .profile-identity {
+    .profile-container {
       display: flex;
       align-items: flex-start;
-      gap: 16px;
-      margin-bottom: 24px;
+      gap: 20px;
 
-      .profile-avatar {
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        object-fit: cover;
-        flex-shrink: 0;
-      }
+      .profile-identity {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
 
-      .profile-info {
-        flex: 1;
-        min-width: 0;
+        .profile-avatar-section {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
 
-        .profile-name {
-          font-size: var(--font-size-lg);
-          font-weight: 600;
-          color: var(--text-primary);
-          margin: 0 0 12px 0;
-          line-height: 1.3;
+          .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+          }
+
+          .profile-name {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.3;
+            text-align: center;
+          }
         }
 
         .modify-btn {
@@ -52,19 +61,69 @@
           padding: 0 16px;
           font-size: var(--font-size-sm);
           border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
+        }
+      }
+
+      .status-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 10px;
+
+        .status-text {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .cube-icon {
+            width: 14px;
+            height: 14px;
+            background-color: #ff8c00;
+            border-radius: 2px;
+            flex-shrink: 0;
+          }
+
+          span {
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+          }
+        }
+
+        .return-text {
+          font-size: var(--font-size-xs);
+          color: #6b7280;
+          margin-left: 22px;
+          white-space: nowrap;
         }
       }
     }
 
-    .contact-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
       gap: 16px;
 
-      .contact-item {
+      li {
         display: flex;
         align-items: flex-start;
         gap: 12px;
+        padding: 0;
 
         .contact-icon {
           width: 32px;
@@ -84,6 +143,11 @@
           svg {
             width: 16px;
             height: 16px;
+          }
+
+          &.empty-icon {
+            background: #e5e7eb;
+            color: var(--text-secondary);
           }
         }
 
@@ -105,21 +169,6 @@
             word-break: break-all;
           }
         }
-
-        &.empty {
-          .contact-icon {
-            background: #f1f5f9;
-            color: var(--text-secondary);
-
-            &.empty-icon {
-              background: #e5e7eb;
-            }
-          }
-
-          .contact-value {
-            color: var(--text-secondary);
-          }
-        }
       }
     }
   }
@@ -135,18 +184,35 @@
     }
 
     .profile-main {
-      .profile-identity {
+      .profile-container {
         flex-direction: column;
-        text-align: center;
-        gap: 12px;
+        align-items: center;
+        gap: 16px;
 
-        .profile-avatar {
-          align-self: center;
+        .profile-identity {
+          gap: 12px;
+
+          .profile-avatar-section {
+            gap: 8px;
+
+            .profile-avatar {
+              width: 64px;
+              height: 64px;
+            }
+          }
+        }
+
+        .status-info {
+          align-items: center;
+          text-align: center;
+
+          .return-text {
+            margin-left: 0;
+          }
         }
       }
 
-      .contact-grid {
-        grid-template-columns: 1fr;
+      ul {
         gap: 12px;
       }
     }
@@ -155,9 +221,18 @@
 
 @media (max-width: 1200px) {
   .employee-profile-card {
-    .contact-grid {
-      grid-template-columns: 1fr;
+    ul {
       gap: 12px;
+    }
+  }
+}
+
+.user-absent {
+  .avatar-image {
+    box-shadow: 0 0 0 6px #ffb66e;
+
+    &:hover {
+      transform: scale(1.05);
     }
   }
 }

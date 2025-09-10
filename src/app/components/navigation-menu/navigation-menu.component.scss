@@ -71,42 +71,59 @@
 /* Carte Information */
 .info-card {
   padding: var(--spacing-md);
-  border: none; /* Supprime la bordure supplémentaire */
+  border: none;
 
-  .info-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  .info-title-container {
     margin-bottom: 16px;
 
     .info-title {
-      font-size: var(--font-size-base);
+      font-size: 16px;
       font-weight: 600;
       color: var(--text-primary);
       margin: 0;
     }
+  }
+
+  .info-tabs-container {
+    margin-bottom: 20px;
 
     .info-tabs {
       display: flex;
       background: #f8fafc;
-      border-radius: var(--radius-pill);
+      border-radius: 6px;
       padding: 2px;
       gap: 2px;
+      width: 100%;
 
       .tab-btn {
         background: transparent;
         border: none;
-        padding: 6px 12px;
-        border-radius: var(--radius-pill);
-        font-size: var(--font-size-xs);
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 14px;
         font-weight: 500;
         color: var(--text-secondary);
         cursor: pointer;
         transition: all 0.2s ease;
+        position: relative;
+        flex: 1; // Chaque bouton prend la même largeur
 
         &.active {
-          background: var(--color-primary);
-          color: white;
+          background: white;
+          color: var(--color-primary);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+          &::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 2px;
+            background: var(--color-primary);
+            border-radius: 1px;
+          }
         }
 
         &:hover:not(.active) {
@@ -121,12 +138,16 @@
     .donut-container {
       display: flex;
       justify-content: center;
-      margin-bottom: 16px;
+      margin-bottom: 24px;
 
       .donut-chart {
         position: relative;
         width: 150px;
         height: 150px;
+
+        .progress-circle {
+          transition: stroke-dasharray 0.5s ease;
+        }
 
         .donut-center {
           position: absolute;
@@ -136,7 +157,7 @@
           text-align: center;
 
           .donut-value {
-            font-size: var(--font-size-2xl);
+            font-size: 28px;
             font-weight: 700;
             color: var(--text-primary);
             line-height: 1;
@@ -144,17 +165,17 @@
           }
 
           .donut-label {
-            font-size: var(--font-size-xs);
+            font-size: 12px;
             color: var(--text-secondary);
             line-height: 1.2;
             margin-bottom: 8px;
           }
 
           .donut-date {
-            font-size: var(--font-size-xs);
+            font-size: 11px;
             color: var(--text-secondary);
             background: #f1f5f9;
-            padding: 4px 8px;
+            padding: 3px 8px;
             border-radius: 12px;
             display: inline-block;
           }
@@ -162,34 +183,81 @@
       }
     }
 
-    .date-navigation {
+    .date-selectors {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-end;
+      gap: 12px;
 
-      .date-nav-btn {
-        background: transparent;
-        border: none;
-        padding: 8px;
-        border-radius: 6px;
-        cursor: pointer;
-        color: var(--text-secondary);
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      .date-input-group {
+        flex: 1;
+        position: relative;
 
-        &:hover {
-          background: #f1f5f9;
+        .date-input {
+          width: 100%;
+          padding: 8px 12px;
+          border: none;
+          border-bottom: 2px solid var(--color-primary);
+          background: transparent;
+          font-size: 12px;
           color: var(--text-primary);
+          outline: none;
+          transition: border-color 0.2s ease;
+
+          &:focus {
+            border-bottom-color: var(--color-primary);
+          }
+
+          // Style pour webkit browsers (Chrome, Safari)
+          &::-webkit-calendar-picker-indicator {
+            opacity: 0.6;
+            cursor: pointer;
+          }
+        }
+
+        .date-label {
+          position: absolute;
+          bottom: -18px;
+          left: 0;
+          font-size: 10px;
+          color: var(--text-secondary);
+          pointer-events: none;
         }
       }
 
-      .date-range {
-        font-size: var(--font-size-xs);
-        color: var(--text-secondary);
-        text-align: center;
-        flex: 1;
+      .date-arrows {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 0 8px;
+
+        .bi-arrow-right {
+          color: var(--color-primary);
+          font-size: 14px;
+        }
+
+        .return-btn {
+          background: transparent;
+          border: none;
+          padding: 4px;
+          border-radius: 4px;
+          cursor: pointer;
+          color: var(--text-secondary);
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          &:hover {
+            background: #f1f5f9;
+            color: var(--color-primary);
+          }
+
+          .bi-arrow-counterclockwise {
+            font-size: 12px;
+          }
+        }
       }
     }
   }

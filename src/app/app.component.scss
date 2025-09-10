@@ -5,11 +5,23 @@
   min-height: 100vh;
 }
 
-.app-container {
+.app-wrapper {
   min-height: 100vh;
+  background-color: #d8deed; /* Background noir qui englobe tout */
+  padding: var(--spacing-xl); /* Espacement autour du conteneur principal */
+}
+
+.app-container {
+  min-height: calc(100vh - calc(var(--spacing-xl) * 2));
   background-color: var(--bg-app);
   display: flex;
   flex-direction: column;
+  max-width: 1800px; /* Largeur maximale réduite */
+  margin: 0 auto; /* Centrage horizontal */
+  padding: 0 var(--spacing-md); /* Espacement sur les côtés pour mobile */
+  border-radius: var(
+    --radius-card
+  ); /* Arrondir les coins du conteneur principal */
 }
 
 /* Topbar générique sur toute la largeur */
@@ -17,7 +29,7 @@
   background: var(--bg-card);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
-  margin: var(--spacing-xl) var(--spacing-xl) 0 var(--spacing-xl);
+  margin: var(--spacing-xl) var(--spacing-lg) 0 var(--spacing-lg);
   transition: box-shadow 0.2s ease;
 }
 
@@ -30,11 +42,54 @@
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   padding: var(--spacing-xl);
-  margin: var(--spacing-xl);
+  margin: var(--spacing-xl) var(--spacing-lg);
   flex: 1;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .unified-frame:hover {
   box-shadow: var(--shadow-card-hover);
+}
+
+/* Améliorations responsive */
+@media (max-width: 768px) {
+  .app-wrapper {
+    padding: var(--spacing-md);
+  }
+
+  .app-container {
+    min-height: calc(100vh - calc(var(--spacing-md) * 2));
+    padding: 0 var(--spacing-sm);
+  }
+
+  .app-topbar {
+    margin: var(--spacing-md) var(--spacing-sm) 0 var(--spacing-sm);
+  }
+
+  .unified-frame {
+    margin: var(--spacing-md) var(--spacing-sm);
+    padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .app-wrapper {
+    padding: var(--spacing-sm);
+  }
+
+  .app-container {
+    min-height: calc(100vh - calc(var(--spacing-sm) * 2));
+    padding: 0 var(--spacing-xs);
+  }
+
+  .app-topbar {
+    margin: var(--spacing-sm) var(--spacing-xs) 0 var(--spacing-xs);
+    border-radius: var(--radius-button);
+  }
+
+  .unified-frame {
+    margin: var(--spacing-sm) var(--spacing-xs);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-button);
+  }
 }

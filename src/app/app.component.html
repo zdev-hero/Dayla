@@ -1,17 +1,19 @@
-<div class="app-container">
-  <!-- Topbar générique sur toute la largeur -->
-  <app-header-navigation class="app-topbar"></app-header-navigation>
+<div class="app-wrapper">
+  <div class="app-container">
+    <!-- Topbar générique sur toute la largeur -->
+    <app-header-navigation class="app-topbar"></app-header-navigation>
 
-  <!-- Cadre unifié pour le contenu principal -->
-  <div class="unified-frame">
-    <div class="layout">
-      <app-navigation-menu class="layout-sidebar"></app-navigation-menu>
-      <main class="layout-main">
-        <app-main-dashboard></app-main-dashboard>
-      </main>
-      <app-quick-actions-panel
-        class="layout-sidebar-right"
-      ></app-quick-actions-panel>
+    <!-- Cadre unifié pour le contenu principal -->
+    <div class="unified-frame">
+      <div class="layout">
+        <app-navigation-menu class="layout-sidebar"></app-navigation-menu>
+        <main class="layout-main">
+          <app-main-dashboard></app-main-dashboard>
+        </main>
+        <app-quick-actions-panel
+          class="layout-sidebar-right"
+        ></app-quick-actions-panel>
+      </div>
     </div>
   </div>
 </div>
