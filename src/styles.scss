@@ -6,7 +6,7 @@
 /* Reset et variables CSS personnalisées */
 :root {
   /* Couleurs principales */
-  --bg-app: #f5f6f7;
+  --bg-app: #eff3fe;
   --bg-card: #ffffff;
   --text-primary: #121826;
   --text-secondary: #6b7280;
@@ -89,14 +89,14 @@ body {
   padding: var(--spacing-xl);
 }
 
-.card {
+.bord {
   background: var(--bg-card);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.card:hover {
+.bord:hover {
   box-shadow: var(--shadow-card-hover);
   transform: translateY(-1px);
 }
@@ -271,5 +271,12 @@ body {
   img {
     width: 32px;
     height: 32px;
+  }
+}
+
+.icon-nav {
+  img {
+    width: 24px;
+    height: 24px;
   }
 }

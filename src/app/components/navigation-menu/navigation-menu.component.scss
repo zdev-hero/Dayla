@@ -1,3 +1,30 @@
+/* Force Bootstrap override avec spécificité maximale */
+:host ::ng-deep .navbar-nav .nav-item .nav-link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px !important;
+  border-radius: var(--radius-button) !important;
+  text-decoration: none !important;
+  color: #475569 !important;
+  font-size: var(--font-size-base) !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  height: 44px !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+:host ::ng-deep .navbar-nav .nav-item.selected .nav-link,
+:host ::ng-deep .navbar-nav .nav-item .nav-link.active {
+  background: var(--bg-app) !important;
+  color: var(--color-primary) !important;
+  border: 1px solid #dde6f6 !important;
+  box-shadow: 0 2px 4px rgba(44, 111, 255, 0.08) !important;
+}
+
 .sidebar {
   width: 100%;
   background: transparent;
@@ -13,55 +40,87 @@
   padding: var(--spacing-md);
 }
 
-/* Navigation */
-.sidebar-nav {
-  .nav-list {
-    list-style: none;
-    margin: 0;
-    padding: 0px;
-    padding-bottom: 50px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .nav-item {
-    .nav-link {
+/* Navigation Bootstrap Override avec spécificité élevée */
+:host {
+  .nav-card {
+    .nav {
+      list-style: none;
+      margin: 0;
+      padding: 0px;
+      padding-bottom: 50px;
       display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      border-radius: var(--radius-button);
-      text-decoration: none;
-      color: #475569;
-      font-size: var(--font-size-base);
-      font-weight: 500;
-      transition: all 0.2s ease;
-      height: 44px;
+      flex-direction: column;
+      gap: 4px;
+    }
 
-      .nav-icon {
-        width: 20px;
-        height: 20px;
-        flex-shrink: 0;
+    .nav-item {
+      width: 100%;
+
+      .nav-link {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        padding: 12px !important;
+        margin: 0 !important;
+        border-radius: var(--radius-button) !important;
+        text-decoration: none !important;
+        color: #475569 !important;
+        font-size: var(--font-size-base) !important;
+        font-weight: 500 !important;
+        transition: all 0.2s ease !important;
+        height: 44px !important;
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+
+        .nav-icon {
+          width: 20px;
+          height: 20px;
+          flex-shrink: 0;
+        }
+
+        .nav-label,
+        .contact-label {
+          flex: 1;
+          color: inherit;
+        }
+
+        &:hover {
+          background: var(--bg-app) !important;
+          color: var(--text-primary) !important;
+          text-decoration: none !important;
+          transform: none !important;
+        }
+
+        &:focus {
+          background: var(--bg-app) !important;
+          color: var(--text-primary) !important;
+          box-shadow: none !important;
+          outline: none !important;
+        }
+
+        &:active {
+          background: var(--bg-app) !important;
+          color: var(--color-primary) !important;
+        }
       }
 
-      .nav-label {
-        flex: 1;
-      }
-
-      &:hover {
-        background: var(--bg-app);
-        color: var(--text-primary);
-      }
-
-      &.active {
-        background: var(--bg-app);
-        color: var(--color-primary);
-        border: 1px solid #dde6f6;
-        box-shadow: 0 2px 4px rgba(44, 111, 255, 0.08);
+      &.selected .nav-link,
+      .nav-link.active {
+        background: var(--bg-app) !important;
+        color: var(--color-primary) !important;
+        border: 1px solid #dde6f6 !important;
+        box-shadow: 0 2px 4px rgba(44, 111, 255, 0.08) !important;
 
         .nav-icon {
           color: var(--color-primary);
+          filter: brightness(0) saturate(100%) invert(37%) sepia(77%)
+            saturate(2342%) hue-rotate(220deg) brightness(102%) contrast(101%);
+        }
+
+        .nav-label,
+        .contact-label {
+          color: var(--color-primary) !important;
         }
       }
     }
@@ -265,22 +324,33 @@
 
 /* Responsive */
 @media (max-width: 900px) {
-  .sidebar {
-    width: 64px;
-    gap: var(--spacing-sm);
-  }
+  :host {
+    .sidebar {
+      width: 64px;
+      gap: var(--spacing-sm);
+    }
 
-  .nav-card {
-    padding: var(--spacing-sm);
-  }
+    .nav-card {
+      padding: var(--spacing-sm);
 
-  .nav-label,
-  .info-card {
-    display: none;
-  }
+      .nav-item .nav-link {
+        justify-content: center !important;
+        padding: 12px 8px !important;
 
-  .nav-link {
-    justify-content: center;
-    padding: 12px 8px;
+        .nav-label,
+        .contact-label {
+          display: none !important;
+        }
+      }
+    }
+
+    .info-card {
+      display: none !important;
+    }
   }
+}
+
+.selected {
+  background: #eff3fe;
+  border-radius: 10px;
 }

@@ -1,160 +1,216 @@
-<aside class="sidebar" aria-label="Navigation principale">
-  <!-- Menu de navigation avec Bootstrap -->
-  <div class="card nav-card">
-    <nav class="navbar-nav">
-      <ul class="nav nav-pills flex-column">
-        <li class="nav-item">
-          <a href="#" class="nav-link active d-flex align-items-center">
-            <i class="bi bi-grid-3x3-gap nav-icon me-2"></i>
-            <span class="nav-label">Tableau de bord</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link d-flex align-items-center">
-            <i class="bi bi-people nav-icon me-2"></i>
-            <span class="nav-label">Salariés</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link d-flex align-items-center">
-            <i class="bi bi-calendar-check nav-icon me-2"></i>
-            <span class="nav-label">Demandes de congés</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link d-flex align-items-center">
-            <i class="bi bi-tags nav-icon me-2"></i>
-            <span class="nav-label">Type de congés</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link d-flex align-items-center">
-            <i class="bi bi-clock-history nav-icon me-2"></i>
-            <span class="nav-label">Historique</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link d-flex align-items-center">
-            <i class="bi bi-gear nav-icon me-2"></i>
-            <span class="nav-label">Paramètres</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-  </div>
-
-  <!-- Carte Information -->
-  <div class="card info-card">
-    <!-- Titre en haut -->
-    <div class="info-title-container">
-      <h6 class="info-title">Information</h6>
-    </div>
-
-    <!-- Boutons de filtrage en dessous -->
-    <div class="info-tabs-container">
-      <div class="info-tabs">
-        <button
-          class="tab-btn"
-          [class.active]="selectedPeriod === 'week'"
-          (click)="onPeriodChange('week')"
-        >
-          Semaine
-        </button>
-        <button
-          class="tab-btn"
-          [class.active]="selectedPeriod === 'month'"
-          (click)="onPeriodChange('month')"
-        >
-          Mois
-        </button>
-      </div>
-    </div>
-
-    <div class="info-content">
-      <!-- Graphique donut -->
-      <div class="donut-container">
-        <div class="donut-chart">
-          <svg width="150" height="150" viewBox="0 0 120 120">
-            <!-- Cercle de fond -->
-            <circle
-              cx="60"
-              cy="60"
-              r="52"
-              stroke="#E2E8F0"
-              stroke-width="8"
-              fill="none"
+<div class="bord nav-card mb-3">
+  <nav class="navbar-nav">
+    <ul class="nav">
+      <li class="nav-item w-100">
+        <a href="#" class="nav-link d-flex align-items-center">
+          <div class="icon-nav me-2">
+            <img
+              src="assets/icons/home.svg"
+              alt=""
+              class="nav-icon"
+              width="20"
+              height="20"
             />
-            <!-- Cercle de progression avec dégradé -->
-            <defs>
-              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop
-                  offset="0%"
-                  style="stop-color: #ff8a4c; stop-opacity: 1"
-                />
-                <stop
-                  offset="100%"
-                  style="stop-color: #2c6fff; stop-opacity: 1"
-                />
-              </linearGradient>
-            </defs>
-            <circle
-              cx="60"
-              cy="60"
-              r="52"
-              stroke="url(#gradient)"
-              stroke-width="8"
-              fill="none"
-              [attr.stroke-dasharray]="strokeDasharray"
-              stroke-dashoffset="0"
-              transform="rotate(-90 60 60)"
-              stroke-linecap="round"
-              class="progress-circle"
-            />
-          </svg>
-
-          <div class="donut-center">
-            <div class="donut-value">{{ presentEmployees }}</div>
-            <div class="donut-label">Salariés présents</div>
-            <div class="donut-date">{{ currentDate }}</div>
           </div>
-        </div>
-      </div>
+          <span class="contact-label">Tableau de bord</span>
+        </a>
+      </li>
+      <li class="nav-item w-100">
+        <a href="#" class="nav-link d-flex align-items-center">
+          <div class="icon-nav me-2">
+            <img
+              src="assets/icons/employees.svg"
+              alt=""
+              class="nav-icon"
+              width="20"
+              height="20"
+            />
+          </div>
+          <span class="nav-label">Salariés</span>
+        </a>
+      </li>
+      <li class="nav-item w-100">
+        <a href="#" class="nav-link d-flex align-items-center">
+          <div class="icon-nav me-2">
+            <img
+              src="assets/icons/leave_request.svg"
+              alt=""
+              class="nav-icon"
+              width="20"
+              height="20"
+            />
+          </div>
+          <span class="nav-label">Demandes de congés</span>
+        </a>
+      </li>
+      <li class="nav-item w-100">
+        <a href="#" class="nav-link d-flex align-items-center">
+          <div class="icon-nav me-2">
+            <img
+              src="assets/icons/leave_type.svg"
+              alt=""
+              class="nav-icon"
+              width="20"
+              height="20"
+            />
+          </div>
+          <span class="nav-label">Type de congés</span>
+        </a>
+      </li>
+      <li class="nav-item w-100">
+        <a href="#" class="nav-link d-flex align-items-center">
+          <div class="icon-nav me-2">
+            <img
+              src="assets/icons/calendar.svg"
+              alt=""
+              class="nav-icon"
+              width="20"
+              height="20"
+            />
+          </div>
+          <span class="nav-label">Calendrier</span>
+        </a>
+      </li>
+      <li class="nav-item w-100">
+        <a href="#" class="nav-link d-flex align-items-center">
+          <div class="icon-nav me-2">
+            <img
+              src="assets/icons/history.svg"
+              alt=""
+              class="nav-icon"
+              width="20"
+              height="20"
+            />
+          </div>
+          <span class="nav-label">Historique</span>
+        </a>
+      </li>
+      <li class="nav-item w-100">
+        <a href="#" class="nav-link d-flex align-items-center">
+          <div class="icon-nav me-2">
+            <img
+              src="assets/icons/settings.svg"
+              alt=""
+              class="nav-icon"
+              width="20"
+              height="20"
+            />
+          </div>
+          <span class="nav-label">Paramètres</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</div>
 
-      <!-- Sélecteurs de dates -->
-      <div class="date-selectors">
-        <div class="date-input-group">
-          <input
-            type="date"
-            class="date-input"
-            [(ngModel)]="startDate"
-            (change)="onStartDateChange()"
-            [value]="startDate"
+<!-- Carte Information -->
+<div class="bord info-card">
+  <!-- Titre en haut -->
+  <div class="info-title-container">
+    <h6 class="info-title">Information</h6>
+  </div>
+
+  <!-- Boutons de filtrage en dessous -->
+  <div class="info-tabs-container">
+    <div class="info-tabs">
+      <button
+        class="tab-btn"
+        [class.active]="selectedPeriod === 'week'"
+        (click)="onPeriodChange('week')"
+      >
+        Semaine
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="selectedPeriod === 'month'"
+        (click)="onPeriodChange('month')"
+      >
+        Mois
+      </button>
+    </div>
+  </div>
+
+  <div class="info-content">
+    <!-- Graphique donut -->
+    <div class="donut-container">
+      <div class="donut-chart">
+        <svg width="150" height="150" viewBox="0 0 120 120">
+          <!-- Cercle de fond -->
+          <circle
+            cx="60"
+            cy="60"
+            r="52"
+            stroke="#E2E8F0"
+            stroke-width="8"
+            fill="none"
           />
-          <label class="date-label">Date de début</label>
-        </div>
-
-        <div class="date-arrows">
-          <i class="bi bi-arrow-right"></i>
-          <button
-            class="return-btn"
-            (click)="goToToday()"
-            title="Revenir à aujourd'hui"
-          >
-            <i class="bi bi-arrow-counterclockwise"></i>
-          </button>
-        </div>
-
-        <div class="date-input-group">
-          <input
-            type="date"
-            class="date-input"
-            [(ngModel)]="endDate"
-            (change)="onEndDateChange()"
-            [value]="endDate"
+          <!-- Cercle de progression avec dégradé -->
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color: #ff8a4c; stop-opacity: 1" />
+              <stop
+                offset="100%"
+                style="stop-color: #2c6fff; stop-opacity: 1"
+              />
+            </linearGradient>
+          </defs>
+          <circle
+            cx="60"
+            cy="60"
+            r="52"
+            stroke="url(#gradient)"
+            stroke-width="8"
+            fill="none"
+            [attr.stroke-dasharray]="strokeDasharray"
+            stroke-dashoffset="0"
+            transform="rotate(-90 60 60)"
+            stroke-linecap="round"
+            class="progress-circle"
           />
-          <label class="date-label">Date de fin</label>
+        </svg>
+
+        <div class="donut-center">
+          <div class="donut-value">{{ presentEmployees }}</div>
+          <div class="donut-label">Salariés présents</div>
+          <div class="donut-date">{{ currentDate }}</div>
         </div>
       </div>
     </div>
+
+    <!-- Sélecteurs de dates -->
+    <div class="date-selectors">
+      <div class="date-input-group">
+        <input
+          type="date"
+          class="date-input"
+          [(ngModel)]="startDate"
+          (change)="onStartDateChange()"
+          [value]="startDate"
+        />
+        <label class="date-label">Date de début</label>
+      </div>
+
+      <div class="date-arrows">
+        <i class="bi bi-arrow-right"></i>
+        <button
+          class="return-btn"
+          (click)="goToToday()"
+          title="Revenir à aujourd'hui"
+        >
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </button>
+      </div>
+
+      <div class="date-input-group">
+        <input
+          type="date"
+          class="date-input"
+          [(ngModel)]="endDate"
+          (change)="onEndDateChange()"
+          [value]="endDate"
+        />
+        <label class="date-label">Date de fin</label>
+      </div>
+    </div>
   </div>
-</aside>
+</div>

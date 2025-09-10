@@ -5,14 +5,12 @@
 
     <!-- Cadre unifié pour le contenu principal -->
     <div class="unified-frame">
-      <div class="layout">
-        <app-navigation-menu class="layout-sidebar"></app-navigation-menu>
-        <main class="layout-main">
+      <div class="row">
+        <app-navigation-menu class="col-md-2"></app-navigation-menu>
+        <main class="col-md-8">
           <app-main-dashboard></app-main-dashboard>
         </main>
-        <app-quick-actions-panel
-          class="layout-sidebar-right"
-        ></app-quick-actions-panel>
+        <app-quick-actions-panel class="col-md-2"></app-quick-actions-panel>
       </div>
     </div>
   </div>

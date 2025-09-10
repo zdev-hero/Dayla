@@ -1,25 +1,23 @@
 <div class="container-fluid dashboard">
   <!-- Section 1: Tableau des demandes de congés -->
-  <section class="row mb-4" aria-labelledby="titre-demandes">
+  <section class="row mb-3 bord" aria-labelledby="titre-demandes">
     <div class="col-12">
       <app-leave-requests></app-leave-requests>
     </div>
   </section>
 
   <!-- Section 2: Profil employé + Analyse des congés -->
-  <section class="row mb-4 card" aria-label="Profil et analyse congés">
-    <div class="row">
-      <div class="col-lg-8 mb-3 mb-lg-0 border-end-section">
-        <app-employee-dashboard></app-employee-dashboard>
-      </div>
-      <div class="col-lg-4">
-        <app-leave-analytics></app-leave-analytics>
-      </div>
+  <section class="row mb-3 bord" aria-label="Profil et analyse congés">
+    <div class="col-lg-8 border-end-section">
+      <app-employee-dashboard></app-employee-dashboard>
+    </div>
+    <div class="col-lg-4">
+      <app-leave-analytics></app-leave-analytics>
     </div>
   </section>
 
   <!-- Section 3: Graphique des balances -->
-  <section class="row mb-4" aria-labelledby="analyse-balances">
+  <section class="row mb-3 bord" aria-labelledby="analyse-balances">
     <div class="col-12">
       <app-leave-balance-overview></app-leave-balance-overview>
     </div>

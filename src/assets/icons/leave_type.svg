@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Calque_2" data-name="Calque 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36.94 32.32">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke-width: 3.7px;
+      }
+
+      .cls-1, .cls-2 {
+        fill: none;
+        stroke: #fbbe68;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .cls-2 {
+        stroke-width: 6.47px;
+      }
+    </style>
+  </defs>
+  <g id="LeftPage">
+    <g id="Menu">
+      <g id="TypeDeCongés">
+        <g id="TypeCongés">
+          <path class="cls-2" d="M3.23,16.16h.03"/>
+          <path class="cls-2" d="M3.23,29.09h.03"/>
+          <path class="cls-2" d="M3.23,3.23h.03"/>
+          <path class="cls-1" d="M12.08,16.16h23"/>
+          <path class="cls-1" d="M12.08,29.09h23"/>
+          <path class="cls-1" d="M12.08,3.23h23"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
