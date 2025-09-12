@@ -45,7 +45,7 @@
           />
         </svg>
         <div class="donut-center">
-          <div class="donut-period">04/2025</div>
+          <div class="donut-period">{{ getCurrentMonth() }}</div>
         </div>
       </div>
     </div>
@@ -55,13 +55,18 @@
       <div class="legend-item">
         <div class="legend-color taken"></div>
         <span class="legend-label">Congés pris</span>
-        <span class="legend-value">5</span>
+        <span class="legend-value">{{ getTotalDaysUsed() }}</span>
       </div>
       <div class="legend-item">
         <div class="legend-color remaining"></div>
         <span class="legend-label">Congés restants</span>
-        <span class="legend-value">15</span>
+        <span class="legend-value">{{ getTotalDaysRemaining() }}</span>
       </div>
+    </div>
+
+    <!-- Message si aucun employé sélectionné -->
+    <div class="no-employee-message" *ngIf="!employee">
+      <p>Sélectionnez un employé pour voir ses statistiques de congés</p>
     </div>
   </div>
 </div>

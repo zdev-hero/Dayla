@@ -1,3 +1,5 @@
+import { Employee } from './employee.model';
+
 export interface LeaveRequest {
   id: string;
   employeeId: string;
@@ -31,4 +33,20 @@ export enum LeaveStatus {
   CANCELLED = 'cancelled',
 }
 
-import { Employee } from './employee.model';
+// Utilitaires pour l'affichage
+export const LEAVE_TYPE_LABELS = {
+  [LeaveType.VACATION]: 'Congés payés',
+  [LeaveType.SICK]: 'Maladie',
+  [LeaveType.PERSONAL]: 'RTT',
+  [LeaveType.MATERNITY]: 'Congé maternité',
+  [LeaveType.PATERNITY]: 'Congé paternité',
+  [LeaveType.BEREAVEMENT]: 'Congé décès',
+  [LeaveType.UNPAID]: 'Sans solde',
+};
+
+export const LEAVE_STATUS_LABELS = {
+  [LeaveStatus.PENDING]: 'En attente',
+  [LeaveStatus.APPROVED]: 'Validé',
+  [LeaveStatus.REJECTED]: 'Refusé',
+  [LeaveStatus.CANCELLED]: 'Annulé',
+};

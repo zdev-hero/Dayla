@@ -78,6 +78,45 @@
         }
       }
     }
+
+    .leave-types-detail {
+      margin-top: var(--spacing-md);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: var(--spacing-sm);
+      border-top: 1px solid var(--border-color);
+
+      .leave-type-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+
+        .leave-type-label {
+          font-size: var(--font-size-sm);
+          color: var(--text-secondary);
+        }
+
+        .leave-type-value {
+          font-size: var(--font-size-sm);
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+      }
+    }
+
+    .no-employee-message {
+      text-align: center;
+      padding: var(--spacing-lg);
+      color: var(--text-muted);
+
+      p {
+        margin: 0;
+        font-size: var(--font-size-sm);
+        font-style: italic;
+      }
+    }
   }
 }
 

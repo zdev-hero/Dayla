@@ -1,9 +1,16 @@
 <div class="leave-table-card">
   <div class="card-header">
-    <h2 class="card-title" id="titre-demandes">Demande des congés</h2>
+    <h2 class="card-title" id="titre-demandes">Demandes de congés</h2>
   </div>
 
-  <div class="table-container">
+  <!-- Indicateur de chargement -->
+  <div *ngIf="loading" class="loading-indicator">
+    <div class="spinner"></div>
+    <p>Chargement des demandes...</p>
+  </div>
+
+  <!-- Contenu principal -->
+  <div *ngIf="!loading" class="table-container">
     <table class="leave-table">
       <thead>
         <tr>
@@ -26,308 +33,127 @@
         </tr>
       </thead>
       <tbody>
-        <tr class="table-row">
-          <td class="select-cell">
-            <div class="select-container pr-0">
-              <input
-                type="checkbox"
-                class="row-checkbox"
-                (change)="onRowSelect(0, $event)"
-              />
-              <div class="vertical-line"></div>
-            </div>
-          </td>
-          <td class="user-cell">
-            <div class="user-info" (click)="onUserClick(0, $event)">
-              <div class="min-user-avatar min-user-present">
-                <img
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=72&h=72&fit=crop&crop=face"
-                  alt="Avatar utilisateur"
-                  class="avatar-image"
+        <ng-container
+          *ngFor="
+            let request of leaveRequests;
+            let i = index;
+            trackBy: trackByRequestId
+          "
+        >
+          <!-- Ligne principale -->
+          <tr class="table-row">
+            <td class="select-cell">
+              <div class="select-container" [class.pr-0]="i === 0">
+                <input
+                  type="checkbox"
+                  class="row-checkbox"
+                  (change)="onRowSelect(i, $event)"
                 />
+                <div class="vertical-line"></div>
               </div>
-              <div class="user-details">
-                <div class="user-name">John Moreau</div>
-                <div class="user-email">jmoraeu&#64;email.com</div>
+            </td>
+            <td class="user-cell">
+              <div class="user-info" (click)="onUserClick(i, $event)">
+                <div
+                  class="min-user-avatar"
+                  [class]="getUserAvatarClass(request)"
+                >
+                  <img
+                    [src]="
+                      request.employee?.profilePicture ||
+                      'assets/images/default-avatar.svg'
+                    "
+                    [alt]="'Avatar de ' + getFullName(request)"
+                    class="avatar-image"
+                    (error)="handleImageError($event)"
+                  />
+                </div>
+                <div class="user-details">
+                  <div class="user-name">{{ getFullName(request) }}</div>
+                  <div class="user-email">
+                    {{ request.employee?.email || "N/A" }}
+                  </div>
+                </div>
               </div>
-            </div>
-          </td>
-          <td>Congés payés</td>
-          <td>18/07/2025</td>
-          <td>3 jours</td>
-          <td>
-            <span
-              class="status-chip validated d-flex align-items-center justify-content-center"
-            >
-              <img
-                src="assets/icons/icon_validatedmail.svg"
-                alt="Validé"
-                class="status-icon"
-              />
-              Validé
-            </span>
-          </td>
-          <td>
-            <button class="action-btn">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
+            </td>
+            <td>{{ LEAVE_TYPE_LABELS[request.leaveType] }}</td>
+            <td>{{ formatDate(request.startDate) }}</td>
+            <td>{{ getDurationText(request.totalDays) }}</td>
+            <td>
+              <span
+                class="status-chip d-flex align-items-center justify-content-center"
+                [class]="getStatusClass(request.status)"
               >
-                <circle cx="12" cy="12" r="1" />
-                <circle cx="12" cy="5" r="1" />
-                <circle cx="12" cy="19" r="1" />
-              </svg>
-            </button>
-          </td>
-        </tr>
+                <img
+                  [src]="getStatusIcon(request.status)"
+                  [alt]="LEAVE_STATUS_LABELS[request.status]"
+                  class="status-icon"
+                />
+                {{ LEAVE_STATUS_LABELS[request.status] }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn more" title="Plus d'options">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="1" />
+                    <circle cx="12" cy="5" r="1" />
+                    <circle cx="12" cy="19" r="1" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
 
-        <tr class="table-row">
-          <td class="select-cell">
-            <div class="select-container">
-              <input
-                type="checkbox"
-                class="row-checkbox"
-                (change)="onRowSelect(1, $event)"
-              />
-              <div class="vertical-line"></div>
-            </div>
-          </td>
-          <td class="user-cell">
-            <div class="user-info" (click)="onUserClick(1, $event)">
-              <div class="min-user-avatar min-user">
-                <img
-                  src="https://images.unsplash.com/photo-1494790108755-2616b9e4e65d?w=72&h=72&fit=crop&crop=face"
-                  alt="Avatar utilisateur"
-                  class="avatar-image"
-                />
+          <!-- Ligne étendue avec nom d'utilisateur -->
+          <tr *ngIf="isRowExpanded(i)" class="expanded-row">
+            <td colspan="7" class="expanded-content">
+              <div class="row">
+                <div class="col-lg-8 border-end-section">
+                  <app-employee-dashboard
+                    [employee]="selectedEmployee"
+                  ></app-employee-dashboard>
+                </div>
+                <div class="col-lg-4">
+                  <app-leave-analytics
+                    [employee]="selectedEmployee"
+                  ></app-leave-analytics>
+                </div>
               </div>
-              <div class="user-details">
-                <div class="user-name">Emma Martin</div>
-                <div class="user-email">emma.martin&#64;email.com</div>
-              </div>
-            </div>
-          </td>
-          <td>RTT</td>
-          <td>14/07/2025</td>
-          <td>5 jours</td>
-          <td>
-            <span
-              class="status-chip rejected d-flex align-items-center justify-content-center"
-            >
-              <img
-                src="assets/icons/icon_rejectedmail.svg"
-                alt="Refusé"
-                class="status-icon"
-              />
-              Refusé
-            </span>
-          </td>
-          <td>
-            <button class="action-btn">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="12" cy="12" r="1" />
-                <circle cx="12" cy="5" r="1" />
-                <circle cx="12" cy="19" r="1" />
-              </svg>
-            </button>
-          </td>
-        </tr>
-
-        <tr class="table-row">
-          <td class="select-cell">
-            <div class="select-container">
-              <input
-                type="checkbox"
-                class="row-checkbox"
-                (change)="onRowSelect(2, $event)"
-              />
-              <div class="vertical-line"></div>
-            </div>
-          </td>
-          <td class="user-cell">
-            <div class="user-info" (click)="onUserClick(2, $event)">
-              <div class="min-user-avatar min-user-absent">
-                <img
-                  src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=72&h=72&fit=crop&crop=face"
-                  alt="Avatar utilisateur"
-                  class="avatar-image"
-                />
-              </div>
-              <div class="user-details">
-                <div class="user-name">Jade Bernard</div>
-                <div class="user-email">jade.bernard&#64;email.com</div>
-              </div>
-            </div>
-          </td>
-          <td>Maladie</td>
-          <td>20/07/2025</td>
-          <td>15 jours</td>
-          <td>
-            <span
-              class="status-chip pending d-flex align-items-center justify-content-center"
-            >
-              <img
-                src="assets/icons/icon_pendingmail.svg"
-                alt="En attente"
-                class="status-icon"
-              />
-              En attente
-            </span>
-          </td>
-          <td>
-            <button class="action-btn">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="12" cy="12" r="1" />
-                <circle cx="12" cy="5" r="1" />
-                <circle cx="12" cy="19" r="1" />
-              </svg>
-            </button>
-          </td>
-        </tr>
-
-        <tr class="table-row">
-          <td class="select-cell">
-            <div class="select-container">
-              <input
-                type="checkbox"
-                class="row-checkbox"
-                (change)="onRowSelect(3, $event)"
-              />
-              <div class="vertical-line"></div>
-            </div>
-          </td>
-          <td class="user-cell">
-            <div class="user-info" (click)="onUserClick(3, $event)">
-              <div class="min-user-avatar min-user">
-                <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=72&h=72&fit=crop&crop=face"
-                  alt="Avatar utilisateur"
-                  class="avatar-image"
-                />
-              </div>
-              <div class="user-details">
-                <div class="user-name">Léo Robert</div>
-                <div class="user-email">leo.robert&#64;email.com</div>
-              </div>
-            </div>
-          </td>
-          <td>Sans solde</td>
-          <td>01/08/2025</td>
-          <td>10 jours</td>
-          <td>
-            <span
-              class="status-chip validated d-flex align-items-center justify-content-center"
-            >
-              <img
-                src="assets/icons/icon_validatedmail.svg"
-                alt="Validé"
-                class="status-icon"
-              />
-              Validé
-            </span>
-          </td>
-          <td>
-            <button class="action-btn">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="12" cy="12" r="1" />
-                <circle cx="12" cy="5" r="1" />
-                <circle cx="12" cy="19" r="1" />
-              </svg>
-            </button>
-          </td>
-        </tr>
-
-        <tr class="table-row">
-          <td class="select-cell">
-            <div class="select-container">
-              <input
-                type="checkbox"
-                class="row-checkbox"
-                (change)="onRowSelect(4, $event)"
-              />
-              <div class="vertical-line"></div>
-            </div>
-          </td>
-          <td class="user-cell">
-            <div class="user-info" (click)="onUserClick(4, $event)">
-              <div class="min-user-avatar min-user">
-                <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=72&h=72&fit=crop&crop=face"
-                  alt="Avatar utilisateur"
-                  class="avatar-image"
-                />
-              </div>
-              <div class="user-details">
-                <div class="user-name">Hugo Fontaine</div>
-                <div class="user-email">hugo.fontaine&#64;email.com</div>
-              </div>
-            </div>
-          </td>
-          <td>Maladie</td>
-          <td>27/07/2025</td>
-          <td>10 jours</td>
-          <td>
-            <span
-              class="status-chip validated d-flex align-items-center justify-content-center"
-            >
-              <img
-                src="assets/icons/icon_validatedmail.svg"
-                alt="Validé"
-                class="status-icon"
-              />
-              Validé
-            </span>
-          </td>
-          <td>
-            <button class="action-btn">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="12" cy="12" r="1" />
-                <circle cx="12" cy="5" r="1" />
-                <circle cx="12" cy="19" r="1" />
-              </svg>
-            </button>
-          </td>
-        </tr>
+            </td>
+          </tr>
+        </ng-container>
       </tbody>
     </table>
+
+    <!-- Message si aucune demande -->
+    <div *ngIf="leaveRequests.length === 0" class="no-requests">
+      <p>Aucune demande de congé trouvée.</p>
+    </div>
   </div>
 
-  <div class="table-footer">
-    <div class="table-info">Affichage de 1–5 sur 100 données</div>
-    <div class="pagination">
-      <button class="pagination-btn" disabled>
+  <!-- Footer avec pagination -->
+  <div *ngIf="!loading" class="table-footer">
+    <div class="table-info">
+      Affichage de {{ (currentPage - 1) * pageSize + 1 }}–{{
+        Math.min(currentPage * pageSize, totalRequests)
+      }}
+      sur {{ totalRequests }} demandes
+    </div>
+
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 1"
+        (click)="previousPage()"
+      >
         <svg
           width="16"
           height="16"
@@ -339,10 +165,21 @@
           <polyline points="15,18 9,12 15,6" />
         </svg>
       </button>
-      <button class="pagination-btn page-number active">1</button>
-      <button class="pagination-btn page-number">2</button>
-      <button class="pagination-btn page-number">3</button>
-      <button class="pagination-btn">
+
+      <button
+        *ngFor="let page of pages; trackBy: trackByPageNumber"
+        class="pagination-btn page-number"
+        [class.active]="page === currentPage"
+        (click)="changePage(page)"
+      >
+        {{ page }}
+      </button>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages"
+        (click)="nextPage()"
+      >
         <svg
           width="16"
           height="16"

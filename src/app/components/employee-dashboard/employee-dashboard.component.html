@@ -1,74 +1,96 @@
 <div class="employee-profile-card">
-  <!-- Badge de statut -->
-  <!-- <div class="status-badge">
-    <span class="status-chip leave-status">En congé payé</span>
-    <span class="return-date">Retour: 21/07/2025</span>
-  </div> -->
+  <!-- Message si aucun employé sélectionné -->
+  <div
+    class="no-employee-message"
+    *ngIf="!employee"
+    style="text-align: center; padding: 2rem"
+  >
+    <p>Sélectionnez un employé dans la liste pour voir son profil</p>
+  </div>
 
-  <!-- Section principale avec avatar et infos -->
-  <div class="profile-main pt-3">
-    <div class="row">
-      <div class="col-md-6">
-        <div class="profile-container">
-          <div class="profile-identity">
-            <div class="profile-avatar-section">
-              <div class="user-avatar user-absent">
-                <img
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=72&h=72&fit=crop&crop=face"
-                  alt="Avatar utilisateur"
-                  class="avatar-image"
-                />
+  <!-- Contenu du profil -->
+  <div *ngIf="employee">
+    <!-- Badge de statut -->
+    <!-- <div class="status-badge">
+      <span class="status-chip leave-status">En congé payé</span>
+      <span class="return-date">Retour: 21/07/2025</span>
+    </div> -->
+
+    <!-- Section principale avec avatar et infos -->
+    <div class="profile-main pt-3">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="profile-container">
+            <div class="profile-identity">
+              <div class="profile-avatar-section">
+                <div class="user-avatar user-absent">
+                  <img
+                    [src]="getProfilePicture()"
+                    [alt]="'Avatar de ' + getFullName()"
+                    class="avatar-image"
+                  />
+                </div>
+                <h3 class="profile-name" id="profil-salarie">
+                  {{ getFullName() }}
+                </h3>
               </div>
-              <h3 class="profile-name" id="profil-salarie">John Moreau</h3>
+              <button class="btn btn-secondary modify-btn">
+                Modifier le Profil
+              </button>
             </div>
-            <button class="btn btn-secondary modify-btn">
-              Modifier le Profil
-            </button>
-          </div>
-          <div class="status-info">
-            <div class="status-text">
-              <div class="cube-icon"></div>
-              <span>En congé payé</span>
+            <div class="status-info">
+              <div class="status-text">
+                <div class="cube-icon"></div>
+                <span>En congé payé</span>
+              </div>
+              <div class="return-text">Retour: {{ returnDate }}</div>
             </div>
-            <div class="return-text">Retour: {{ returnDate }}</div>
           </div>
         </div>
-      </div>
-      <div class="col-md-6">
-        <ul>
-          <li>
-            <div class="icon">
-              <img src="assets/icons/email.svg" alt="email" class="icon" />
-            </div>
-            <div class="contact-details">
-              <div class="contact-label">Email</div>
-              <div class="contact-value">jmoreau&#64;mail.com</div>
-            </div>
-          </li>
+        <div class="col-md-6">
+          <ul>
+            <li>
+              <div class="icon">
+                <img src="assets/icons/email.svg" alt="email" class="icon" />
+              </div>
+              <div class="contact-details">
+                <div class="contact-label">Email</div>
+                <div class="contact-value">{{ employee?.email || "N/A" }}</div>
+              </div>
+            </li>
 
-          <li>
-            <div class="icon">
-              <img src="assets/icons/phone.svg" alt="phone" class="icon" />
-            </div>
-            <div class="contact-details">
-              <div class="contact-label">Phone</div>
-              <div class="contact-value">06 12 12 12 12</div>
-            </div>
-          </li>
+            <li>
+              <div class="icon">
+                <img src="assets/icons/phone.svg" alt="position" class="icon" />
+              </div>
+              <div class="contact-details">
+                <div class="contact-label">Poste</div>
+                <div class="contact-value">
+                  {{ employee?.position || "N/A" }}
+                </div>
+              </div>
+            </li>
 
-          <li>
-            <div class="icon">
-              <img src="assets/icons/address.svg" alt="address" class="icon" />
-            </div>
-            <div class="contact-details">
-              <div class="contact-label">Adresse</div>
-              <div class="contact-value">Votre adresse ici, Ville, 12345</div>
-            </div>
-          </li>
-        </ul>
+            <li>
+              <div class="icon">
+                <img
+                  src="assets/icons/address.svg"
+                  alt="department"
+                  class="icon"
+                />
+              </div>
+              <div class="contact-details">
+                <div class="contact-label">Département</div>
+                <div class="contact-value">
+                  {{ employee?.department || "N/A" }}
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
+
+      <!-- Informations de contact -->
     </div>
-
-    <!-- Informations de contact -->
   </div>
 </div>
