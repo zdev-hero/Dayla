@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Calque_2" data-name="Calque 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <g id="Body">
+    <g id="ListSalariés">
+      <g id="ContenuDeGrid">
+        <g id="btn">
+          <g id="btn_vert_-_copie" data-name="btn_vert - copie">
+            <path class="cls-1" d="M9,18C4.05,18,0,13.95,0,9S4.05,0,9,0s9,4.05,9,9-4.05,9-9,9ZM9,1.88c-3.9,0-7.12,3.22-7.12,7.12s3.22,7.12,7.12,7.12,7.12-3.22,7.12-7.12S12.9,1.88,9,1.88Z"/>
+            <path class="cls-1" d="M7.57,12.52c-.22,0-.52-.07-.67-.3l-1.88-1.87c-.37-.38-.37-.98,0-1.35s.98-.38,1.35,0l1.2,1.2,4.05-4.05c.38-.38.98-.38,1.35,0,.38.37.38.97,0,1.35l-4.72,4.72c-.23.23-.45.3-.68.3Z"/>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

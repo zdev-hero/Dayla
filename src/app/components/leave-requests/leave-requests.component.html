@@ -1,4 +1,4 @@
-<div class="leave-table-card card">
+<div class="leave-table-card">
   <div class="card-header">
     <h2 class="card-title" id="titre-demandes">Demande des congés</h2>
   </div>
@@ -7,6 +7,16 @@
     <table class="leave-table">
       <thead>
         <tr>
+          <th class="col-select">
+            <!-- <div class="select-header">
+              <input
+                type="checkbox"
+                class="select-all-checkbox"
+                (change)="onSelectAll($event)"
+              />
+              <div class="vertical-line"></div>
+            </div> -->
+          </th>
           <th class="col-user">User</th>
           <th class="col-type">Type de congé</th>
           <th class="col-date">Date de départ</th>
@@ -17,13 +27,25 @@
       </thead>
       <tbody>
         <tr class="table-row">
-          <td class="user-cell">
-            <div class="user-info">
-              <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face"
-                alt="John Moreau"
-                class="user-avatar"
+          <td class="select-cell">
+            <div class="select-container pr-0">
+              <input
+                type="checkbox"
+                class="row-checkbox"
+                (change)="onRowSelect(0, $event)"
               />
+              <div class="vertical-line"></div>
+            </div>
+          </td>
+          <td class="user-cell">
+            <div class="user-info" (click)="onUserClick(0, $event)">
+              <div class="min-user-avatar min-user-present">
+                <img
+                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=72&h=72&fit=crop&crop=face"
+                  alt="Avatar utilisateur"
+                  class="avatar-image"
+                />
+              </div>
               <div class="user-details">
                 <div class="user-name">John Moreau</div>
                 <div class="user-email">jmoraeu&#64;email.com</div>
@@ -34,7 +56,16 @@
           <td>18/07/2025</td>
           <td>3 jours</td>
           <td>
-            <span class="status-chip validated">Validé</span>
+            <span
+              class="status-chip validated d-flex align-items-center justify-content-center"
+            >
+              <img
+                src="assets/icons/icon_validatedmail.svg"
+                alt="Validé"
+                class="status-icon"
+              />
+              Validé
+            </span>
           </td>
           <td>
             <button class="action-btn">
@@ -55,13 +86,25 @@
         </tr>
 
         <tr class="table-row">
-          <td class="user-cell">
-            <div class="user-info">
-              <img
-                src="https://images.unsplash.com/photo-1494790108755-2616b9e4e65d?w=32&h=32&fit=crop&crop=face"
-                alt="Emma Martin"
-                class="user-avatar"
+          <td class="select-cell">
+            <div class="select-container">
+              <input
+                type="checkbox"
+                class="row-checkbox"
+                (change)="onRowSelect(1, $event)"
               />
+              <div class="vertical-line"></div>
+            </div>
+          </td>
+          <td class="user-cell">
+            <div class="user-info" (click)="onUserClick(1, $event)">
+              <div class="min-user-avatar min-user">
+                <img
+                  src="https://images.unsplash.com/photo-1494790108755-2616b9e4e65d?w=72&h=72&fit=crop&crop=face"
+                  alt="Avatar utilisateur"
+                  class="avatar-image"
+                />
+              </div>
               <div class="user-details">
                 <div class="user-name">Emma Martin</div>
                 <div class="user-email">emma.martin&#64;email.com</div>
@@ -72,7 +115,16 @@
           <td>14/07/2025</td>
           <td>5 jours</td>
           <td>
-            <span class="status-chip rejected">Refusé</span>
+            <span
+              class="status-chip rejected d-flex align-items-center justify-content-center"
+            >
+              <img
+                src="assets/icons/icon_rejectedmail.svg"
+                alt="Refusé"
+                class="status-icon"
+              />
+              Refusé
+            </span>
           </td>
           <td>
             <button class="action-btn">
@@ -93,13 +145,25 @@
         </tr>
 
         <tr class="table-row">
-          <td class="user-cell">
-            <div class="user-info">
-              <img
-                src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face"
-                alt="Jade Bernard"
-                class="user-avatar"
+          <td class="select-cell">
+            <div class="select-container">
+              <input
+                type="checkbox"
+                class="row-checkbox"
+                (change)="onRowSelect(2, $event)"
               />
+              <div class="vertical-line"></div>
+            </div>
+          </td>
+          <td class="user-cell">
+            <div class="user-info" (click)="onUserClick(2, $event)">
+              <div class="min-user-avatar min-user-absent">
+                <img
+                  src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=72&h=72&fit=crop&crop=face"
+                  alt="Avatar utilisateur"
+                  class="avatar-image"
+                />
+              </div>
               <div class="user-details">
                 <div class="user-name">Jade Bernard</div>
                 <div class="user-email">jade.bernard&#64;email.com</div>
@@ -110,7 +174,16 @@
           <td>20/07/2025</td>
           <td>15 jours</td>
           <td>
-            <span class="status-chip pending">En attente</span>
+            <span
+              class="status-chip pending d-flex align-items-center justify-content-center"
+            >
+              <img
+                src="assets/icons/icon_pendingmail.svg"
+                alt="En attente"
+                class="status-icon"
+              />
+              En attente
+            </span>
           </td>
           <td>
             <button class="action-btn">
@@ -131,13 +204,25 @@
         </tr>
 
         <tr class="table-row">
-          <td class="user-cell">
-            <div class="user-info">
-              <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face"
-                alt="Léo Robert"
-                class="user-avatar"
+          <td class="select-cell">
+            <div class="select-container">
+              <input
+                type="checkbox"
+                class="row-checkbox"
+                (change)="onRowSelect(3, $event)"
               />
+              <div class="vertical-line"></div>
+            </div>
+          </td>
+          <td class="user-cell">
+            <div class="user-info" (click)="onUserClick(3, $event)">
+              <div class="min-user-avatar min-user">
+                <img
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=72&h=72&fit=crop&crop=face"
+                  alt="Avatar utilisateur"
+                  class="avatar-image"
+                />
+              </div>
               <div class="user-details">
                 <div class="user-name">Léo Robert</div>
                 <div class="user-email">leo.robert&#64;email.com</div>
@@ -148,7 +233,16 @@
           <td>01/08/2025</td>
           <td>10 jours</td>
           <td>
-            <span class="status-chip validated">Validé</span>
+            <span
+              class="status-chip validated d-flex align-items-center justify-content-center"
+            >
+              <img
+                src="assets/icons/icon_validatedmail.svg"
+                alt="Validé"
+                class="status-icon"
+              />
+              Validé
+            </span>
           </td>
           <td>
             <button class="action-btn">
@@ -169,13 +263,25 @@
         </tr>
 
         <tr class="table-row">
-          <td class="user-cell">
-            <div class="user-info">
-              <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face"
-                alt="Hugo Fontaine"
-                class="user-avatar"
+          <td class="select-cell">
+            <div class="select-container">
+              <input
+                type="checkbox"
+                class="row-checkbox"
+                (change)="onRowSelect(4, $event)"
               />
+              <div class="vertical-line"></div>
+            </div>
+          </td>
+          <td class="user-cell">
+            <div class="user-info" (click)="onUserClick(4, $event)">
+              <div class="min-user-avatar min-user">
+                <img
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=72&h=72&fit=crop&crop=face"
+                  alt="Avatar utilisateur"
+                  class="avatar-image"
+                />
+              </div>
               <div class="user-details">
                 <div class="user-name">Hugo Fontaine</div>
                 <div class="user-email">hugo.fontaine&#64;email.com</div>
@@ -186,7 +292,16 @@
           <td>27/07/2025</td>
           <td>10 jours</td>
           <td>
-            <span class="status-chip validated">Validé</span>
+            <span
+              class="status-chip validated d-flex align-items-center justify-content-center"
+            >
+              <img
+                src="assets/icons/icon_validatedmail.svg"
+                alt="Validé"
+                class="status-icon"
+              />
+              Validé
+            </span>
           </td>
           <td>
             <button class="action-btn">

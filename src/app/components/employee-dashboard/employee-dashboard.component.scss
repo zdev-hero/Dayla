@@ -125,32 +125,6 @@
         gap: 12px;
         padding: 0;
 
-        .contact-icon {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          background: linear-gradient(
-            135deg,
-            var(--color-primary-light),
-            var(--color-primary)
-          );
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          flex-shrink: 0;
-
-          svg {
-            width: 16px;
-            height: 16px;
-          }
-
-          &.empty-icon {
-            background: #e5e7eb;
-            color: var(--text-secondary);
-          }
-        }
-
         .contact-details {
           flex: 1;
           min-width: 0;
@@ -223,16 +197,6 @@
   .employee-profile-card {
     ul {
       gap: 12px;
-    }
-  }
-}
-
-.user-absent {
-  .avatar-image {
-    box-shadow: 0 0 0 6px #ffb66e;
-
-    &:hover {
-      transform: scale(1.05);
     }
   }
 }

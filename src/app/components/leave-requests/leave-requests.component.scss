@@ -15,7 +15,6 @@
   .table-container {
     overflow-x: auto;
     border-radius: var(--radius-button);
-    border: 1px solid var(--border-light);
 
     .leave-table {
       width: 100%;
@@ -28,27 +27,69 @@
         top: 0;
         z-index: 1;
 
+        .select-header {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          position: relative;
+          height: 100%;
+
+          .select-all-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #3b82f6;
+            cursor: pointer;
+            border-radius: 3px;
+            z-index: 2;
+          }
+
+          .vertical-line {
+            width: 3px;
+            height: 30px;
+            background-color: #3b82f6;
+            opacity: 0.2;
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 2px;
+            z-index: 1;
+          }
+        }
+
         th {
           padding: 16px 12px;
           text-align: left;
           font-weight: 600;
           color: var(--text-primary);
           border-bottom: 1px solid var(--border-separator);
+          vertical-align: middle;
 
+          &.col-select {
+            padding: 16px 8px;
+            width: 60px;
+            text-align: center;
+          }
           &.col-user {
-            width: 40%;
+            width: 35%;
+            text-align: left;
           }
           &.col-type {
             width: 16%;
+            text-align: left;
           }
           &.col-date {
             width: 16%;
+            text-align: left;
           }
           &.col-duration {
             width: 12%;
+            text-align: left;
           }
           &.col-status {
             width: 10%;
+            text-align: left;
           }
           &.col-action {
             width: 6%;
@@ -64,6 +105,18 @@
 
           &:hover {
             background: #f8fafc;
+
+            .select-cell .select-container .vertical-line {
+              opacity: 0.6;
+            }
+          }
+
+          &.selected {
+            background: #f0f8ff;
+
+            .select-cell .select-container .vertical-line {
+              opacity: 1;
+            }
           }
 
           &:last-child {
@@ -74,12 +127,66 @@
             padding: 16px 12px;
             color: var(--text-primary);
             vertical-align: middle;
+            text-align: left;
+
+            &.select-cell {
+              padding: 16px 8px;
+              text-align: center;
+              position: relative;
+
+              .select-container {
+                padding: 0 !important;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                position: relative;
+                height: 100%;
+
+                .row-checkbox {
+                  width: 18px;
+                  height: 18px;
+                  accent-color: #3b82f6;
+                  cursor: pointer;
+                  border-radius: 3px;
+                  z-index: 2;
+
+                  &:checked + .vertical-line {
+                    opacity: 1 !important;
+                  }
+                }
+
+                .vertical-line {
+                  width: 3px;
+                  height: calc(100% + 32px);
+                  background-color: #3b82f6;
+                  opacity: 0;
+                  transition: opacity 0.3s ease;
+                  position: absolute;
+                  left: -8px;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  border-radius: 2px;
+                  z-index: 1;
+                }
+              }
+            }
 
             &.user-cell {
+              text-align: left;
+
               .user-info {
                 display: flex;
                 align-items: center;
                 gap: 12px;
+                cursor: pointer;
+                padding: 4px;
+                border-radius: 6px;
+                transition: background-color 0.2s ease;
+
+                &:hover {
+                  background-color: rgba(59, 130, 246, 0.1);
+                }
 
                 .user-avatar {
                   width: 32px;
@@ -106,6 +213,37 @@
                   }
                 }
               }
+            }
+
+            // Alignement spécifique pour chaque type de colonne
+            &:nth-child(2) {
+              // col-user
+              text-align: left;
+            }
+
+            &:nth-child(3) {
+              // col-type
+              text-align: left;
+            }
+
+            &:nth-child(4) {
+              // col-date
+              text-align: left;
+            }
+
+            &:nth-child(5) {
+              // col-duration
+              text-align: left;
+            }
+
+            &:nth-child(6) {
+              // col-status
+              text-align: left;
+            }
+
+            &:nth-child(7) {
+              // col-action
+              text-align: center;
             }
 
             .action-btn {
@@ -136,8 +274,6 @@
     justify-content: space-between;
     align-items: center;
     margin-top: var(--spacing-md);
-    padding-top: var(--spacing-md);
-    border-top: 1px solid var(--border-separator);
 
     .table-info {
       font-size: var(--font-size-sm);
@@ -192,7 +328,7 @@
   .leave-table-card {
     .table-container {
       .leave-table {
-        min-width: 600px; // Force horizontal scroll sur mobile
+        min-width: 400px; // Force horizontal scroll sur mobile
 
         thead th {
           padding: 12px 8px;
