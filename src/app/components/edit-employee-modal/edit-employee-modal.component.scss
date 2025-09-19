@@ -96,11 +96,95 @@
       flex-shrink: 0;
       border: 3px solid white;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      position: relative;
 
       .avatar-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+
+        &:hover {
+          opacity: 0.8;
+        }
+      }
+
+      // Section de téléchargement d'image
+      .image-upload-section {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        min-width: 200px;
+        margin-top: 8px;
+
+        &::before {
+          content: "";
+          position: absolute;
+          top: -8px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0;
+          height: 0;
+          border-left: 8px solid transparent;
+          border-right: 8px solid transparent;
+          border-bottom: 8px solid white;
+        }
+
+        .btn-change-image {
+          width: 100%;
+          padding: 8px 12px;
+          background: #3b82f6;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          margin-bottom: 8px;
+          transition: background 0.2s ease;
+
+          &:hover {
+            background: #2563eb;
+          }
+
+          svg {
+            width: 14px;
+            height: 14px;
+          }
+        }
+
+        .btn-cancel-upload {
+          width: 100%;
+          padding: 6px 12px;
+          background: transparent;
+          color: #6b7280;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+          }
+        }
+
+        .file-input {
+          display: none;
+        }
       }
     }
 
@@ -122,6 +206,30 @@
 
   // Formulaire
   .edit-form {
+    .form-section {
+      margin-bottom: 32px;
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0 0 20px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &::before {
+          content: "";
+          width: 4px;
+          height: 20px;
+          background: #3b82f6;
+          border-radius: 2px;
+        }
+      }
+    }
+
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -172,6 +280,33 @@
             border-color: #ef4444;
             box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
           }
+        }
+      }
+
+      select.form-control {
+        cursor: pointer;
+
+        option {
+          padding: 8px;
+        }
+      }
+
+      .input-group {
+        display: flex;
+        align-items: center;
+        position: relative;
+
+        .form-control {
+          padding-right: 60px;
+        }
+
+        .input-suffix {
+          position: absolute;
+          right: 16px;
+          color: #6b7280;
+          font-size: 14px;
+          font-weight: 500;
+          pointer-events: none;
         }
       }
 
@@ -300,13 +435,40 @@
       .employee-avatar {
         width: 60px;
         height: 60px;
+
+        .image-upload-section {
+          min-width: 150px;
+
+          .btn-change-image,
+          .btn-cancel-upload {
+            font-size: 12px;
+            padding: 6px 8px;
+          }
+        }
       }
     }
 
     .edit-form {
+      .form-section {
+        margin-bottom: 24px;
+
+        .section-title {
+          font-size: 16px;
+        }
+      }
+
       .form-row {
         grid-template-columns: 1fr;
         gap: 0;
+      }
+
+      .form-group {
+        .input-group {
+          .input-suffix {
+            right: 12px;
+            font-size: 12px;
+          }
+        }
       }
     }
   }

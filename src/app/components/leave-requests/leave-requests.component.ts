@@ -8,7 +8,7 @@ import {
   LEAVE_TYPE_LABELS,
   LEAVE_STATUS_LABELS,
 } from '../../models/leave-request.model';
-import { Employee } from '../../models/employee.model';
+import { Employee, ContractType } from '../../models/employee.model';
 import { LeaveManagementService } from '../../services/leave-management.service';
 import { EmployeeDashboardComponent } from '../employee-dashboard/employee-dashboard.component';
 import { LeaveAnalyticsComponent } from '../leave-analytics/leave-analytics.component';
@@ -406,6 +406,7 @@ export class LeaveRequestsComponent implements OnInit {
         email: 'john.doe@example.com',
         position: 'Développeur',
         department: 'IT',
+        contractType: ContractType.CDI,
         hireDate: new Date(),
         leaveBalance: {
           vacation: 25,

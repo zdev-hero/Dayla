@@ -6,6 +6,7 @@ import {
   LeaveType,
   LeaveStatus,
 } from '../models/leave-request.model';
+import { Employee, ContractType } from '../models/employee.model';
 
 @Injectable({
   providedIn: 'root',
@@ -77,6 +78,7 @@ export class LeaveManagementService {
           email: 'jmoreau@email.com',
           position: 'Développeur Senior',
           department: 'IT',
+          contractType: ContractType.CDI,
           hireDate: new Date('2020-01-15'),
           profilePicture:
             'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=72&h=72&fit=crop&crop=face',
@@ -108,6 +110,7 @@ export class LeaveManagementService {
           email: 'emma.martin@email.com',
           position: 'Designer UI/UX',
           department: 'Design',
+          contractType: ContractType.CDI,
           hireDate: new Date('2021-06-10'),
           profilePicture:
             'https://images.unsplash.com/photo-1494790108755-2616b612c5c0?w=72&h=72&fit=crop&crop=face',
@@ -138,6 +141,7 @@ export class LeaveManagementService {
           email: 'jade.bernard@email.com',
           position: 'Développeur Junior',
           department: 'IT',
+          contractType: ContractType.CDI,
           hireDate: new Date('2022-09-01'),
           profilePicture:
             'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=72&h=72&fit=crop&crop=face',
@@ -167,6 +171,7 @@ export class LeaveManagementService {
           email: 'leo.robert@email.com',
           position: 'Responsable RH',
           department: 'HR',
+          contractType: ContractType.CDI,
           hireDate: new Date('2018-04-15'),
           profilePicture:
             'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=72&h=72&fit=crop&crop=face',
@@ -198,6 +203,7 @@ export class LeaveManagementService {
           email: 'hugo.fontaine@email.com',
           position: 'Développeur Full Stack',
           department: 'IT',
+          contractType: ContractType.CDI,
           hireDate: new Date('2021-02-28'),
           profilePicture:
             'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=72&h=72&fit=crop&crop=face',
