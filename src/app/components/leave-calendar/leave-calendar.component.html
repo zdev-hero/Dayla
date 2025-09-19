@@ -125,7 +125,7 @@
   </header>
 
   <!-- Tableau calendrier -->
-  <div class="calendar-table-wrapper">
+  <div class="calendar-table-wrapper" >
     <!-- En-tête avec les dates/mois -->
     <div class="calendar-header-sticky">
       <div class="employee-column-header">
@@ -158,6 +158,13 @@
           class="dates-header"
           [style.transform]="'translateX(' + -scrollPosition + 'px)'"
         >
+          <!-- Cadre du mois en cours dans l'en-tête -->
+          <div
+            class="month-frame-header"
+            [style.left.px]="getMonthStartPosition(currentMonth)"
+            [style.width.px]="getMonthWidth(currentMonth)"
+          ></div>
+
           <!-- En-tête des mois -->
           <div class="months-row">
             <div
@@ -228,6 +235,13 @@
             class="days-wrapper"
             [style.transform]="'translateX(' + -scrollPosition + 'px)'"
           >
+            <!-- Cadre du mois en cours pour cette ligne -->
+            <div
+              class="month-frame-row"
+              [style.left.px]="getMonthStartPosition(currentMonth)"
+              [style.width.px]="getMonthWidth(currentMonth)"
+            ></div>
+
             <div
               *ngFor="let day of empCalendar.days"
               [class]="getCellClass(day)"

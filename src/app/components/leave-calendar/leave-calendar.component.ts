@@ -76,7 +76,7 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
   }
 
   // Navigation par mois
-  currentMonth = new Date().getMonth(); // 0-11 pour janvier-décembre
+  currentMonth = 0; // Commence par janvier (0-11 pour janvier-décembre)
 
   // Getters pour les noms des mois précédent et suivant
   get previousMonthName(): string {
@@ -506,6 +506,7 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
 
   scrollLeft() {
     this.scrollPosition = Math.max(0, this.scrollPosition - this.scrollStep);
+    this.updateCurrentMonthFromScrollPosition();
   }
 
   scrollRight() {
@@ -513,6 +514,7 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
       this.maxScrollPosition,
       this.scrollPosition + this.scrollStep
     );
+    this.updateCurrentMonthFromScrollPosition();
   }
 
   // Propriétés calculées pour la scrollbar
@@ -560,11 +562,45 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
       0,
       Math.min(this.maxScrollPosition, this.scrollPositionAtStart + deltaScroll)
     );
+    this.updateCurrentMonthFromScrollPosition();
   }
 
   @HostListener('document:mouseup')
   onDocumentMouseUp() {
     this.isDraggingScrollbar = false;
+  }
+
+  // Détection du mois actuellement visible au centre (avec seuil)
+  updateCurrentMonthFromScrollPosition() {
+    const viewCenter = this.scrollPosition + this.containerWidth / 2;
+    let accumulatedWidth = 0;
+    let closestMonth = 0;
+    let closestDistance = Infinity;
+    
+    for (let i = 0; i < 12; i++) {
+      const monthWidth = this.getMonthWidth(i);
+      const monthCenter = accumulatedWidth + monthWidth / 2;
+      
+      // Distance entre le centre du mois et le centre de la vue
+      const distance = Math.abs(monthCenter - viewCenter);
+      
+      // Ne changer de mois que si le centre du nouveau mois est plus proche
+      // et que le mois est suffisamment visible (au moins 30% du mois visible)
+      const monthStart = accumulatedWidth;
+      const monthEnd = accumulatedWidth + monthWidth;
+      const visibleStart = Math.max(monthStart, this.scrollPosition);
+      const visibleEnd = Math.min(monthEnd, this.scrollPosition + this.containerWidth);
+      const visibleRatio = (visibleEnd - visibleStart) / monthWidth;
+      
+      if (distance < closestDistance && visibleRatio > 0.3) {
+        closestDistance = distance;
+        closestMonth = i;
+      }
+      
+      accumulatedWidth += monthWidth;
+    }
+    
+    this.currentMonth = closestMonth;
   }
 
   // Navigation par mois - méthodes pour les boutons
@@ -599,11 +635,26 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
       0,
       Math.min(this.maxScrollPosition, targetPosition)
     );
+    this.updateCurrentMonthFromScrollPosition();
   }
 
   // Navigation par mois
   scrollToMonth(monthIndex: number) {
     this.currentMonth = monthIndex;
     this.scrollToMonthCenter(monthIndex);
+  }
+
+  // Vérifier si un jour appartient au mois sélectionné
+  isCurrentMonth(day: Date): boolean {
+    return day.getMonth() === this.currentMonth;
+  }
+
+  // Obtenir la position de début d'un mois spécifique
+  getMonthStartPosition(monthIndex: number): number {
+    let position = 0;
+    for (let i = 0; i < monthIndex; i++) {
+      position += this.getMonthWidth(i);
+    }
+    return position;
   }
 }
