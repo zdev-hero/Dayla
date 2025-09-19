@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
 import {
   LeaveRequest,
   LeaveStatus,
@@ -11,6 +12,8 @@ import { Employee } from '../../models/employee.model';
 import { LeaveManagementService } from '../../services/leave-management.service';
 import { EmployeeDashboardComponent } from '../employee-dashboard/employee-dashboard.component';
 import { LeaveAnalyticsComponent } from '../leave-analytics/leave-analytics.component';
+import { EditEmployeeModalComponent } from '../edit-employee-modal/edit-employee-modal.component';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-leave-requests',
@@ -38,7 +41,10 @@ export class LeaveRequestsComponent implements OnInit {
   LEAVE_TYPE_LABELS = LEAVE_TYPE_LABELS;
   LEAVE_STATUS_LABELS = LEAVE_STATUS_LABELS;
 
-  constructor(private leaveManagementService: LeaveManagementService) {}
+  constructor(
+    private leaveManagementService: LeaveManagementService,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit(): void {
     this.loadLeaveRequests();
@@ -270,30 +276,62 @@ export class LeaveRequestsComponent implements OnInit {
 
   // Actions sur les demandes
   approveRequest(request: LeaveRequest): void {
-    this.leaveManagementService.approveLeaveRequest(request.id).subscribe({
-      next: () => {
-        this.loadLeaveRequests(); // Recharger les données
-      },
-      error: (error) => {
-        console.error("Erreur lors de l'approbation:", error);
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Approuver la demande',
+        message: `Êtes-vous sûr de vouloir approuver la demande de congé de ${this.getFullName(
+          request
+        )} ?`,
+        confirmText: 'Approuver',
+        cancelText: 'Annuler',
       },
     });
-  }
 
-  rejectRequest(request: LeaveRequest): void {
-    const reason = prompt('Raison du refus:');
-    if (reason) {
-      this.leaveManagementService
-        .rejectLeaveRequest(request.id, reason)
-        .subscribe({
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.leaveManagementService.approveLeaveRequest(request.id).subscribe({
           next: () => {
             this.loadLeaveRequests(); // Recharger les données
           },
           error: (error) => {
-            console.error('Erreur lors du rejet:', error);
+            console.error("Erreur lors de l'approbation:", error);
           },
         });
-    }
+      }
+    });
+  }
+
+  rejectRequest(request: LeaveRequest): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Rejeter la demande',
+        message: `Êtes-vous sûr de vouloir rejeter la demande de congé de ${this.getFullName(
+          request
+        )} ?`,
+        confirmText: 'Rejeter',
+        cancelText: 'Annuler',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        const reason = prompt('Raison du refus:');
+        if (reason) {
+          this.leaveManagementService
+            .rejectLeaveRequest(request.id, reason)
+            .subscribe({
+              next: () => {
+                this.loadLeaveRequests(); // Recharger les données
+              },
+              error: (error) => {
+                console.error('Erreur lors du rejet:', error);
+              },
+            });
+        }
+      }
+    });
   }
 
   // Méthodes trackBy pour optimiser les performances
@@ -319,5 +357,86 @@ export class LeaveRequestsComponent implements OnInit {
   // Méthode pour vérifier si une ligne est étendue
   isRowExpanded(index: number): boolean {
     return this.expandedRows.has(index);
+  }
+
+  // Méthodes pour le modal d'édition d'employé
+  openEditModal(employee: Employee): void {
+    const dialogRef = this.dialog.open(EditEmployeeModalComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      data: { employee: employee },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.onModalSave(result);
+      }
+    });
+  }
+
+  onModalClose(): void {}
+
+  onModalSave(updatedEmployee: Employee): void {
+    // Mettre à jour l'employé dans la liste locale
+    this.leaveRequests.forEach((request) => {
+      if (request.employee?.id === updatedEmployee.id) {
+        request.employee = updatedEmployee;
+      }
+    });
+
+    // Si c'est l'employé sélectionné, le mettre à jour aussi
+    if (this.selectedEmployee?.id === updatedEmployee.id) {
+      this.selectedEmployee = updatedEmployee;
+    }
+
+    console.log('Employé mis à jour:', updatedEmployee);
+    this.onModalClose();
+  }
+
+  // Méthodes de test pour MatDialog
+  testMatDialog(): void {
+    if (this.leaveRequests.length > 0 && this.leaveRequests[0].employee) {
+      this.openEditModal(this.leaveRequests[0].employee);
+    } else {
+      // Créer un employé de test
+      const testEmployee: Employee = {
+        id: 'test-1',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@example.com',
+        position: 'Développeur',
+        department: 'IT',
+        hireDate: new Date(),
+        leaveBalance: {
+          vacation: 25,
+          sick: 10,
+          personal: 5,
+          totalDaysUsed: 8,
+          totalDaysRemaining: 32,
+        },
+      };
+      this.openEditModal(testEmployee);
+    }
+  }
+
+  testConfirmationDialog(): void {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Test de confirmation',
+        message:
+          'Ceci est un test de la boîte de dialogue de confirmation. Voulez-vous continuer ?',
+        confirmText: 'Oui',
+        cancelText: 'Non',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        alert('Vous avez confirmé !');
+      } else {
+        alert('Vous avez annulé !');
+      }
+    });
   }
 }

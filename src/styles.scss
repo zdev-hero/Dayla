@@ -340,3 +340,113 @@ body {
     height: 24px;
   }
 }
+
+/* ============================================
+   STYLES GLOBAUX POUR LES MODALS
+   ============================================ */
+
+/* S'assurer que les modals sont toujours au premier plan */
+app-edit-employee-modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 2147483647 !important; /* Z-index maximum possible */
+  pointer-events: none; /* Permettre aux éléments enfants de gérer les événements */
+
+  /* Permettre aux enfants d'avoir pointer-events */
+  * {
+    pointer-events: auto;
+  }
+}
+
+/* Classes pour bloquer le scroll du body */
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/* Quand le modal est ouvert, s'assurer que TOUS les autres éléments sont derrière */
+body.modal-open {
+  .app-wrapper,
+  .app-container,
+  .unified-frame,
+  .app-topbar,
+  app-header-navigation,
+  app-navigation-menu,
+  app-main-dashboard,
+  app-quick-actions-panel,
+  .main-content,
+  .topbar,
+  .sidebar,
+  .sidebar-right,
+  .navbar,
+  .nav,
+  .card,
+  .absence-card,
+  .info-card,
+  .nav-card,
+  .leave-table-card,
+  .row,
+  .col-md-2,
+  .col-md-8,
+  .container-fluid,
+  main {
+    position: relative !important;
+    z-index: 1 !important;
+    transform: none !important; /* Annuler toute transformation qui pourrait créer un nouveau contexte de superposition */
+    filter: none !important; /* Annuler les filtres qui créent de nouveaux contextes */
+  }
+
+  /* Désactiver les hover effects qui causent le clignotement */
+  * {
+    pointer-events: none !important;
+    transition: none !important;
+  }
+
+  /* Mais permettre les interactions dans le modal */
+  app-edit-employee-modal,
+  app-edit-employee-modal * {
+    pointer-events: auto !important;
+  }
+}
+
+/* ============================================
+   STYLES MATERIAL DESIGN
+   ============================================ */
+
+/* Styles personnalisés pour les dialogs Material */
+.mat-mdc-dialog-container {
+  border-radius: var(--radius-card) !important;
+  box-shadow: var(--shadow-card-hover) !important;
+}
+
+.mat-mdc-dialog-title {
+  font-family: var(--font-family) !important;
+  font-size: var(--font-size-xl) !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+}
+
+.mat-mdc-dialog-content {
+  font-family: var(--font-family) !important;
+  font-size: var(--font-size-base) !important;
+  color: var(--text-secondary) !important;
+}
+
+.mat-mdc-button {
+  font-family: var(--font-family) !important;
+  font-size: var(--font-size-base) !important;
+  border-radius: var(--radius-button) !important;
+  text-transform: none !important;
+}
+
+/* Overlay personnalisé */
+.cdk-overlay-dark-backdrop {
+  background: rgba(0, 0, 0, 0.5) !important;
+}

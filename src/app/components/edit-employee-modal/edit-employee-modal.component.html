@@ -1,0 +1,168 @@
+<!-- Modal Content pour MatDialog -->
+<div class="modal-container">
+    <!-- Header du modal -->
+    <div class="modal-header">
+      <h2 class="modal-title">Modifier l'employé</h2>
+      <button
+        class="close-button"
+        (click)="closeModal()"
+        type="button"
+        aria-label="Fermer"
+      >
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body du modal -->
+    <div class="modal-body">
+      <!-- Section profil employé -->
+      <div class="employee-profile-section">
+        <div class="employee-avatar">
+          <img
+            [src]="
+              employee?.profilePicture || 'assets/images/default-avatar.svg'
+            "
+            [alt]="'Avatar de ' + employee?.firstName"
+            class="avatar-image"
+            (error)="handleImageError($event)"
+          />
+        </div>
+        <div class="employee-info">
+          <h3>{{ employee?.firstName }} {{ employee?.lastName }}</h3>
+          <p>{{ employee?.position }} • {{ employee?.department }}</p>
+        </div>
+      </div>
+
+      <!-- Formulaire d'édition -->
+      <form
+        [formGroup]="editForm"
+        (ngSubmit)="onSubmitEdit()"
+        class="edit-form"
+      >
+        <div class="form-row">
+          <!-- Prénom -->
+          <div class="form-group">
+            <label for="firstName" class="form-label">
+              Prénom <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              class="form-control"
+              formControlName="firstName"
+              [class.is-invalid]="getFieldError('firstName')"
+              placeholder="Entrez le prénom"
+            />
+            <div *ngIf="getFieldError('firstName')" class="invalid-feedback">
+              {{ getFieldError("firstName") }}
+            </div>
+          </div>
+
+          <!-- Nom -->
+          <div class="form-group">
+            <label for="lastName" class="form-label">
+              Nom <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              class="form-control"
+              formControlName="lastName"
+              [class.is-invalid]="getFieldError('lastName')"
+              placeholder="Entrez le nom"
+            />
+            <div *ngIf="getFieldError('lastName')" class="invalid-feedback">
+              {{ getFieldError("lastName") }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email" class="form-label">
+            Email <span class="required">*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            class="form-control"
+            formControlName="email"
+            [class.is-invalid]="getFieldError('email')"
+            placeholder="exemple@email.com"
+          />
+          <div *ngIf="getFieldError('email')" class="invalid-feedback">
+            {{ getFieldError("email") }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <!-- Poste -->
+          <div class="form-group">
+            <label for="position" class="form-label">
+              Poste <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="position"
+              class="form-control"
+              formControlName="position"
+              [class.is-invalid]="getFieldError('position')"
+              placeholder="Entrez le poste"
+            />
+            <div *ngIf="getFieldError('position')" class="invalid-feedback">
+              {{ getFieldError("position") }}
+            </div>
+          </div>
+
+          <!-- Département -->
+          <div class="form-group">
+            <label for="department" class="form-label">
+              Département <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="department"
+              class="form-control"
+              formControlName="department"
+              [class.is-invalid]="getFieldError('department')"
+              placeholder="Entrez le département"
+            />
+            <div *ngIf="getFieldError('department')" class="invalid-feedback">
+              {{ getFieldError("department") }}
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Footer du modal -->
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="closeModal()"
+        [disabled]="isSubmitting"
+      >
+        Annuler
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        (click)="onSubmitEdit()"
+        [disabled]="!editForm.valid || isSubmitting"
+      >
+        <span *ngIf="isSubmitting" class="spinner"></span>
+        {{ isSubmitting ? "Enregistrement..." : "Enregistrer" }}
+      </button>
+    </div>
+  </div>

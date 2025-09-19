@@ -59,7 +59,6 @@
         .tooltip {
           transform: translate(-50%, -100%);
           pointer-events: none;
-          z-index: 10;
 
           &::after {
             content: "";
