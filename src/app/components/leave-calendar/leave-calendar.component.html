@@ -1,1 +1,339 @@
-<p>leave-calendar works!</p>
+<div class="calendar-container">
+  <!-- Header avec filtres -->
+  <header class="calendar-header">
+    <div class="header-top">
+      <h1 class="page-title">Calendrier des congés</h1>
+      <div class="view-controls">
+        <select
+          [(ngModel)]="viewMode"
+          (change)="onFilterChange()"
+          class="view-selector"
+        >
+          <option value="year">Vue annuelle</option>
+          <option value="quarter">Vue trimestrielle</option>
+          <option value="month">Vue mensuelle</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="filters-row">
+      <!-- Sélecteur d'année -->
+      <div class="filter-group">
+        <label>Année</label>
+        <select
+          [(ngModel)]="selectedYear"
+          (change)="onYearChange()"
+          class="year-selector"
+        >
+          <option [value]="selectedYear - 1">{{ selectedYear - 1 }}</option>
+          <option [value]="selectedYear">{{ selectedYear }}</option>
+          <option [value]="selectedYear + 1">{{ selectedYear + 1 }}</option>
+        </select>
+      </div>
+
+      <!-- Période spécifique -->
+      <div class="filter-group" *ngIf="viewMode === 'quarter'">
+        <label>Trimestre</label>
+        <select [(ngModel)]="selectedQuarter" (change)="onFilterChange()">
+          <option value="1">Q1 (Jan-Mar)</option>
+          <option value="2">Q2 (Avr-Juin)</option>
+          <option value="3">Q3 (Juil-Sep)</option>
+          <option value="4">Q4 (Oct-Déc)</option>
+        </select>
+      </div>
+
+      <div class="filter-group" *ngIf="viewMode === 'month'">
+        <label>Mois</label>
+        <select [(ngModel)]="selectedMonth" (change)="onFilterChange()">
+          <option *ngFor="let month of months; let i = index" [value]="i + 1">
+            {{ month }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Filtres -->
+      <div class="filter-group">
+        <label>Équipe</label>
+        <select [(ngModel)]="selectedTeam" (change)="onFilterChange()">
+          <option value="">Toutes les équipes</option>
+          <option *ngFor="let team of teams" [value]="team">{{ team }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Employé</label>
+        <select [(ngModel)]="selectedEmployee" (change)="onFilterChange()">
+          <option value="">Tous les employés</option>
+          <option *ngFor="let employee of employees" [value]="employee.id">
+            {{ employee.firstName }} {{ employee.lastName }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Type de congé</label>
+        <select [(ngModel)]="selectedLeaveType" (change)="onFilterChange()">
+          <option value="">Tous les types</option>
+          <option *ngFor="let type of leaveTypes" [value]="type">
+            {{ getLeaveTypeLabel(type) }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Statut</label>
+        <select [(ngModel)]="selectedStatus" (change)="onFilterChange()">
+          <option value="">Tous les statuts</option>
+          <option *ngFor="let status of leaveStatuses" [value]="status">
+            {{ getLeaveStatusLabel(status) }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Légende -->
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color status-worked"></div>
+        <span>Travaillé</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color status-approved"></div>
+        <span>Congé validé</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color status-pending"></div>
+        <span>En attente</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color status-rejected"></div>
+        <span>Refusé</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color status-rtt"></div>
+        <span>RTT</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color status-holiday"></div>
+        <span>Jour férié</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color status-weekend"></div>
+        <span>Week-end</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Tableau calendrier -->
+  <div class="calendar-table-wrapper">
+    <!-- En-tête avec les dates/mois -->
+    <div class="calendar-header-sticky">
+      <div class="employee-column-header">
+        <span>Employés</span>
+        <!-- Boutons de navigation dans l'en-tête -->
+        <div class="scroll-controls">
+          <button
+            class="scroll-btn scroll-left"
+            (click)="scrollLeft()"
+            [disabled]="!canScrollLeft"
+            title="Scroll vers la gauche"
+          >
+            ←
+          </button>
+          <button
+            class="scroll-btn scroll-right"
+            (click)="scrollRight()"
+            [disabled]="!canScrollRight"
+            title="Scroll vers la droite"
+          >
+            →
+          </button>
+        </div>
+      </div>
+      <div class="dates-header-container" #datesHeaderContainer>
+        <div
+          class="dates-header"
+          [style.transform]="'translateX(' + -scrollPosition + 'px)'"
+        >
+          <!-- En-tête des mois -->
+          <div class="months-row">
+            <div
+              *ngFor="let month of months; let monthIndex = index"
+              class="month-header-cell"
+              [style.width.px]="getMonthWidth(monthIndex)"
+              (click)="scrollToMonth(monthIndex)"
+              [title]="'Aller au mois de ' + month"
+            >
+              {{ month }}
+            </div>
+          </div>
+          <!-- En-tête des jours -->
+          <div class="days-row">
+            <div
+              *ngFor="let day of getAllDaysOfYear()"
+              class="day-header-cell"
+              [class.weekend]="isWeekendDay(day)"
+              [class.holiday]="isHoliday(day)"
+            >
+              {{ day.getDate() }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lignes des employés avec scroll synchronisé -->
+    <div class="employees-container">
+      <div class="employee-row" *ngFor="let empCalendar of employeeCalendars">
+        <!-- Colonne employé (fixe) -->
+        <div class="employee-info-fixed">
+          <div class="employee-avatar">
+            <img
+              [src]="
+                empCalendar.employee.profilePicture ||
+                'assets/images/default-avatar.svg'
+              "
+              [alt]="
+                empCalendar.employee.firstName +
+                ' ' +
+                empCalendar.employee.lastName
+              "
+            />
+          </div>
+          <div class="employee-details">
+            <div class="employee-name">
+              {{ empCalendar.employee.firstName }}
+              {{ empCalendar.employee.lastName }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Cellules de jours (scroll synchronisé) -->
+        <div class="days-container-scrollable">
+          <div
+            class="days-wrapper"
+            [style.transform]="'translateX(' + -scrollPosition + 'px)'"
+          >
+            <div
+              *ngFor="let day of empCalendar.days"
+              [class]="getCellClass(day)"
+              [title]="getCellTitle(day)"
+              (click)="onCellClick(day, empCalendar.employee)"
+            >
+              <!-- Contenu de la cellule selon le statut -->
+              <span *ngIf="day.status === 'worked'" class="day-indicator"
+                >1</span
+              >
+              <span *ngIf="day.status === 'approved'" class="approved-indicator"
+                >✓</span
+              >
+              <span *ngIf="day.status === 'pending'" class="pending-indicator"
+                >?</span
+              >
+              <span *ngIf="day.status === 'rejected'" class="rejected-indicator"
+                >✗</span
+              >
+              <span *ngIf="day.status === 'rtt'" class="rtt-indicator">R</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scrollbar personnalisée en bas -->
+    <div class="custom-scrollbar">
+      <div class="scrollbar-track">
+        <div
+          class="scrollbar-thumb"
+          [style.width.%]="scrollThumbWidth"
+          [style.left.%]="scrollThumbPosition"
+          (mousedown)="onScrollbarMouseDown($event)"
+        ></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup de détails pour les demandes en attente -->
+  <div
+    class="popup-overlay"
+    *ngIf="showDetailsPopup"
+    (click)="closeDetailsPopup()"
+  >
+    <div class="popup-content" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>Détails de la demande de congé</h3>
+        <button class="close-btn" (click)="closeDetailsPopup()">&times;</button>
+      </div>
+
+      <div class="popup-body" *ngIf="selectedLeaveRequest">
+        <div class="request-info">
+          <div class="info-row">
+            <label>Employé :</label>
+            <span
+              >{{ selectedLeaveRequest.employee?.firstName }}
+              {{ selectedLeaveRequest.employee?.lastName }}</span
+            >
+          </div>
+          <div class="info-row">
+            <label>Type de congé :</label>
+            <span>{{ getLeaveTypeLabel(selectedLeaveRequest.leaveType) }}</span>
+          </div>
+          <div class="info-row">
+            <label>Période :</label>
+            <span>
+              Du {{ formatDate(selectedLeaveRequest.startDate) }} au
+              {{ formatDate(selectedLeaveRequest.endDate) }}
+            </span>
+          </div>
+          <div class="info-row">
+            <label>Nombre de jours :</label>
+            <span>{{ selectedLeaveRequest.totalDays }} jour(s)</span>
+          </div>
+          <div class="info-row">
+            <label>Motif :</label>
+            <span>{{ selectedLeaveRequest.reason }}</span>
+          </div>
+          <div class="info-row">
+            <label>Date de demande :</label>
+            <span>{{ formatDate(selectedLeaveRequest.submittedDate) }}</span>
+          </div>
+          <div class="info-row">
+            <label>Statut :</label>
+            <span class="status-badge status-pending">
+              {{ getLeaveStatusLabel(selectedLeaveRequest.status) }}
+            </span>
+          </div>
+        </div>
+
+        <div
+          class="action-section"
+          *ngIf="selectedLeaveRequest.status === 'pending'"
+        >
+          <h4>Actions</h4>
+          <div class="action-buttons">
+            <button class="btn btn-approve" (click)="approveLeaveRequest()">
+              ✓ Valider la demande
+            </button>
+            <button class="btn btn-reject" (click)="rejectLeaveRequest()">
+              ✗ Refuser la demande
+            </button>
+          </div>
+
+          <div
+            class="rejection-reason"
+            *ngIf="selectedLeaveRequest.status === 'pending'"
+          >
+            <label for="rejectionReason">Motif de refus (optionnel) :</label>
+            <textarea
+              id="rejectionReason"
+              [(ngModel)]="rejectionReason"
+              placeholder="Indiquez le motif du refus..."
+              rows="3"
+            >
+            </textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

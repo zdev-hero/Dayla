@@ -2,7 +2,11 @@
   <nav class="navbar-nav">
     <ul class="nav">
       <li class="nav-item w-100">
-        <a href="#" class="nav-link d-flex align-items-center">
+        <a
+          routerLink="/dashboard"
+          class="nav-link d-flex align-items-center"
+          routerLinkActive="active"
+        >
           <div class="icon-nav me-2">
             <img
               src="assets/icons/home.svg"
@@ -16,7 +20,11 @@
         </a>
       </li>
       <li class="nav-item w-100">
-        <a href="#" class="nav-link d-flex align-items-center">
+        <a
+          routerLink="/employees"
+          class="nav-link d-flex align-items-center"
+          routerLinkActive="active"
+        >
           <div class="icon-nav me-2">
             <img
               src="assets/icons/employees.svg"
@@ -30,7 +38,11 @@
         </a>
       </li>
       <li class="nav-item w-100">
-        <a href="#" class="nav-link d-flex align-items-center">
+        <a
+          routerLink="/leave-requests"
+          class="nav-link d-flex align-items-center"
+          routerLinkActive="active"
+        >
           <div class="icon-nav me-2">
             <img
               src="assets/icons/leave_request.svg"
@@ -44,21 +56,11 @@
         </a>
       </li>
       <li class="nav-item w-100">
-        <a href="#" class="nav-link d-flex align-items-center">
-          <div class="icon-nav me-2">
-            <img
-              src="assets/icons/leave_type.svg"
-              alt=""
-              class="nav-icon"
-              width="20"
-              height="20"
-            />
-          </div>
-          <span class="nav-label">Type de congés</span>
-        </a>
-      </li>
-      <li class="nav-item w-100">
-        <a href="#" class="nav-link d-flex align-items-center">
+        <a
+          routerLink="/leave-calendar"
+          class="nav-link d-flex align-items-center"
+          routerLinkActive="active"
+        >
           <div class="icon-nav me-2">
             <img
               src="assets/icons/calendar.svg"
@@ -68,11 +70,15 @@
               height="20"
             />
           </div>
-          <span class="nav-label">Calendrier</span>
+          <span class="nav-label">Calendrier des congés</span>
         </a>
       </li>
       <li class="nav-item w-100">
-        <a href="#" class="nav-link d-flex align-items-center">
+        <a
+          routerLink="/history"
+          class="nav-link d-flex align-items-center"
+          routerLinkActive="active"
+        >
           <div class="icon-nav me-2">
             <img
               src="assets/icons/history.svg"
