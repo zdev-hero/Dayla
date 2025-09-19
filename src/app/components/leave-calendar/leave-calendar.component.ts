@@ -68,11 +68,25 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
 
   // Propriétés calculées pour éviter ExpressionChangedAfterItHasBeenCheckedError
   get canScrollLeft(): boolean {
-    return this.scrollPosition > 0;
+    return this.currentMonth > 0;
   }
 
   get canScrollRight(): boolean {
-    return this.scrollPosition < this.maxScrollPosition;
+    return this.currentMonth < 11;
+  }
+
+  // Navigation par mois
+  currentMonth = new Date().getMonth(); // 0-11 pour janvier-décembre
+
+  // Getters pour les noms des mois précédent et suivant
+  get previousMonthName(): string {
+    if (this.currentMonth === 0) return '';
+    return this.months[this.currentMonth - 1];
+  }
+
+  get nextMonthName(): string {
+    if (this.currentMonth === 11) return '';
+    return this.months[this.currentMonth + 1];
   }
 
   // Variables pour la scrollbar personnalisée
@@ -553,15 +567,43 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
     this.isDraggingScrollbar = false;
   }
 
-  // Navigation par mois
-  scrollToMonth(monthIndex: number) {
+  // Navigation par mois - méthodes pour les boutons
+  scrollToPreviousMonth() {
+    if (this.currentMonth > 0) {
+      this.currentMonth--;
+      this.scrollToMonthCenter(this.currentMonth);
+    }
+  }
+
+  scrollToNextMonth() {
+    if (this.currentMonth < 11) {
+      this.currentMonth++;
+      this.scrollToMonthCenter(this.currentMonth);
+    }
+  }
+
+  scrollToMonthCenter(monthIndex: number) {
+    const monthWidth = this.getMonthWidth(monthIndex);
     let targetPosition = 0;
+
+    // Calculer la position du début du mois
     for (let i = 0; i < monthIndex; i++) {
       targetPosition += this.getMonthWidth(i);
     }
+
+    // Centrer le mois dans la vue
+    const centerOffset = (this.containerWidth - monthWidth) / 2;
+    targetPosition = targetPosition - centerOffset;
+
     this.scrollPosition = Math.max(
       0,
       Math.min(this.maxScrollPosition, targetPosition)
     );
+  }
+
+  // Navigation par mois
+  scrollToMonth(monthIndex: number) {
+    this.currentMonth = monthIndex;
+    this.scrollToMonthCenter(monthIndex);
   }
 }

@@ -130,27 +130,30 @@
     <div class="calendar-header-sticky">
       <div class="employee-column-header">
         <span>Employés</span>
-        <!-- Boutons de navigation dans l'en-tête -->
-        <div class="scroll-controls">
-          <button
-            class="scroll-btn scroll-left"
-            (click)="scrollLeft()"
-            [disabled]="!canScrollLeft"
-            title="Scroll vers la gauche"
-          >
-            ←
-          </button>
-          <button
-            class="scroll-btn scroll-right"
-            (click)="scrollRight()"
-            [disabled]="!canScrollRight"
-            title="Scroll vers la droite"
-          >
-            →
-          </button>
-        </div>
       </div>
       <div class="dates-header-container" #datesHeaderContainer>
+        <!-- Bouton mois précédent à gauche -->
+        <div class="scroll-controls-left">
+          <button
+            class="scroll-btn scroll-left"
+            (click)="scrollToPreviousMonth()"
+            [disabled]="!canScrollLeft"
+            [title]="'Aller à ' + previousMonthName"
+          >
+            ← {{ previousMonthName }}
+          </button>
+        </div>
+        <!-- Bouton mois suivant à droite -->
+        <div class="scroll-controls-right">
+          <button
+            class="scroll-btn scroll-right"
+            (click)="scrollToNextMonth()"
+            [disabled]="!canScrollRight"
+            [title]="'Aller à ' + nextMonthName"
+          >
+            {{ nextMonthName }} →
+          </button>
+        </div>
         <div
           class="dates-header"
           [style.transform]="'translateX(' + -scrollPosition + 'px)'"
@@ -165,6 +168,17 @@
               [title]="'Aller au mois de ' + month"
             >
               {{ month }}
+            </div>
+          </div>
+          <!-- En-tête des noms des jours -->
+          <div class="weekdays-row">
+            <div
+              *ngFor="let day of getAllDaysOfYear()"
+              class="weekday-header-cell"
+              [class.weekend]="isWeekendDay(day)"
+              [class.holiday]="isHoliday(day)"
+            >
+              {{ weekDays[day.getDay()] }}
             </div>
           </div>
           <!-- En-tête des jours -->
@@ -242,6 +256,7 @@
 
     <!-- Scrollbar personnalisée en bas -->
     <div class="custom-scrollbar">
+      <div class="scrollbar-employee-placeholder"></div>
       <div class="scrollbar-track">
         <div
           class="scrollbar-thumb"
