@@ -65,6 +65,29 @@ export class LeaveManagementService {
     return of(request!);
   }
 
+  // Nouvelle méthode pour mettre à jour une demande de congé
+  updateLeaveRequest(leaveRequest: LeaveRequest): Observable<LeaveRequest> {
+    // return this.http.put<LeaveRequest>(`${this.apiUrl}/${leaveRequest.id}`, leaveRequest);
+    const requests = this.getMockLeaveRequests();
+    const index = requests.findIndex((r) => r.id === leaveRequest.id);
+    if (index !== -1) {
+      requests[index] = { ...leaveRequest };
+      return of(requests[index]);
+    }
+    return of(leaveRequest);
+  }
+
+  // Nouvelle méthode pour supprimer une demande de congé
+  deleteLeaveRequest(requestId: string): Observable<void> {
+    // return this.http.delete<void>(`${this.apiUrl}/${requestId}`);
+    const requests = this.getMockLeaveRequests();
+    const index = requests.findIndex((r) => r.id === requestId);
+    if (index !== -1) {
+      requests.splice(index, 1);
+    }
+    return of();
+  }
+
   // Données mock pour les tests
   private getMockLeaveRequests(): LeaveRequest[] {
     return [

@@ -219,10 +219,8 @@
           <!-- En-tête des noms des jours -->
           <div class="weekdays-row">
             <div
-              *ngFor="let day of getAllDaysOfYear()"
-              class="weekday-header-cell"
-              [class.weekend]="isWeekendDay(day)"
-              [class.holiday]="isHoliday(day)"
+              *ngFor="let day of getAllDaysOfYear(); let dayIndex = index"
+              [ngClass]="getWeekdayHeaderClass(dayIndex)"
             >
               {{ weekDays[day.getDay()] }}
             </div>
@@ -230,10 +228,8 @@
           <!-- En-tête des jours -->
           <div class="days-row">
             <div
-              *ngFor="let day of getAllDaysOfYear()"
-              class="day-header-cell"
-              [class.weekend]="isWeekendDay(day)"
-              [class.holiday]="isHoliday(day)"
+              *ngFor="let day of getAllDaysOfYear(); let dayIndex = index"
+              [ngClass]="getDayHeaderClass(dayIndex)"
             >
               {{ day.getDate() }}
             </div>
@@ -244,7 +240,11 @@
 
     <!-- Lignes des employés avec scroll synchronisé -->
     <div class="employees-container">
-      <div class="employee-row" *ngFor="let empCalendar of employeeCalendars">
+      <div
+        class="employee-row"
+        *ngFor="let empCalendar of employeeCalendars"
+        [ngClass]="getEmployeeRowClass(empCalendar.employee)"
+      >
         <!-- Colonne employé (fixe) -->
         <div class="employee-info-fixed">
           <div class="employee-avatar">
@@ -282,10 +282,12 @@
             ></div>
 
             <div
-              *ngFor="let day of empCalendar.days"
-              [class]="getCellClass(day)"
+              *ngFor="let day of empCalendar.days; let dayIndex = index"
+              [class]="getCellClass(day, empCalendar.employee, dayIndex)"
               [title]="getCellTitle(day)"
               (click)="onCellClick(day, empCalendar.employee)"
+              (mouseenter)="onCellMouseEnter(day, empCalendar.employee)"
+              (mouseleave)="onCellMouseLeave()"
             >
               <!-- Contenu de la cellule selon le statut -->
               <span *ngIf="day.status === 'worked'" class="day-indicator"
@@ -329,12 +331,19 @@
   >
     <div class="popup-content" (click)="$event.stopPropagation()">
       <div class="popup-header">
-        <h3>Détails de la demande de congé</h3>
+        <h3>
+          {{
+            isEditingLeave
+              ? "Modifier la demande de congé"
+              : "Détails de la demande de congé"
+          }}
+        </h3>
         <button class="close-btn" (click)="closeDetailsPopup()">&times;</button>
       </div>
 
       <div class="popup-body" *ngIf="selectedLeaveRequest">
-        <div class="request-info">
+        <!-- Mode lecture -->
+        <div class="request-info" *ngIf="!isEditingLeave">
           <div class="info-row">
             <label>Employé :</label>
             <span
@@ -367,15 +376,111 @@
           </div>
           <div class="info-row">
             <label>Statut :</label>
-            <span class="status-badge status-pending">
+            <span
+              class="status-badge"
+              [ngClass]="{
+                'status-pending': selectedLeaveRequest.status === 'pending',
+                'status-approved': selectedLeaveRequest.status === 'approved',
+                'status-rejected': selectedLeaveRequest.status === 'rejected'
+              }"
+            >
               {{ getLeaveStatusLabel(selectedLeaveRequest.status) }}
             </span>
           </div>
+          <div class="info-row" *ngIf="selectedLeaveRequest.comments">
+            <label>Commentaires :</label>
+            <span>{{ selectedLeaveRequest.comments }}</span>
+          </div>
         </div>
 
+        <!-- Mode édition -->
+        <div
+          class="request-edit"
+          *ngIf="isEditingLeave && editableLeaveRequest"
+        >
+          <div class="edit-row">
+            <label>Employé :</label>
+            <span
+              >{{ editableLeaveRequest.employee?.firstName }}
+              {{ editableLeaveRequest.employee?.lastName }}</span
+            >
+          </div>
+          <div class="edit-row">
+            <label for="editLeaveType">Type de congé :</label>
+            <select
+              id="editLeaveType"
+              [(ngModel)]="editableLeaveRequest.leaveType"
+              class="edit-select"
+            >
+              <option *ngFor="let type of leaveTypes" [value]="type">
+                {{ getLeaveTypeLabel(type) }}
+              </option>
+            </select>
+          </div>
+          <div class="edit-row">
+            <label for="editStartDate">Date de début :</label>
+            <input
+              id="editStartDate"
+              type="date"
+              [(ngModel)]="editableLeaveRequest.startDate"
+              class="edit-input"
+            />
+          </div>
+          <div class="edit-row">
+            <label for="editEndDate">Date de fin :</label>
+            <input
+              id="editEndDate"
+              type="date"
+              [(ngModel)]="editableLeaveRequest.endDate"
+              class="edit-input"
+            />
+          </div>
+          <div class="edit-row">
+            <label for="editReason">Motif :</label>
+            <textarea
+              id="editReason"
+              [(ngModel)]="editableLeaveRequest.reason"
+              rows="3"
+              class="edit-textarea"
+            ></textarea>
+          </div>
+          <div class="edit-row">
+            <label for="editStatus">Statut :</label>
+            <select
+              id="editStatus"
+              [(ngModel)]="editableLeaveRequest.status"
+              class="edit-select"
+            >
+              <option [value]="leaveStatuses[0]">
+                {{ getLeaveStatusLabel(leaveStatuses[0]) }}
+              </option>
+              <option [value]="leaveStatuses[1]">
+                {{ getLeaveStatusLabel(leaveStatuses[1]) }}
+              </option>
+              <option [value]="leaveStatuses[2]">
+                {{ getLeaveStatusLabel(leaveStatuses[2]) }}
+              </option>
+            </select>
+          </div>
+          <div
+            class="edit-row"
+            *ngIf="editableLeaveRequest.status === leaveStatuses[2]"
+          >
+            <label for="editComments">Motif de refus :</label>
+            <textarea
+              id="editComments"
+              [(ngModel)]="tempRejectionReason"
+              rows="2"
+              class="edit-textarea"
+              placeholder="Indiquez le motif du refus..."
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Actions pour les demandes en attente -->
         <div
           class="action-section"
-          *ngIf="selectedLeaveRequest.status === 'pending'"
+          *ngIf="selectedLeaveRequest.status === 'pending' && !isEditingLeave"
         >
           <h4>Actions</h4>
           <div class="action-buttons">
@@ -387,10 +492,7 @@
             </button>
           </div>
 
-          <div
-            class="rejection-reason"
-            *ngIf="selectedLeaveRequest.status === 'pending'"
-          >
+          <div class="rejection-reason">
             <label for="rejectionReason">Motif de refus (optionnel) :</label>
             <textarea
               id="rejectionReason"
@@ -399,6 +501,30 @@
               rows="3"
             >
             </textarea>
+          </div>
+        </div>
+
+        <!-- Actions pour toutes les demandes -->
+        <div class="action-section" *ngIf="!isEditingLeave">
+          <div class="secondary-actions">
+            <button class="btn btn-edit" (click)="startEditingLeave()">
+              ✏️ Modifier
+            </button>
+            <button class="btn btn-delete" (click)="deleteLeaveRequest()">
+              🗑️ Supprimer
+            </button>
+          </div>
+        </div>
+
+        <!-- Actions en mode édition -->
+        <div class="action-section" *ngIf="isEditingLeave">
+          <div class="edit-actions">
+            <button class="btn btn-save" (click)="saveLeaveChanges()">
+              ✓ Sauvegarder
+            </button>
+            <button class="btn btn-cancel" (click)="cancelEditingLeave()">
+              ✕ Annuler
+            </button>
           </div>
         </div>
       </div>

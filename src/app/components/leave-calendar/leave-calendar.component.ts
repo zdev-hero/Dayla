@@ -119,6 +119,19 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
   showDetailsPopup = false;
   rejectionReason = '';
 
+  // Nouvelles propriétés pour l'édition des congés
+  isEditingLeave = false;
+  editableLeaveRequest?: LeaveRequest;
+  tempRejectionReason = '';
+
+  // Propriétés pour l'effet de focus vertical et horizontal
+  hoveredEmployeeId?: string;
+  hoveredDayIndex?: number;
+
+  // Cache pour optimiser les performances
+  private allDaysCache?: Date[];
+  private dayIndexMap = new Map<string, number>();
+
   // Mois et jours de la semaine
   months = [
     'Janvier',
@@ -162,6 +175,8 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
     this.loadData();
     // S'assurer que le mois courant est sélectionné au démarrage
     this.currentMonth = new Date().getMonth();
+    // Initialiser le cache des jours
+    this.getAllDaysOfYear();
   }
 
   ngAfterViewInit() {
@@ -343,11 +358,18 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
   }
 
   onYearChange() {
+    // Vider le cache lors du changement d'année
+    this.clearCache();
     this.generateCalendars();
     // Maintenir le mois actuel lors du changement d'année
     setTimeout(() => {
       this.scrollToMonthCenter(this.currentMonth);
     }, 0);
+  }
+
+  private clearCache() {
+    this.allDaysCache = undefined;
+    this.dayIndexMap.clear();
   }
 
   // Méthodes pour la recherche d'employés
@@ -418,7 +440,14 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
   }
 
   onCellClick(day: CalendarDay, employee: Employee) {
-    if (day.leaveRequest && day.status === 'pending') {
+    // Permettre la modification des congés en attente, validés et rejetés
+    if (
+      day.leaveRequest &&
+      (day.status === 'pending' ||
+        day.status === 'approved' ||
+        day.status === 'rejected' ||
+        day.status === 'rtt')
+    ) {
       this.selectedLeaveRequest = day.leaveRequest;
       this.showDetailsPopup = true;
     }
@@ -428,6 +457,9 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
     this.showDetailsPopup = false;
     this.selectedLeaveRequest = undefined;
     this.rejectionReason = '';
+    this.isEditingLeave = false;
+    this.editableLeaveRequest = undefined;
+    this.tempRejectionReason = '';
   }
 
   approveLeaveRequest() {
@@ -476,13 +508,156 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
       });
   }
 
-  getCellClass(day: CalendarDay): string {
+  // Nouvelles méthodes pour l'édition des congés
+  startEditingLeave() {
+    if (!this.selectedLeaveRequest) return;
+
+    this.isEditingLeave = true;
+    this.editableLeaveRequest = { ...this.selectedLeaveRequest };
+    this.tempRejectionReason = this.selectedLeaveRequest.comments || '';
+  }
+
+  cancelEditingLeave() {
+    this.isEditingLeave = false;
+    this.editableLeaveRequest = undefined;
+    this.tempRejectionReason = '';
+  }
+
+  saveLeaveChanges() {
+    if (!this.editableLeaveRequest) return;
+
+    // Ajouter le motif de refus si le statut est rejeté
+    if (this.editableLeaveRequest.status === LeaveStatus.REJECTED) {
+      this.editableLeaveRequest.comments = this.tempRejectionReason;
+    }
+
+    this.leaveService.updateLeaveRequest(this.editableLeaveRequest).subscribe({
+      next: (updatedRequest: LeaveRequest) => {
+        // Mettre à jour la demande dans la liste locale
+        const index = this.leaveRequests.findIndex(
+          (r) => r.id === updatedRequest.id
+        );
+        if (index !== -1) {
+          this.leaveRequests[index] = updatedRequest;
+        }
+        this.generateCalendars();
+        this.closeDetailsPopup();
+      },
+      error: (error: any) => {
+        console.error('Erreur lors de la mise à jour:', error);
+      },
+    });
+  }
+
+  deleteLeaveRequest() {
+    if (!this.selectedLeaveRequest) return;
+
+    if (
+      confirm('Êtes-vous sûr de vouloir supprimer cette demande de congé ?')
+    ) {
+      this.leaveService
+        .deleteLeaveRequest(this.selectedLeaveRequest.id)
+        .subscribe({
+          next: () => {
+            // Supprimer la demande de la liste locale
+            this.leaveRequests = this.leaveRequests.filter(
+              (r) => r.id !== this.selectedLeaveRequest!.id
+            );
+            this.generateCalendars();
+            this.closeDetailsPopup();
+          },
+          error: (error: any) => {
+            console.error('Erreur lors de la suppression:', error);
+          },
+        });
+    }
+  }
+
+  // Méthodes pour l'effet de focus vertical et horizontal
+  onCellMouseEnter(day: CalendarDay, employee: Employee) {
+    this.hoveredEmployeeId = employee.id;
+
+    // Utiliser le cache d'index pour une recherche rapide
+    const dayKey = `${day.date.getFullYear()}-${day.date.getMonth()}-${day.date.getDate()}`;
+    this.hoveredDayIndex = this.dayIndexMap.get(dayKey);
+  }
+
+  onCellMouseLeave() {
+    this.hoveredEmployeeId = undefined;
+    this.hoveredDayIndex = undefined;
+  }
+
+  getCellClass(day: CalendarDay, employee: Employee, dayIndex: number): string {
     const classes = ['calendar-cell'];
 
     classes.push(`status-${day.status}`);
 
-    if (day.leaveRequest && day.status === 'pending') {
+    // Rendre tous les congés cliquables (en attente, validés, rejetés, RTT)
+    if (
+      day.leaveRequest &&
+      (day.status === 'pending' ||
+        day.status === 'approved' ||
+        day.status === 'rejected' ||
+        day.status === 'rtt')
+    ) {
       classes.push('clickable');
+    }
+
+    // Ajouter les classes de focus
+    if (this.hoveredEmployeeId === employee.id) {
+      classes.push('row-focused');
+    }
+
+    if (this.hoveredDayIndex === dayIndex) {
+      classes.push('column-focused');
+    }
+
+    return classes.join(' ');
+  }
+
+  getEmployeeRowClass(employee: Employee): string {
+    const classes = [];
+    if (this.hoveredEmployeeId === employee.id) {
+      classes.push('row-hovered');
+    }
+    return classes.join(' ');
+  }
+
+  getDayHeaderClass(dayIndex: number): string {
+    const classes = ['day-header-cell'];
+    const allDays = this.getAllDaysOfYear();
+    const day = allDays[dayIndex];
+
+    if (this.isWeekendDay(day)) {
+      classes.push('weekend');
+    }
+
+    if (this.isHoliday(day)) {
+      classes.push('holiday');
+    }
+
+    if (this.hoveredDayIndex === dayIndex) {
+      classes.push('column-hovered');
+    }
+
+    return classes.join(' ');
+  }
+
+  getWeekdayHeaderClass(dayIndex: number): string {
+    const classes = ['weekday-header-cell'];
+    const allDays = this.getAllDaysOfYear();
+    const day = allDays[dayIndex];
+
+    if (this.isWeekendDay(day)) {
+      classes.push('weekend');
+    }
+
+    if (this.isHoliday(day)) {
+      classes.push('holiday');
+    }
+
+    if (this.hoveredDayIndex === dayIndex) {
+      classes.push('column-hovered');
     }
 
     return classes.join(' ');
@@ -520,16 +695,29 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
 
   // Nouvelles méthodes pour le layout horizontal
   getAllDaysOfYear(): Date[] {
+    if (this.allDaysCache) {
+      return this.allDaysCache;
+    }
+
     const days: Date[] = [];
     const startDate = new Date(this.selectedYear, 0, 1);
     const endDate = new Date(this.selectedYear, 11, 31);
 
     const currentDate = new Date(startDate);
+    let index = 0;
     while (currentDate <= endDate) {
-      days.push(new Date(currentDate));
+      const dayDate = new Date(currentDate);
+      days.push(dayDate);
+
+      // Créer la clé pour le cache d'index
+      const dayKey = `${dayDate.getFullYear()}-${dayDate.getMonth()}-${dayDate.getDate()}`;
+      this.dayIndexMap.set(dayKey, index);
+
       currentDate.setDate(currentDate.getDate() + 1);
+      index++;
     }
 
+    this.allDaysCache = days;
     return days;
   }
 

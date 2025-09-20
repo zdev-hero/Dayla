@@ -740,7 +740,67 @@
               background: #fef3c7;
               color: #92400e;
             }
+
+            &.status-approved {
+              background: #d1fae5;
+              color: #065f46;
+            }
+
+            &.status-rejected {
+              background: #fecaca;
+              color: #991b1b;
+            }
           }
+        }
+      }
+    }
+
+    // Nouveaux styles pour le mode édition
+    .request-edit {
+      margin-bottom: 32px;
+
+      .edit-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 16px;
+
+        label {
+          font-weight: 600;
+          color: #374151;
+          font-size: 14px;
+        }
+
+        .edit-input,
+        .edit-select,
+        .edit-textarea {
+          width: 100%;
+          padding: 10px 12px;
+          border: 1px solid #d1d5db;
+          border-radius: 8px;
+          font-size: 14px;
+          color: #374151;
+          transition: all 0.2s ease;
+
+          &:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+          }
+        }
+
+        .edit-textarea {
+          resize: vertical;
+          min-height: 80px;
+          font-family: inherit;
+
+          &::placeholder {
+            color: #9ca3af;
+          }
+        }
+
+        .edit-select {
+          cursor: pointer;
         }
       }
     }
@@ -785,6 +845,84 @@
 
             &:hover {
               background: #dc2626;
+            }
+          }
+        }
+      }
+
+      // Nouveaux styles pour les actions secondaires et d'édition
+      .secondary-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e5e7eb;
+
+        .btn {
+          padding: 8px 16px;
+          border: 1px solid #d1d5db;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: white;
+          color: #374151;
+
+          &.btn-edit {
+            &:hover {
+              background: #f8fafc;
+              border-color: #3b82f6;
+              color: #3b82f6;
+            }
+          }
+
+          &.btn-delete {
+            &:hover {
+              background: #fef2f2;
+              border-color: #ef4444;
+              color: #ef4444;
+            }
+          }
+        }
+      }
+
+      .edit-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+
+        .btn {
+          padding: 10px 20px;
+          border: none;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          &.btn-save {
+            background: #10b981;
+            color: white;
+
+            &:hover {
+              background: #059669;
+            }
+          }
+
+          &.btn-cancel {
+            background: #6b7280;
+            color: white;
+
+            &:hover {
+              background: #4b5563;
             }
           }
         }
@@ -1152,4 +1290,169 @@
     rgba(255, 255, 255, 0.1) 0%,
     rgba(255, 255, 255, 0.02) 100%
   );
+}
+
+// Styles pour l'effet de focus vertical et horizontal
+.calendar-table-wrapper {
+  // Focus sur les lignes (employés)
+  .employee-row.row-hovered {
+    background: rgba(59, 130, 246, 0.08);
+
+    .employee-info-fixed {
+      background: rgba(59, 130, 246, 0.12);
+      border-color: rgba(59, 130, 246, 0.3);
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+    }
+  }
+
+  .calendar-cell.row-focused {
+    background-color: rgba(59, 130, 246, 0.12) !important;
+    border-top: 2px solid rgba(59, 130, 246, 0.4);
+    border-bottom: 2px solid rgba(59, 130, 246, 0.4);
+    position: relative;
+    z-index: 5;
+
+    // Conserver les couleurs d'origine mais avec un filtre de luminosité
+    &.status-worked {
+      background: rgba(255, 255, 255, 0.9) !important;
+      background-blend-mode: overlay;
+    }
+
+    &.status-approved {
+      background: rgba(16, 185, 129, 0.9) !important;
+      filter: brightness(1.1);
+    }
+
+    &.status-pending {
+      background: rgba(245, 158, 11, 0.9) !important;
+      filter: brightness(1.1);
+    }
+
+    &.status-rejected {
+      background: rgba(239, 68, 68, 0.9) !important;
+      filter: brightness(1.1);
+    }
+
+    &.status-rtt {
+      background: rgba(59, 130, 246, 0.9) !important;
+      filter: brightness(1.1);
+    }
+
+    &.status-holiday {
+      background: rgba(107, 114, 128, 0.9) !important;
+      filter: brightness(1.1);
+    }
+
+    &.status-weekend {
+      background: rgba(241, 245, 249, 0.9) !important;
+    }
+  }
+
+  // Focus sur les colonnes (jours)
+  .calendar-cell.column-focused {
+    background-color: rgba(34, 197, 94, 0.12) !important;
+    border-left: 2px solid rgba(34, 197, 94, 0.4);
+    border-right: 2px solid rgba(34, 197, 94, 0.4);
+    position: relative;
+    z-index: 5;
+
+    // Conserver les couleurs d'origine mais avec un filtre de luminosité
+    &.status-worked {
+      background: rgba(255, 255, 255, 0.9) !important;
+    }
+
+    &.status-approved {
+      background: rgba(16, 185, 129, 0.9) !important;
+      filter: brightness(1.15);
+    }
+
+    &.status-pending {
+      background: rgba(245, 158, 11, 0.9) !important;
+      filter: brightness(1.15);
+    }
+
+    &.status-rejected {
+      background: rgba(239, 68, 68, 0.9) !important;
+      filter: brightness(1.15);
+    }
+
+    &.status-rtt {
+      background: rgba(59, 130, 246, 0.9) !important;
+      filter: brightness(1.15);
+    }
+
+    &.status-holiday {
+      background: rgba(107, 114, 128, 0.9) !important;
+      filter: brightness(1.15);
+    }
+
+    &.status-weekend {
+      background: rgba(241, 245, 249, 0.9) !important;
+    }
+  }
+
+  // Focus croisé (cellule à l'intersection)
+  .calendar-cell.row-focused.column-focused {
+    background-color: rgba(168, 85, 247, 0.15) !important;
+    border: 3px solid rgba(168, 85, 247, 0.6);
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.25),
+      0 0 4px rgba(168, 85, 247, 0.15);
+    transform: scale(1.03);
+    z-index: 10;
+    border-radius: 4px;
+
+    // Animation de pulsation réduite pour les performances
+    animation: focusPulse 3s ease-in-out infinite;
+  }
+
+  // Focus sur les en-têtes des colonnes
+  .weekday-header-cell.column-hovered,
+  .day-header-cell.column-hovered {
+    background: rgba(34, 197, 94, 0.15) !important;
+    border-left: 2px solid rgba(34, 197, 94, 0.4);
+    border-right: 2px solid rgba(34, 197, 94, 0.4);
+    color: rgba(34, 197, 94, 0.9);
+    font-weight: 700;
+    transform: scale(1.05);
+    z-index: 15;
+    position: relative;
+    box-shadow: 0 2px 6px rgba(34, 197, 94, 0.2);
+  }
+}
+
+// Animation pour la cellule d'intersection - optimisée
+@keyframes focusPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.25),
+      0 0 4px rgba(168, 85, 247, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.35),
+      0 0 6px rgba(168, 85, 247, 0.25);
+  }
+}
+
+// Amélioration pour les transitions - optimisées pour la performance
+.calendar-cell,
+.weekday-header-cell,
+.day-header-cell,
+.employee-info-fixed {
+  transition: background-color 0.1s ease-out, border-color 0.1s ease-out,
+    box-shadow 0.1s ease-out;
+  will-change: background-color, border-color, box-shadow;
+}
+
+// Optimisation spécifique pour les cellules qui changent souvent
+.calendar-cell {
+  transition: background-color 0.05s ease-out, border-color 0.05s ease-out,
+    transform 0.1s ease-out, box-shadow 0.1s ease-out;
+
+  // Optimisations GPU
+  &.row-focused,
+  &.column-focused,
+  &.row-focused.column-focused {
+    transform: translateZ(0); // Force l'accélération GPU
+    backface-visibility: hidden; // Évite les scintillements
+  }
 }
