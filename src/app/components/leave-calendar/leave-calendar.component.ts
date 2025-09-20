@@ -59,6 +59,10 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
   leaveRequests: LeaveRequest[] = [];
   employeeCalendars: EmployeeCalendar[] = [];
 
+  // Recherche d'employés
+  employeeSearchTerm = '';
+  filteredEmployees: Employee[] = [];
+
   // Propriétés pour la gestion du scroll
   scrollPosition = 0;
   maxScrollPosition = 0;
@@ -76,7 +80,7 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
   }
 
   // Navigation par mois
-  currentMonth = 0; // Commence par janvier (0-11 pour janvier-décembre)
+  currentMonth = new Date().getMonth(); // Commence par le mois d'aujourd'hui (0-11 pour janvier-décembre)
 
   // Getters pour les noms des mois précédent et suivant
   get previousMonthName(): string {
@@ -156,12 +160,16 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.loadData();
+    // S'assurer que le mois courant est sélectionné au démarrage
+    this.currentMonth = new Date().getMonth();
   }
 
   ngAfterViewInit() {
     // Utiliser setTimeout pour s'assurer que le DOM est complètement rendu
     setTimeout(() => {
       this.calculateScrollDimensions();
+      // Positionner automatiquement sur le mois d'aujourd'hui
+      this.scrollToMonthCenter(this.currentMonth);
     }, 0);
   }
 
@@ -279,6 +287,19 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
   applyFilters() {
     let filtered = [...this.employeeCalendars];
 
+    // Filtre par recherche d'employé
+    if (this.employeeSearchTerm.trim()) {
+      const searchTerm = this.employeeSearchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (ec) =>
+          `${ec.employee.firstName} ${ec.employee.lastName}`
+            .toLowerCase()
+            .includes(searchTerm) ||
+          ec.employee.department.toLowerCase().includes(searchTerm) ||
+          ec.employee.position.toLowerCase().includes(searchTerm)
+      );
+    }
+
     // Filtre par équipe
     if (this.selectedTeam) {
       filtered = filtered.filter(
@@ -323,6 +344,44 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
 
   onYearChange() {
     this.generateCalendars();
+    // Maintenir le mois actuel lors du changement d'année
+    setTimeout(() => {
+      this.scrollToMonthCenter(this.currentMonth);
+    }, 0);
+  }
+
+  // Méthodes pour la recherche d'employés
+  onEmployeeSearch() {
+    if (!this.employeeSearchTerm.trim()) {
+      this.filteredEmployees = [];
+      return;
+    }
+
+    const searchTerm = this.employeeSearchTerm.toLowerCase();
+    this.filteredEmployees = this.employees
+      .filter(
+        (employee) =>
+          `${employee.firstName} ${employee.lastName}`
+            .toLowerCase()
+            .includes(searchTerm) ||
+          employee.department.toLowerCase().includes(searchTerm) ||
+          employee.position.toLowerCase().includes(searchTerm)
+      )
+      .slice(0, 10); // Limiter à 10 résultats
+  }
+
+  selectEmployee(employee: Employee) {
+    this.selectedEmployee = employee.id;
+    this.employeeSearchTerm = `${employee.firstName} ${employee.lastName}`;
+    this.filteredEmployees = [];
+    this.onFilterChange();
+  }
+
+  clearEmployeeSearch() {
+    this.employeeSearchTerm = '';
+    this.selectedEmployee = '';
+    this.filteredEmployees = [];
+    this.onFilterChange();
   }
 
   getVisibleDays(employeeCalendar: EmployeeCalendar): CalendarDay[] {
@@ -570,37 +629,18 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
     this.isDraggingScrollbar = false;
   }
 
-  // Détection du mois actuellement visible au centre (avec seuil)
+  // Détection du mois actuellement visible
   updateCurrentMonthFromScrollPosition() {
-    const viewCenter = this.scrollPosition + this.containerWidth / 2;
     let accumulatedWidth = 0;
-    let closestMonth = 0;
-    let closestDistance = Infinity;
-    
     for (let i = 0; i < 12; i++) {
       const monthWidth = this.getMonthWidth(i);
-      const monthCenter = accumulatedWidth + monthWidth / 2;
-      
-      // Distance entre le centre du mois et le centre de la vue
-      const distance = Math.abs(monthCenter - viewCenter);
-      
-      // Ne changer de mois que si le centre du nouveau mois est plus proche
-      // et que le mois est suffisamment visible (au moins 30% du mois visible)
-      const monthStart = accumulatedWidth;
-      const monthEnd = accumulatedWidth + monthWidth;
-      const visibleStart = Math.max(monthStart, this.scrollPosition);
-      const visibleEnd = Math.min(monthEnd, this.scrollPosition + this.containerWidth);
-      const visibleRatio = (visibleEnd - visibleStart) / monthWidth;
-      
-      if (distance < closestDistance && visibleRatio > 0.3) {
-        closestDistance = distance;
-        closestMonth = i;
+      if (this.scrollPosition < accumulatedWidth + monthWidth / 2) {
+        this.currentMonth = i;
+        return;
       }
-      
       accumulatedWidth += monthWidth;
     }
-    
-    this.currentMonth = closestMonth;
+    this.currentMonth = 11; // Décembre si on est à la fin
   }
 
   // Navigation par mois - méthodes pour les boutons
@@ -656,5 +696,16 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
       position += this.getMonthWidth(i);
     }
     return position;
+  }
+
+  // Méthode utilitaire pour revenir au mois d'aujourd'hui
+  goToCurrentMonth() {
+    const currentMonthIndex = new Date().getMonth();
+    this.scrollToMonth(currentMonthIndex);
+  }
+
+  // Vérifier si nous sommes sur le mois d'aujourd'hui
+  isOnCurrentMonth(): boolean {
+    return this.currentMonth === new Date().getMonth();
   }
 }

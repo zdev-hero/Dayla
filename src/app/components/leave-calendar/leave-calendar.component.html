@@ -125,11 +125,50 @@
   </header>
 
   <!-- Tableau calendrier -->
-  <div class="calendar-table-wrapper" >
+  <div class="calendar-table-wrapper">
     <!-- En-tête avec les dates/mois -->
     <div class="calendar-header-sticky">
       <div class="employee-column-header">
         <span>Employés</span>
+
+        <!-- Champ de recherche d'employés -->
+        <div class="employee-search">
+          <div class="search-input-container">
+            <input
+              type="text"
+              [(ngModel)]="employeeSearchTerm"
+              (input)="onEmployeeSearch()"
+              placeholder="Rechercher un employé..."
+              class="employee-search-input"
+            />
+            <button
+              *ngIf="employeeSearchTerm"
+              (click)="clearEmployeeSearch()"
+              class="clear-search-btn"
+              title="Effacer la recherche"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Liste d'autocomplétion -->
+          <div class="autocomplete-list" *ngIf="filteredEmployees.length > 0">
+            <div
+              *ngFor="let employee of filteredEmployees"
+              class="autocomplete-item"
+              (click)="selectEmployee(employee)"
+            >
+              <div class="employee-info">
+                <span class="employee-name"
+                  >{{ employee.firstName }} {{ employee.lastName }}</span
+                >
+                <span class="employee-dept"
+                  >{{ employee.department }} - {{ employee.position }}</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="dates-header-container" #datesHeaderContainer>
         <!-- Bouton mois précédent à gauche -->

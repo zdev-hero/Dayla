@@ -8,7 +8,7 @@
     border-radius: 12px;
     padding: 24px;
     margin-bottom: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 
     .header-top {
       display: flex;
@@ -147,7 +147,7 @@
     background: white;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 
     .calendar-header-sticky {
       display: flex;
@@ -166,9 +166,117 @@
         background: #f8fafc;
         border-right: 2px solid #e5e7eb;
         display: flex;
-        align-items: center;
-        justify-content: center;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
         font-size: 16px;
+        gap: 12px;
+
+        > span {
+          text-align: center;
+        }
+
+        .employee-search {
+          position: relative;
+
+          .search-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+
+            .employee-search-input {
+              width: 100%;
+              padding: 8px 32px 8px 12px;
+              border: 1px solid #d1d5db;
+              border-radius: 8px;
+              font-size: 14px;
+              font-weight: normal;
+              background: white;
+              color: #374151;
+              transition: all 0.2s ease;
+
+              &:focus {
+                outline: none;
+                border-color: #2563eb;
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+              }
+
+              &::placeholder {
+                color: #9ca3af;
+                font-style: italic;
+              }
+            }
+
+            .clear-search-btn {
+              position: absolute;
+              right: 8px;
+              top: 50%;
+              transform: translateY(-50%);
+              background: none;
+              border: none;
+              color: #9ca3af;
+              cursor: pointer;
+              font-size: 14px;
+              padding: 2px;
+              border-radius: 50%;
+              width: 20px;
+              height: 20px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: all 0.2s ease;
+
+              &:hover {
+                background: #f3f4f6;
+                color: #6b7280;
+              }
+            }
+          }
+
+          .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+
+            .autocomplete-item {
+              padding: 12px;
+              cursor: pointer;
+              transition: background-color 0.2s ease;
+              border-bottom: 1px solid #f3f4f6;
+
+              &:hover {
+                background: #f8fafc;
+              }
+
+              &:last-child {
+                border-bottom: none;
+              }
+
+              .employee-info {
+                .employee-name {
+                  font-weight: 600;
+                  color: #1e293b;
+                  font-size: 14px;
+                  margin-bottom: 2px;
+                }
+
+                .employee-dept {
+                  font-size: 12px;
+                  color: #6b7280;
+                }
+              }
+            }
+          }
+        }
       }
 
       .dates-header-container {
@@ -244,12 +352,13 @@
               font-weight: 600;
               color: #374151;
               font-size: 14px;
-              background: #f1f5f9;
+              background: #e7f7ff;
               cursor: pointer;
               transition: background-color 0.2s ease;
 
               &:hover {
-                background: #e2e8f0;
+                background: #bfeaff;
+                font-weight: 900;
               }
 
               &:last-child {
@@ -349,7 +458,7 @@
           padding: 4px 16px;
           gap: 8px;
           border-right: 2px solid #e5e7eb;
-          background: #fafbfc;
+          background: #ffffff;
 
           .employee-avatar {
             width: 25px;
