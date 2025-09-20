@@ -1,14 +1,18 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
   ViewChild,
   ElementRef,
   AfterViewInit,
   HostListener,
   ChangeDetectorRef,
+  Inject,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { LeaveManagementService } from '../../services/leave-management.service';
 import { EmployeeService } from '../../services/employee.service';
 import { Employee } from '../../models/employee.model';
@@ -50,7 +54,7 @@ export interface EmployeeCalendar {
   templateUrl: './leave-calendar.component.html',
   styleUrls: ['./leave-calendar.component.scss'],
 })
-export class LeaveCalendarComponent implements OnInit, AfterViewInit {
+export class LeaveCalendarComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('datesHeaderContainer', { static: false })
   datesHeaderContainer!: ElementRef;
 
@@ -132,6 +136,23 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
   private allDaysCache?: Date[];
   private dayIndexMap = new Map<string, number>();
 
+  // Sélection multiple
+  selectedCells: Set<string> = new Set();
+  isMultiSelectMode = false;
+  lastSelectedCell?: { employeeId: string; dayIndex: number };
+  showBulkManagementPopup = false;
+  selectedDays: Array<{ day: CalendarDay; employee: Employee }> = [];
+  bulkAction: 'approve' | 'reject' | 'modify' | 'assign' | null = null;
+  bulkRejectionReason = '';
+  bulkLeaveType: LeaveType = LeaveType.VACATION;
+  bulkReason = '';
+
+  // Variables pour la sélection par glisser-déposer
+  isDragging = false;
+  dragStartCell?: { employeeId: string; dayIndex: number };
+  dragCurrentCells: Set<string> = new Set();
+  dragPreviewCells: Set<string> = new Set();
+
   // Mois et jours de la semaine
   months = [
     'Janvier',
@@ -168,7 +189,8 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
   constructor(
     private leaveService: LeaveManagementService,
     private employeeService: EmployeeService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit() {
@@ -177,6 +199,11 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
     this.currentMonth = new Date().getMonth();
     // Initialiser le cache des jours
     this.getAllDaysOfYear();
+    
+    // Event listener global pour gérer le mouseup en dehors des cellules (seulement côté client)
+    if (isPlatformBrowser(this.platformId)) {
+      document.addEventListener('mouseup', this.onGlobalMouseUp.bind(this));
+    }
   }
 
   ngAfterViewInit() {
@@ -186,6 +213,13 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
       // Positionner automatiquement sur le mois d'aujourd'hui
       this.scrollToMonthCenter(this.currentMonth);
     }, 0);
+  }
+
+  ngOnDestroy() {
+    // Nettoyer les event listeners globaux (seulement côté client)
+    if (isPlatformBrowser(this.platformId)) {
+      document.removeEventListener('mouseup', this.onGlobalMouseUp.bind(this));
+    }
   }
 
   @HostListener('window:resize', ['$event'])
@@ -439,9 +473,22 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onCellClick(day: CalendarDay, employee: Employee) {
-    // Permettre la modification des congés en attente, validés et rejetés
-    if (
+  onCellClick(day: CalendarDay, employee: Employee, event?: MouseEvent) {
+    const dayIndex = this.getDayIndexForDate(day.date);
+    const cellKey = `${employee.id}-${dayIndex}`;
+
+    // Si on a Ctrl/Cmd pressé ou on est déjà en mode multi-sélection
+    if ((event && (event.ctrlKey || event.metaKey)) || this.isMultiSelectMode) {
+      this.handleMultiSelection(
+        cellKey,
+        day,
+        employee,
+        dayIndex,
+        event?.shiftKey || false
+      );
+    }
+    // Sélection simple pour les demandes existantes
+    else if (
       day.leaveRequest &&
       (day.status === 'pending' ||
         day.status === 'approved' ||
@@ -451,6 +498,304 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
       this.selectedLeaveRequest = day.leaveRequest;
       this.showDetailsPopup = true;
     }
+    // Sélection simple pour les cellules vides (pour affecter un congé)
+    else if (day.status === 'worked') {
+      // Créer une demande temporaire pour les cellules vides
+      this.selectedLeaveRequest = {
+        id: 'temp',
+        employeeId: employee.id,
+        employee: employee,
+        leaveType: LeaveType.VACATION,
+        startDate: day.date,
+        endDate: day.date,
+        totalDays: 1,
+        reason: '',
+        status: LeaveStatus.PENDING,
+        submittedDate: new Date(),
+      };
+      this.selectedEmployee = employee.id;
+      this.isEditingLeave = true; // Mode édition pour créer une nouvelle demande
+      this.showDetailsPopup = true;
+    }
+  }
+
+  private handleMultiSelection(
+    cellKey: string,
+    day: CalendarDay,
+    employee: Employee,
+    dayIndex: number,
+    isShiftPressed: boolean
+  ) {
+    // Si Shift est pressé et on a une dernière cellule sélectionnée, sélectionner la plage
+    if (
+      isShiftPressed &&
+      this.lastSelectedCell &&
+      this.lastSelectedCell.employeeId === employee.id
+    ) {
+      this.selectRange(this.lastSelectedCell.dayIndex, dayIndex, employee);
+    } else {
+      // Toggle de la sélection de cette cellule
+      if (this.selectedCells.has(cellKey)) {
+        this.selectedCells.delete(cellKey);
+        this.selectedDays = this.selectedDays.filter(
+          (item) =>
+            !(
+              item.employee.id === employee.id &&
+              this.getDayIndexForDate(item.day.date) === dayIndex
+            )
+        );
+      } else {
+        // Ne permettre la sélection que des cellules appropriées
+        if (
+          day.status === 'worked' ||
+          day.status === 'pending' ||
+          day.status === 'approved' ||
+          day.status === 'rejected' ||
+          day.status === 'rtt'
+        ) {
+          this.selectedCells.add(cellKey);
+          this.selectedDays.push({ day, employee });
+        }
+      }
+    }
+
+    this.lastSelectedCell = { employeeId: employee.id, dayIndex };
+    this.isMultiSelectMode = this.selectedCells.size > 0;
+
+    // Si on a des sélections, analyser le type d'action possible
+    if (this.selectedCells.size > 0) {
+      this.analyzeBulkAction();
+    }
+  }
+
+  private selectRange(
+    startIndex: number,
+    endIndex: number,
+    employee: Employee
+  ) {
+    const minIndex = Math.min(startIndex, endIndex);
+    const maxIndex = Math.max(startIndex, endIndex);
+
+    for (let i = minIndex; i <= maxIndex; i++) {
+      const dayData = this.getEmployeeDayByIndex(employee.id, i);
+      if (
+        dayData &&
+        (dayData.status === 'worked' ||
+          dayData.status === 'pending' ||
+          dayData.status === 'approved' ||
+          dayData.status === 'rejected' ||
+          dayData.status === 'rtt')
+      ) {
+        const cellKey = `${employee.id}-${i}`;
+        if (!this.selectedCells.has(cellKey)) {
+          this.selectedCells.add(cellKey);
+          this.selectedDays.push({ day: dayData, employee });
+        }
+      }
+    }
+  }
+
+  private getEmployeeDayByIndex(
+    employeeId: string,
+    dayIndex: number
+  ): CalendarDay | null {
+    const empCalendar = this.employeeCalendars.find(
+      (ec) => ec.employee.id === employeeId
+    );
+    return empCalendar && empCalendar.days[dayIndex]
+      ? empCalendar.days[dayIndex]
+      : null;
+  }
+
+  private getDayIndexForDate(date: Date): number {
+    const dayKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    return this.dayIndexMap.get(dayKey) || 0;
+  }
+
+  private analyzeBulkAction() {
+    if (this.selectedDays.length === 0) return;
+
+    const statuses = this.selectedDays.map((item) => item.day.status);
+    const uniqueStatuses = [...new Set(statuses)];
+
+    // Analyser quel type d'action est possible
+    if (uniqueStatuses.every((status) => status === 'pending')) {
+      this.bulkAction = 'approve'; // Demandes en attente -> on peut valider/refuser
+    } else if (
+      uniqueStatuses.every(
+        (status) => status === 'approved' || status === 'rtt'
+      )
+    ) {
+      this.bulkAction = 'modify'; // Congés validés -> on peut modifier
+    } else if (uniqueStatuses.every((status) => status === 'worked')) {
+      this.bulkAction = 'assign'; // Cellules vides -> on peut affecter des congés
+    } else {
+      this.bulkAction = null; // Mélange -> actions limitées
+    }
+  }
+
+  // Méthodes pour la sélection par glisser-déposer
+  onCellMouseDown(day: CalendarDay, employee: Employee, event: MouseEvent) {
+    const dayIndex = this.getDayIndexForDate(day.date);
+
+    // Vérifier si la cellule peut être sélectionnée
+    if (!this.canSelectCell(day)) {
+      return;
+    }
+
+    // Toujours préparer le drag, mais on décidera plus tard si c'est un vrai drag
+    this.dragStartCell = { employeeId: employee.id, dayIndex };
+    this.dragCurrentCells.clear();
+    this.dragPreviewCells.clear();
+
+    const cellKey = `${employee.id}-${dayIndex}`;
+    this.dragCurrentCells.add(cellKey);
+    this.dragPreviewCells.add(cellKey);
+  }
+
+  onCellMouseEnter(day: CalendarDay, employee: Employee) {
+    this.hoveredEmployeeId = employee.id;
+
+    // Utiliser le cache d'index pour une recherche rapide
+    const dayKey = `${day.date.getFullYear()}-${day.date.getMonth()}-${day.date.getDate()}`;
+    this.hoveredDayIndex = this.dayIndexMap.get(dayKey);
+
+    // Si on a un dragStartCell mais pas encore isDragging, c'est qu'on commence à bouger
+    if (this.dragStartCell && !this.isDragging) {
+      // Commencer le vrai drag maintenant
+      this.isDragging = true;
+    }
+
+    // Gestion du drag selection
+    if (this.isDragging && this.dragStartCell) {
+      this.updateDragSelection(employee, this.hoveredDayIndex || 0);
+    }
+  }
+
+  onCellMouseUp(day: CalendarDay, employee: Employee, event: MouseEvent) {
+    if (this.isDragging) {
+      // Finaliser la sélection par drag
+      this.finalizeDragSelection(event.ctrlKey || event.metaKey);
+    }
+    
+    // Réinitialiser l'état de drag
+    this.isDragging = false;
+    this.dragStartCell = undefined;
+    this.dragCurrentCells.clear();
+    this.dragPreviewCells.clear();
+  }
+
+  onGlobalMouseUp(event: MouseEvent) {
+    // Si on était en train de draguer et qu'on relâche la souris n'importe où
+    if (this.isDragging || this.dragStartCell) {
+      // Finaliser la sélection avec les cellules actuellement sélectionnées
+      if (this.isDragging && this.dragCurrentCells.size > 0) {
+        this.finalizeDragSelection(event.ctrlKey || event.metaKey);
+      }
+      
+      // Réinitialiser l'état
+      this.isDragging = false;
+      this.dragStartCell = undefined;
+      this.dragCurrentCells.clear();
+      this.dragPreviewCells.clear();
+    }
+  }
+
+  private canSelectCell(day: CalendarDay): boolean {
+    return (
+      day.status === 'worked' ||
+      day.status === 'pending' ||
+      day.status === 'approved' ||
+      day.status === 'rejected' ||
+      day.status === 'rtt'
+    );
+  }
+
+  private updateDragSelection(
+    currentEmployee: Employee,
+    currentDayIndex: number
+  ) {
+    if (!this.dragStartCell) return;
+
+    this.dragPreviewCells.clear();
+
+    // Sélection rectangulaire
+    const startEmployeeIndex = this.getEmployeeIndex(
+      this.dragStartCell.employeeId
+    );
+    const currentEmployeeIndex = this.getEmployeeIndex(currentEmployee.id);
+    const startDayIndex = this.dragStartCell.dayIndex;
+
+    if (startEmployeeIndex === -1 || currentEmployeeIndex === -1) return;
+
+    const minEmployeeIndex = Math.min(startEmployeeIndex, currentEmployeeIndex);
+    const maxEmployeeIndex = Math.max(startEmployeeIndex, currentEmployeeIndex);
+    const minDayIndex = Math.min(startDayIndex, currentDayIndex);
+    const maxDayIndex = Math.max(startDayIndex, currentDayIndex);
+
+    // Parcourir la zone rectangulaire
+    for (
+      let empIndex = minEmployeeIndex;
+      empIndex <= maxEmployeeIndex;
+      empIndex++
+    ) {
+      const empCalendar = this.employeeCalendars[empIndex];
+      if (!empCalendar) continue;
+
+      for (let dayIndex = minDayIndex; dayIndex <= maxDayIndex; dayIndex++) {
+        const day = empCalendar.days[dayIndex];
+        if (day && this.canSelectCell(day)) {
+          const cellKey = `${empCalendar.employee.id}-${dayIndex}`;
+          this.dragPreviewCells.add(cellKey);
+        }
+      }
+    }
+  }
+
+  private finalizeDragSelection(addToExisting: boolean) {
+    if (!addToExisting && !this.isMultiSelectMode) {
+      // Si on n'ajoute pas à la sélection existante et on n'est pas en mode multi, vider la sélection
+      this.clearSelection();
+    }
+
+    // Ajouter les cellules de la sélection drag à la sélection principale
+    this.dragPreviewCells.forEach((cellKey) => {
+      if (!this.selectedCells.has(cellKey)) {
+        this.selectedCells.add(cellKey);
+
+        // Trouver la cellule et l'employé correspondants
+        const [employeeId, dayIndexStr] = cellKey.split('-');
+        const dayIndex = parseInt(dayIndexStr);
+        const empCalendar = this.employeeCalendars.find(
+          (ec) => ec.employee.id === employeeId
+        );
+
+        if (empCalendar && empCalendar.days[dayIndex]) {
+          this.selectedDays.push({
+            day: empCalendar.days[dayIndex],
+            employee: empCalendar.employee,
+          });
+        }
+      }
+    });
+
+    // Réinitialiser les variables de drag
+    this.isDragging = false;
+    this.dragStartCell = undefined;
+    this.dragCurrentCells.clear();
+    this.dragPreviewCells.clear();
+
+    // Mettre à jour l'état
+    this.isMultiSelectMode = this.selectedCells.size > 0;
+    if (this.selectedCells.size > 0) {
+      this.analyzeBulkAction();
+    }
+  }
+
+  private getEmployeeIndex(employeeId: string): number {
+    return this.employeeCalendars.findIndex(
+      (ec) => ec.employee.id === employeeId
+    );
   }
 
   closeDetailsPopup() {
@@ -573,22 +918,279 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
     }
   }
 
-  // Méthodes pour l'effet de focus vertical et horizontal
-  onCellMouseEnter(day: CalendarDay, employee: Employee) {
-    this.hoveredEmployeeId = employee.id;
-
-    // Utiliser le cache d'index pour une recherche rapide
-    const dayKey = `${day.date.getFullYear()}-${day.date.getMonth()}-${day.date.getDate()}`;
-    this.hoveredDayIndex = this.dayIndexMap.get(dayKey);
+  // Méthodes pour la gestion de la sélection multiple
+  openBulkManagementPopup() {
+    if (this.selectedCells.size > 0) {
+      this.showBulkManagementPopup = true;
+      this.analyzeBulkAction();
+    }
   }
 
-  onCellMouseLeave() {
-    this.hoveredEmployeeId = undefined;
-    this.hoveredDayIndex = undefined;
+  closeBulkManagementPopup() {
+    this.showBulkManagementPopup = false;
+    this.bulkRejectionReason = '';
+    this.bulkLeaveType = LeaveType.VACATION;
+    this.bulkReason = '';
   }
+
+  clearSelection() {
+    this.selectedCells.clear();
+    this.selectedDays = [];
+    this.isMultiSelectMode = false;
+    this.lastSelectedCell = undefined;
+    this.bulkAction = null;
+  }
+
+  // Actions de gestion groupée
+  bulkApprove() {
+    const pendingRequests = this.selectedDays
+      .filter((item) => item.day.status === 'pending' && item.day.leaveRequest)
+      .map((item) => item.day.leaveRequest!);
+
+    if (pendingRequests.length === 0) return;
+
+    // Approuver toutes les demandes en lot
+    const approvalObservables = pendingRequests.map((request) =>
+      this.leaveService.approveLeaveRequest(request.id)
+    );
+
+    forkJoin(approvalObservables).subscribe({
+      next: () => {
+        this.loadData();
+        this.clearSelection();
+        this.closeBulkManagementPopup();
+      },
+      error: (error) => {
+        console.error("Erreur lors de l'approbation en lot:", error);
+      },
+    });
+  }
+
+  bulkReject() {
+    if (!this.bulkRejectionReason.trim()) return;
+
+    const pendingRequests = this.selectedDays
+      .filter((item) => item.day.status === 'pending' && item.day.leaveRequest)
+      .map((item) => item.day.leaveRequest!);
+
+    if (pendingRequests.length === 0) return;
+
+    const rejectionObservables = pendingRequests.map((request) =>
+      this.leaveService.rejectLeaveRequest(request.id, this.bulkRejectionReason)
+    );
+
+    forkJoin(rejectionObservables).subscribe({
+      next: () => {
+        this.loadData();
+        this.clearSelection();
+        this.closeBulkManagementPopup();
+      },
+      error: (error) => {
+        console.error('Erreur lors du refus en lot:', error);
+      },
+    });
+  }
+
+  bulkModify() {
+    const approvedRequests = this.selectedDays
+      .filter(
+        (item) =>
+          (item.day.status === 'approved' || item.day.status === 'rtt') &&
+          item.day.leaveRequest
+      )
+      .map((item) => item.day.leaveRequest!);
+
+    if (approvedRequests.length === 0) return;
+
+    const dateRange = this.getSelectedDateRange();
+    if (!dateRange) return;
+
+    // Créer de nouvelles demandes modifiées
+    const modifiedRequests = approvedRequests.map((request) => ({
+      ...request,
+      leaveType: this.bulkLeaveType,
+      startDate: dateRange.startDate,
+      endDate: dateRange.endDate,
+      reason: this.bulkReason || request.reason,
+    }));
+
+    const updateObservables = modifiedRequests.map((request) =>
+      this.leaveService.updateLeaveRequest(request)
+    );
+
+    forkJoin(updateObservables).subscribe({
+      next: () => {
+        this.loadData();
+        this.clearSelection();
+        this.closeBulkManagementPopup();
+      },
+      error: (error) => {
+        console.error('Erreur lors de la modification en lot:', error);
+      },
+    });
+  }
+
+  bulkAssign() {
+    const workedDays = this.selectedDays.filter(
+      (item) => item.day.status === 'worked'
+    );
+
+    if (workedDays.length === 0) return;
+
+    const dateRange = this.getSelectedDateRange();
+    if (!dateRange) return;
+
+    // Grouper par employé pour créer des demandes distinctes
+    const employeeGroups = workedDays.reduce((groups, item) => {
+      const employeeId = item.employee.id;
+      if (!groups[employeeId]) {
+        groups[employeeId] = { employee: item.employee, days: [] };
+      }
+      groups[employeeId].days.push(item.day);
+      return groups;
+    }, {} as { [key: string]: { employee: Employee; days: CalendarDay[] } });
+
+    // Créer une demande de congé pour chaque employé
+    const newRequests = Object.values(employeeGroups).map((group) => {
+      const totalDays = group.days.length;
+      return {
+        id: '', // Sera généré par le service
+        employeeId: group.employee.id,
+        employee: group.employee,
+        leaveType: this.bulkLeaveType,
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+        totalDays,
+        reason: this.bulkReason,
+        status: LeaveStatus.APPROVED, // Directement approuvé
+        submittedDate: new Date(),
+      } as LeaveRequest;
+    });
+
+    const createObservables = newRequests.map((request) =>
+      this.leaveService.createLeaveRequest(request)
+    );
+
+    forkJoin(createObservables).subscribe({
+      next: () => {
+        this.loadData();
+        this.clearSelection();
+        this.closeBulkManagementPopup();
+      },
+      error: (error) => {
+        console.error("Erreur lors de l'affectation en lot:", error);
+      },
+    });
+  }
+
+  bulkCreatePending() {
+    const workedDays = this.selectedDays.filter(
+      (item) => item.day.status === 'worked'
+    );
+
+    if (workedDays.length === 0) return;
+
+    const dateRange = this.getSelectedDateRange();
+    if (!dateRange) return;
+
+    // Grouper par employé pour créer des demandes distinctes
+    const employeeGroups = workedDays.reduce((groups, item) => {
+      const employeeId = item.employee.id;
+      if (!groups[employeeId]) {
+        groups[employeeId] = { employee: item.employee, days: [] };
+      }
+      groups[employeeId].days.push(item.day);
+      return groups;
+    }, {} as { [key: string]: { employee: Employee; days: CalendarDay[] } });
+
+    // Créer une demande de congé en attente pour chaque employé
+    const newRequests = Object.values(employeeGroups).map((group) => {
+      const totalDays = group.days.length;
+      return {
+        id: '', // Sera généré par le service
+        employeeId: group.employee.id,
+        employee: group.employee,
+        leaveType: this.bulkLeaveType,
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+        totalDays,
+        reason: this.bulkReason,
+        status: LeaveStatus.PENDING, // En attente de validation
+        submittedDate: new Date(),
+      } as LeaveRequest;
+    });
+
+    const createObservables = newRequests.map((request) =>
+      this.leaveService.createLeaveRequest(request)
+    );
+
+    forkJoin(createObservables).subscribe({
+      next: () => {
+        this.loadData();
+        this.clearSelection();
+        this.closeBulkManagementPopup();
+      },
+      error: (error) => {
+        console.error(
+          'Erreur lors de la création des demandes en attente:',
+          error
+        );
+      },
+    });
+  }
+
+  getStatusCount(status: string): number {
+    return this.selectedDays.filter((item) => item.day.status === status)
+      .length;
+  }
+
+  // Méthodes pour gérer les dates sélectionnées
+  getSelectedDates(): Date[] {
+    return this.selectedDays
+      .map((item) => item.day.date)
+      .sort((a, b) => a.getTime() - b.getTime());
+  }
+
+  getSelectedDateRange(): { startDate: Date; endDate: Date } | null {
+    const dates = this.getSelectedDates();
+    if (dates.length === 0) return null;
+
+    return {
+      startDate: dates[0],
+      endDate: dates[dates.length - 1],
+    };
+  }
+
+  getSelectedDateRangeText(): string {
+    const range = this.getSelectedDateRange();
+    if (!range) return 'Aucune date sélectionnée';
+
+    if (range.startDate.getTime() === range.endDate.getTime()) {
+      return `Le ${this.formatDate(range.startDate)}`;
+    }
+
+    return `Du ${this.formatDate(range.startDate)} au ${this.formatDate(
+      range.endDate
+    )}`;
+  }
+
+  getSelectedDatesText(): string {
+    const dates = this.getSelectedDates();
+    if (dates.length === 0) return 'Aucune date sélectionnée';
+    if (dates.length === 1) return `Le ${this.formatDate(dates[0])}`;
+    if (dates.length <= 3) {
+      return dates.map((date) => this.formatDate(date)).join(', ');
+    }
+    return `${dates.length} jours sélectionnés (${this.formatDate(
+      dates[0]
+    )} - ${this.formatDate(dates[dates.length - 1])})`;
+  }
+
+  // Méthodes pour l'effet de focus vertical et horizontal - supprimées (duplicatas)
 
   getCellClass(day: CalendarDay, employee: Employee, dayIndex: number): string {
     const classes = ['calendar-cell'];
+    const cellKey = `${employee.id}-${dayIndex}`;
 
     classes.push(`status-${day.status}`);
 
@@ -601,6 +1203,21 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
         day.status === 'rtt')
     ) {
       classes.push('clickable');
+    }
+
+    // Ajouter les cellules vides cliquables pour affectation
+    if (day.status === 'worked') {
+      classes.push('clickable');
+    }
+
+    // Classe de sélection
+    if (this.selectedCells.has(cellKey)) {
+      classes.push('selected');
+    }
+
+    // Classe de prévisualisation de drag
+    if (this.dragPreviewCells.has(cellKey)) {
+      classes.push('drag-preview');
     }
 
     // Ajouter les classes de focus
@@ -814,6 +1431,9 @@ export class LeaveCalendarComponent implements OnInit, AfterViewInit {
 
   @HostListener('document:mouseup')
   onDocumentMouseUp() {
+    if (this.isDragging) {
+      this.finalizeDragSelection(false);
+    }
     this.isDraggingScrollbar = false;
   }
 

@@ -124,6 +124,27 @@
     </div>
   </header>
 
+  <!-- Barre d'outils pour la sélection multiple -->
+  <div class="selection-toolbar" *ngIf="isMultiSelectMode">
+    <div class="toolbar-info">
+      <span class="selection-count"
+        >{{ selectedCells.size }} cellule(s) sélectionnée(s)</span
+      >
+    </div>
+    <div class="toolbar-actions">
+      <button
+        class="btn btn-primary"
+        (click)="openBulkManagementPopup()"
+        [disabled]="selectedCells.size === 0"
+      >
+        <i class="icon-settings"></i> Gérer la sélection
+      </button>
+      <button class="btn btn-secondary" (click)="clearSelection()">
+        <i class="icon-clear"></i> Effacer la sélection
+      </button>
+    </div>
+  </div>
+
   <!-- Tableau calendrier -->
   <div class="calendar-table-wrapper">
     <!-- En-tête avec les dates/mois -->
@@ -177,7 +198,6 @@
             class="scroll-btn scroll-left"
             (click)="scrollToPreviousMonth()"
             [disabled]="!canScrollLeft"
-            [title]="'Aller à ' + previousMonthName"
           >
             ← {{ previousMonthName }}
           </button>
@@ -188,7 +208,6 @@
             class="scroll-btn scroll-right"
             (click)="scrollToNextMonth()"
             [disabled]="!canScrollRight"
-            [title]="'Aller à ' + nextMonthName"
           >
             {{ nextMonthName }} →
           </button>
@@ -284,10 +303,10 @@
             <div
               *ngFor="let day of empCalendar.days; let dayIndex = index"
               [class]="getCellClass(day, empCalendar.employee, dayIndex)"
-              [title]="getCellTitle(day)"
-              (click)="onCellClick(day, empCalendar.employee)"
+              (click)="onCellClick(day, empCalendar.employee, $event)"
+              (mousedown)="onCellMouseDown(day, empCalendar.employee, $event)"
               (mouseenter)="onCellMouseEnter(day, empCalendar.employee)"
-              (mouseleave)="onCellMouseLeave()"
+              (mouseup)="onCellMouseUp(day, empCalendar.employee, $event)"
             >
               <!-- Contenu de la cellule selon le statut -->
               <span *ngIf="day.status === 'worked'" class="day-indicator"
@@ -319,6 +338,180 @@
           [style.left.%]="scrollThumbPosition"
           (mousedown)="onScrollbarMouseDown($event)"
         ></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup de gestion groupée -->
+  <div
+    class="popup-overlay"
+    *ngIf="showBulkManagementPopup"
+    (click)="closeBulkManagementPopup()"
+  >
+    <div class="bulk-management-popup" (click)="$event.stopPropagation()">
+      <div class="popup-header">
+        <h3>Gestion groupée des congés</h3>
+        <button class="close-btn" (click)="closeBulkManagementPopup()">
+          &times;
+        </button>
+      </div>
+
+      <div class="popup-body">
+        <div class="selection-summary">
+          <p>
+            <strong>{{ selectedCells.size }}</strong> cellule(s) sélectionnée(s)
+          </p>
+          <div class="selection-breakdown" *ngIf="selectedDays.length > 0">
+            <div class="breakdown-item" *ngIf="getStatusCount('pending') > 0">
+              <span class="status-badge status-pending"
+                >{{ getStatusCount("pending") }} En attente</span
+              >
+            </div>
+            <div class="breakdown-item" *ngIf="getStatusCount('approved') > 0">
+              <span class="status-badge status-approved"
+                >{{ getStatusCount("approved") }} Validé</span
+              >
+            </div>
+            <div class="breakdown-item" *ngIf="getStatusCount('rtt') > 0">
+              <span class="status-badge status-rtt"
+                >{{ getStatusCount("rtt") }} RTT</span
+              >
+            </div>
+            <div class="breakdown-item" *ngIf="getStatusCount('rejected') > 0">
+              <span class="status-badge status-rejected"
+                >{{ getStatusCount("rejected") }} Refusé</span
+              >
+            </div>
+            <div class="breakdown-item" *ngIf="getStatusCount('worked') > 0">
+              <span class="status-badge status-worked"
+                >{{ getStatusCount("worked") }} Libre</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions pour demandes en attente -->
+        <div class="action-group" *ngIf="getStatusCount('pending') > 0">
+          <h4>Actions pour les demandes en attente</h4>
+          <div class="action-buttons">
+            <button class="btn btn-approve" (click)="bulkApprove()">
+              ✓ Valider toutes ({{ getStatusCount("pending") }})
+            </button>
+            <button
+              class="btn btn-reject"
+              (click)="bulkReject()"
+              [disabled]="!bulkRejectionReason.trim()"
+            >
+              ✗ Refuser toutes ({{ getStatusCount("pending") }})
+            </button>
+          </div>
+          <div class="form-group">
+            <label for="bulkRejectionReason">Motif de refus :</label>
+            <textarea
+              id="bulkRejectionReason"
+              [(ngModel)]="bulkRejectionReason"
+              placeholder="Indiquez le motif du refus..."
+              rows="2"
+              class="form-control"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Actions pour congés validés -->
+        <div
+          class="action-group"
+          *ngIf="getStatusCount('approved') > 0 || getStatusCount('rtt') > 0"
+        >
+          <h4>Modifier les congés validés</h4>
+
+          <div class="selected-dates-info">
+            <strong>Dates concernées :</strong> {{ getSelectedDatesText() }}
+          </div>
+
+          <div class="form-group">
+            <label for="bulkLeaveType">Type de congé :</label>
+            <select
+              id="bulkLeaveType"
+              [(ngModel)]="bulkLeaveType"
+              class="form-control"
+            >
+              <option *ngFor="let type of leaveTypes" [value]="type">
+                {{ getLeaveTypeLabel(type) }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="bulkReason">Motif :</label>
+            <textarea
+              id="bulkReason"
+              [(ngModel)]="bulkReason"
+              placeholder="Nouveau motif..."
+              rows="2"
+              class="form-control"
+            ></textarea>
+          </div>
+          <button class="btn btn-primary" (click)="bulkModify()">
+            ✏️ Modifier tous ({{
+              getStatusCount("approved") + getStatusCount("rtt")
+            }})
+          </button>
+        </div>
+
+        <!-- Actions pour cellules libres -->
+        <div class="action-group" *ngIf="getStatusCount('worked') > 0">
+          <h4>Affecter des congés</h4>
+
+          <div class="selected-dates-info">
+            <strong>Dates concernées :</strong> {{ getSelectedDatesText() }}
+          </div>
+
+          <div class="form-group">
+            <label for="assignLeaveType">Type de congé :</label>
+            <select
+              id="assignLeaveType"
+              [(ngModel)]="bulkLeaveType"
+              class="form-control"
+            >
+              <option *ngFor="let type of leaveTypes" [value]="type">
+                {{ getLeaveTypeLabel(type) }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="assignReason">Motif :</label>
+            <textarea
+              id="assignReason"
+              [(ngModel)]="bulkReason"
+              placeholder="Motif des congés..."
+              rows="2"
+              class="form-control"
+            ></textarea>
+          </div>
+
+          <div class="action-buttons">
+            <button
+              class="btn btn-success"
+              (click)="bulkAssign()"
+              [disabled]="!bulkReason.trim()"
+            >
+              ✓ Valider et affecter ({{ getStatusCount("worked") }} cellules)
+            </button>
+            <button
+              class="btn btn-warning"
+              (click)="bulkCreatePending()"
+              [disabled]="!bulkReason.trim()"
+            >
+              📝 Créer demande en attente ({{ getStatusCount("worked") }}
+              cellules)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="popup-footer">
+        <button class="btn btn-secondary" (click)="closeBulkManagementPopup()">
+          Fermer
+        </button>
       </div>
     </div>
   </div>

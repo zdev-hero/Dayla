@@ -65,6 +65,16 @@ export class LeaveManagementService {
     return of(request!);
   }
 
+  // Nouvelle méthode pour créer une demande de congé
+  createLeaveRequest(leaveRequest: LeaveRequest): Observable<LeaveRequest> {
+    // return this.http.post<LeaveRequest>(this.apiUrl, leaveRequest);
+    const newRequest = {
+      ...leaveRequest,
+      id: Math.random().toString(36).substr(2, 9), // Générer un ID temporaire
+    };
+    return of(newRequest);
+  }
+
   // Nouvelle méthode pour mettre à jour une demande de congé
   updateLeaveRequest(leaveRequest: LeaveRequest): Observable<LeaveRequest> {
     // return this.http.put<LeaveRequest>(`${this.apiUrl}/${leaveRequest.id}`, leaveRequest);
