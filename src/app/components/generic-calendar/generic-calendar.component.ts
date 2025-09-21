@@ -12,6 +12,8 @@ import {
   Input,
   Output,
   EventEmitter,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -87,7 +89,7 @@ export interface CalendarCellEditEvent {
   styleUrls: ['./generic-calendar.component.scss'],
 })
 export class GenericCalendarComponent
-  implements OnInit, AfterViewInit, OnDestroy
+  implements OnInit, AfterViewInit, OnDestroy, OnChanges
 {
   @ViewChild('datesHeaderContainer', { static: false })
   datesHeaderContainer!: ElementRef;
@@ -245,6 +247,18 @@ export class GenericCalendarComponent
 
     if (isPlatformBrowser(this.platformId)) {
       document.addEventListener('mouseup', this.onGlobalMouseUp.bind(this));
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['selectedYear'] || changes['selectedMonth']) {
+      this.clearCache();
+      setTimeout(() => {
+        this.calculateScrollDimensions();
+        if (this.config.viewMode === 'year') {
+          this.scrollToMonthCenter(this.currentMonth);
+        }
+      }, 0);
     }
   }
 
@@ -734,13 +748,19 @@ export class GenericCalendarComponent
     this.clearCache();
     this.yearChange.emit(this.selectedYear);
     setTimeout(() => {
-      this.scrollToMonthCenter(this.currentMonth);
+      this.calculateScrollDimensions();
+      if (this.config.viewMode === 'year') {
+        this.scrollToMonthCenter(this.currentMonth);
+      }
     }, 0);
   }
 
   onMonthChange() {
     this.clearCache();
     this.monthChange.emit(this.selectedMonth);
+    setTimeout(() => {
+      this.calculateScrollDimensions();
+    }, 0);
   }
 
   private clearCache() {

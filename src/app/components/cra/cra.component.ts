@@ -10,6 +10,7 @@ import {
   EmployeeCalendar,
   CalendarCellClickEvent,
 } from '../generic-calendar/generic-calendar.component';
+import { YearPickerComponent } from '../year-picker/year-picker.component';
 import { EmployeeService } from '../../services/employee.service';
 import { CraService } from '../../services/cra.service';
 import { Employee } from '../../models/employee.model';
@@ -23,7 +24,12 @@ import { CRA_CALENDAR_CONFIG } from '../../config/calendar-configs';
 @Component({
   selector: 'app-cra',
   standalone: true,
-  imports: [CommonModule, FormsModule, GenericCalendarComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    GenericCalendarComponent,
+    YearPickerComponent,
+  ],
   templateUrl: './cra.component.html',
   styleUrls: ['./cra.component.scss'],
 })
@@ -63,6 +69,11 @@ export class CraComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Mise à jour de la configuration pour s'assurer du mode mensuel
+    this.calendarConfig = {
+      ...CRA_CALENDAR_CONFIG,
+      viewMode: 'month',
+    };
     this.loadData();
   }
 
@@ -226,12 +237,16 @@ export class CraComponent implements OnInit, OnDestroy {
 
   onYearChange(year: number) {
     this.selectedYear = year;
-    this.generateEmployeeCalendar();
+    setTimeout(() => {
+      this.generateEmployeeCalendar();
+    }, 0);
   }
 
   onMonthChange(month: number) {
     this.selectedMonth = month;
-    this.generateEmployeeCalendar();
+    setTimeout(() => {
+      this.generateEmployeeCalendar();
+    }, 0);
   }
 
   onManageSelection(event: {

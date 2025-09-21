@@ -1,0 +1,66 @@
+<div class="year-picker-container">
+  <!-- Déclencheur du sélecteur (optionnel) -->
+  <div
+    class="year-picker-trigger"
+    *ngIf="showTrigger"
+    (click)="togglePicker()"
+    [class.active]="isOpen"
+  >
+    <span class="selected-year">{{ selectedYear }}</span>
+    <i class="dropdown-icon" [class.rotated]="isOpen">▼</i>
+  </div>
+
+  <!-- Overlay pour fermer en cliquant à l'extérieur -->
+  <div class="year-picker-overlay" *ngIf="isOpen" (click)="closePicker()"></div>
+
+  <!-- Panneau de sélection d'année -->
+  <div
+    class="year-picker-panel"
+    *ngIf="isOpen"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- En-tête avec navigation par décennie -->
+    <div class="year-picker-header">
+      <button
+        class="nav-button prev-decade"
+        (click)="previousDecade()"
+        [disabled]="!canGoPreviousDecade"
+        title="Décennie précédente"
+      >
+        ‹
+      </button>
+      <span class="decade-label">{{ decadeLabel }}</span>
+      <button
+        class="nav-button next-decade"
+        (click)="nextDecade()"
+        [disabled]="!canGoNextDecade"
+        title="Décennie suivante"
+      >
+        ›
+      </button>
+    </div>
+
+    <!-- Grille des années -->
+    <div class="years-grid">
+      <button
+        *ngFor="let year of years"
+        class="year-button"
+        [class.selected]="isSelectedYear(year)"
+        [class.current]="isCurrentYear(year)"
+        [class.disabled]="isYearDisabled(year)"
+        [disabled]="isYearDisabled(year)"
+        (click)="selectYear(year)"
+        [title]="'Sélectionner l\'année ' + year"
+      >
+        {{ year }}
+      </button>
+    </div>
+
+    <!-- Actions -->
+    <div class="year-picker-actions">
+      <button class="action-button cancel" (click)="closePicker()">
+        Annuler
+      </button>
+    </div>
+  </div>
+</div>

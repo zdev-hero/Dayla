@@ -16,6 +16,7 @@ import {
   EmployeeCalendar as GenericEmployeeCalendar,
   CalendarCellClickEvent,
 } from '../generic-calendar/generic-calendar.component';
+import { YearPickerComponent } from '../year-picker/year-picker.component';
 import { LeaveManagementService } from '../../services/leave-management.service';
 import { EmployeeService } from '../../services/employee.service';
 import { Employee } from '../../models/employee.model';
@@ -42,7 +43,12 @@ interface LeaveEmployeeCalendar extends GenericEmployeeCalendar {
 @Component({
   selector: 'app-leave-calendar',
   standalone: true,
-  imports: [CommonModule, FormsModule, GenericCalendarComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    GenericCalendarComponent,
+    YearPickerComponent,
+  ],
   templateUrl: './leave-calendar.component.html',
   styleUrls: ['./leave-calendar.component.scss'],
 })
@@ -122,7 +128,15 @@ export class LeaveCalendarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.updateCalendarConfig();
     this.loadData();
+  }
+
+  private updateCalendarConfig() {
+    this.calendarConfig = {
+      ...LEAVE_CALENDAR_CONFIG,
+      viewMode: this.viewMode as 'year' | 'month',
+    };
   }
 
   ngOnDestroy() {
@@ -166,8 +180,22 @@ export class LeaveCalendarComponent implements OnInit, OnDestroy {
 
   generateEmployeeDays(employee: Employee): LeaveCalendarDay[] {
     const days: LeaveCalendarDay[] = [];
-    const startDate = new Date(this.selectedYear, 0, 1);
-    const endDate = new Date(this.selectedYear, 11, 31);
+    let startDate: Date;
+    let endDate: Date;
+
+    // Générer les dates en fonction du mode de vue
+    if (this.viewMode === 'month') {
+      startDate = new Date(this.selectedYear, this.selectedMonth - 1, 1);
+      endDate = new Date(this.selectedYear, this.selectedMonth, 0);
+    } else if (this.viewMode === 'quarter') {
+      const quarterStartMonth = (this.selectedQuarter - 1) * 3;
+      startDate = new Date(this.selectedYear, quarterStartMonth, 1);
+      endDate = new Date(this.selectedYear, quarterStartMonth + 3, 0);
+    } else {
+      // Vue année par défaut
+      startDate = new Date(this.selectedYear, 0, 1);
+      endDate = new Date(this.selectedYear, 11, 31);
+    }
 
     const currentDate = new Date(startDate);
 
@@ -363,12 +391,16 @@ export class LeaveCalendarComponent implements OnInit, OnDestroy {
 
   onYearChange(year: number) {
     this.selectedYear = year;
-    this.generateCalendars();
+    setTimeout(() => {
+      this.generateCalendars();
+    }, 0);
   }
 
   onMonthChange(month: number) {
     this.selectedMonth = month;
-    this.generateCalendars();
+    setTimeout(() => {
+      this.generateCalendars();
+    }, 0);
   }
 
   // Méthodes pour la recherche d'employés (interne, gardée de l'ancien code)
@@ -406,7 +438,10 @@ export class LeaveCalendarComponent implements OnInit, OnDestroy {
   }
 
   onFilterChange() {
-    this.applyFilters();
+    this.updateCalendarConfig();
+    setTimeout(() => {
+      this.generateCalendars();
+    }, 0);
   }
 
   // Gestion des popups (gardée de l'ancien code)

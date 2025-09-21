@@ -7,14 +7,12 @@
       <div class="period-controls">
         <div class="period-selector">
           <label>Année</label>
-          <select
-            [(ngModel)]="selectedYear"
-            (change)="onYearChange(selectedYear)"
-          >
-            <option [value]="selectedYear - 1">{{ selectedYear - 1 }}</option>
-            <option [value]="selectedYear">{{ selectedYear }}</option>
-            <option [value]="selectedYear + 1">{{ selectedYear + 1 }}</option>
-          </select>
+          <app-year-picker
+            [selectedYear]="selectedYear"
+            [minYear]="2020"
+            [maxYear]="2030"
+            (yearChange)="onYearChange($event)"
+          ></app-year-picker>
         </div>
 
         <div class="period-selector">
