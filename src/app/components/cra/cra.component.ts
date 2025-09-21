@@ -18,6 +18,7 @@ import {
   CraLeaveType,
   CRA_LEAVE_TYPE_LABELS,
 } from '../../models/cra.model';
+import { CRA_CALENDAR_CONFIG } from '../../config/calendar-configs';
 
 @Component({
   selector: 'app-cra',
@@ -31,29 +32,7 @@ export class CraComponent implements OnInit, OnDestroy {
 
   // Configuration du calendrier
   calendarConfig: CalendarConfig = {
-    mode: 'cra',
-    viewMode: 'month',
-    showEmployeeSearch: false,
-    showFilters: false,
-    showLegend: true,
-    showMultiSelection: false,
-    allowCellEditing: true,
-    allowMultiSelect: false,
-    allowDragSelect: false,
-    title: "Compte Rendu d'Activité (CRA)",
-    employeeColumnWidth: 300,
-    cellWidth: 32,
-    cellHeight: 40,
-    legends: [
-      { status: 'empty', label: 'À saisir', color: '#f8fafc' },
-      { status: 'partial', label: '0.5 jour', color: '#fef3c7' },
-      { status: 'full', label: '1 jour', color: '#d1fae5' },
-      { status: 'vacation', label: 'Congé payé', color: '#3b82f6' },
-      { status: 'rtt', label: 'RTT', color: '#8b5cf6' },
-      { status: 'sick_leave', label: 'Maladie', color: '#ef4444' },
-      { status: 'holiday', label: 'Jour férié', color: '#6b7280' },
-      { status: 'weekend', label: 'Week-end', color: '#e5e7eb' },
-    ],
+    ...CRA_CALENDAR_CONFIG,
   };
 
   // Données
@@ -253,6 +232,18 @@ export class CraComponent implements OnInit, OnDestroy {
   onMonthChange(month: number) {
     this.selectedMonth = month;
     this.generateEmployeeCalendar();
+  }
+
+  onManageSelection(event: {
+    selectedCells: Set<string>;
+    selectedData: { employee: Employee; day: CalendarDay; dayIndex: number }[];
+  }) {
+    // Pour le CRA, on peut implémenter une gestion groupée si nécessaire
+    // Pour l'instant, on affiche juste un message ou on ouvre une modal de saisie groupée
+    console.log('Gestion de sélection CRA:', event);
+
+    // Exemple : ouvrir une modal pour saisir des valeurs en lot
+    // this.openBulkEditModal(event.selectedData);
   }
 
   // Gestion du modal d'édition

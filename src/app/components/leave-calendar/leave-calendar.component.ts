@@ -26,6 +26,7 @@ import {
   LEAVE_TYPE_LABELS,
   LEAVE_STATUS_LABELS,
 } from '../../models/leave-request.model';
+import { LEAVE_CALENDAR_CONFIG } from '../../config/calendar-configs';
 
 // Interface locale pour étendre CalendarDay avec les propriétés spécifiques aux congés
 interface LeaveCalendarDay extends GenericCalendarDay {
@@ -50,28 +51,7 @@ export class LeaveCalendarComponent implements OnInit, OnDestroy {
 
   // Configuration du calendrier générique
   calendarConfig: CalendarConfig = {
-    mode: 'leave-management',
-    viewMode: 'year',
-    showEmployeeSearch: true,
-    showFilters: true,
-    showLegend: true,
-    showMultiSelection: true,
-    allowCellEditing: false,
-    allowMultiSelect: true,
-    allowDragSelect: true,
-    title: 'Calendrier des congés',
-    employeeColumnWidth: 300,
-    cellWidth: 24,
-    cellHeight: 32,
-    legends: [
-      { status: 'worked', label: 'Travaillé', color: 'white' },
-      { status: 'approved', label: 'Congé validé', color: '#10b981' },
-      { status: 'pending', label: 'En attente', color: '#f59e0b' },
-      { status: 'rejected', label: 'Refusé', color: '#ef4444' },
-      { status: 'rtt', label: 'RTT', color: '#3b82f6' },
-      { status: 'holiday', label: 'Jour férié', color: '#6b7280' },
-      { status: 'weekend', label: 'Week-end', color: '#e5e7eb' },
-    ],
+    ...LEAVE_CALENDAR_CONFIG,
   };
 
   // Données
@@ -112,6 +92,11 @@ export class LeaveCalendarComponent implements OnInit, OnDestroy {
   bulkRejectionReason = '';
   bulkLeaveType: LeaveType = LeaveType.VACATION;
   bulkReason = '';
+
+  // Getter pour le mode multi-sélection
+  get isMultiSelectMode(): boolean {
+    return this.selectedCells.size > 0;
+  }
 
   // Mois pour l'affichage
   months = [
@@ -356,6 +341,24 @@ export class LeaveCalendarComponent implements OnInit, OnDestroy {
   onEmployeeSearch(searchTerm: string) {
     this.employeeSearchTerm = searchTerm;
     this.onEmployeeSearchInternal();
+  }
+
+  onManageSelection(event: {
+    selectedCells: Set<string>;
+    selectedData: {
+      employee: Employee;
+      day: GenericCalendarDay;
+      dayIndex: number;
+    }[];
+  }) {
+    // Convertir les données sélectionnées au format attendu
+    this.selectedDays = event.selectedData.map((item) => ({
+      employee: item.employee,
+      day: item.day as LeaveCalendarDay,
+    }));
+
+    // Ouvrir la popup de gestion groupée
+    this.openBulkManagementPopup();
   }
 
   onYearChange(year: number) {

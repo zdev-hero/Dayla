@@ -10,8 +10,11 @@
       >
     </div>
     <div class="toolbar-actions">
+      <button class="btn btn-primary" (click)="manageSelection()">
+        <i class="icon-manage"></i> Gérer la sélection
+      </button>
       <button class="btn btn-secondary" (click)="clearSelection()">
-        <i class="icon-clear"></i> Effacer la sélection
+        <i class="icon-clear">Effacer la sélection</i>
       </button>
     </div>
   </div>
@@ -38,7 +41,7 @@
             />
             <button
               *ngIf="employeeSearchTerm"
-              (click)="clearEmployeeSearch()"
+              (click)="clearEmployeeSearchHandler()"
               class="clear-search-btn"
               title="Effacer la recherche"
             >

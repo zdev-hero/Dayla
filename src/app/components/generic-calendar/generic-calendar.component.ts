@@ -96,6 +96,7 @@ export class GenericCalendarComponent
   @Input() config: CalendarConfig = { mode: 'leave-management' };
   @Input() employees: Employee[] = [];
   @Input() employeeCalendars: EmployeeCalendar[] = [];
+  @Input() filteredEmployees: Employee[] = [];
   @Input() selectedYear = new Date().getFullYear();
   @Input() selectedMonth = new Date().getMonth() + 1;
 
@@ -103,8 +104,14 @@ export class GenericCalendarComponent
   @Output() cellClick = new EventEmitter<CalendarCellClickEvent>();
   @Output() cellEdit = new EventEmitter<CalendarCellEditEvent>();
   @Output() employeeSearch = new EventEmitter<string>();
+  @Output() employeeSelect = new EventEmitter<Employee>();
+  @Output() clearEmployeeSearch = new EventEmitter<void>();
   @Output() yearChange = new EventEmitter<number>();
   @Output() monthChange = new EventEmitter<number>();
+  @Output() manageSelectionClick = new EventEmitter<{
+    selectedCells: Set<string>;
+    selectedData: { employee: Employee; day: CalendarDay; dayIndex: number }[];
+  }>();
 
   // Propriétés internes pour le scroll
   scrollPosition = 0;
@@ -116,7 +123,6 @@ export class GenericCalendarComponent
 
   // Propriétés de l'interface
   employeeSearchTerm = '';
-  filteredEmployees: Employee[] = [];
 
   // Propriétés pour la gestion du focus
   hoveredEmployeeId?: string;
@@ -318,13 +324,12 @@ export class GenericCalendarComponent
 
   selectEmployee(employee: Employee) {
     this.employeeSearchTerm = `${employee.firstName} ${employee.lastName}`;
-    this.filteredEmployees = [];
+    this.employeeSelect.emit(employee);
   }
 
-  clearEmployeeSearch() {
+  clearEmployeeSearchHandler() {
     this.employeeSearchTerm = '';
-    this.filteredEmployees = [];
-    this.employeeSearch.emit('');
+    this.clearEmployeeSearch.emit();
   }
 
   // Méthodes pour les interactions de cellules
@@ -563,6 +568,42 @@ export class GenericCalendarComponent
     this.selectedCells.clear();
     this.isMultiSelectMode = false;
     this.lastSelectedCell = undefined;
+  }
+
+  manageSelection() {
+    if (this.selectedCells.size === 0) {
+      return;
+    }
+
+    // Construire les données sélectionnées
+    const selectedData: {
+      employee: Employee;
+      day: CalendarDay;
+      dayIndex: number;
+    }[] = [];
+
+    this.selectedCells.forEach((cellKey) => {
+      const [employeeId, dayIndexStr] = cellKey.split('-');
+      const dayIndex = parseInt(dayIndexStr, 10);
+
+      const empCalendar = this.employeeCalendars.find(
+        (ec) => ec.employee.id === employeeId
+      );
+
+      if (empCalendar && empCalendar.days[dayIndex]) {
+        selectedData.push({
+          employee: empCalendar.employee,
+          day: empCalendar.days[dayIndex],
+          dayIndex: dayIndex,
+        });
+      }
+    });
+
+    // Émettre l'événement avec les données sélectionnées
+    this.manageSelectionClick.emit({
+      selectedCells: new Set(this.selectedCells),
+      selectedData: selectedData,
+    });
   }
 
   // Méthodes pour le scroll
