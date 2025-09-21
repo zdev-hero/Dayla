@@ -26,6 +26,11 @@ export const routes: Routes = [
   },
   { path: 'leave-calendar', component: LeaveCalendarComponent },
   {
+    path: 'cra',
+    loadComponent: () =>
+      import('./components/cra/cra.component').then((m) => m.CraComponent),
+  },
+  {
     path: 'history',
     loadComponent: () =>
       import('./components/leave-analytics/leave-analytics.component').then(

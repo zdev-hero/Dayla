@@ -1,0 +1,264 @@
+<div class="calendar-container">
+  <!-- Barre d'outils pour la sélection multiple -->
+  <div
+    class="selection-toolbar"
+    *ngIf="isMultiSelectMode && config.showMultiSelection"
+  >
+    <div class="toolbar-info">
+      <span class="selection-count"
+        >{{ selectedCells.size }} cellule(s) sélectionnée(s)</span
+      >
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-secondary" (click)="clearSelection()">
+        <i class="icon-clear"></i> Effacer la sélection
+      </button>
+    </div>
+  </div>
+
+  <!-- Tableau calendrier -->
+  <div class="calendar-table-wrapper">
+    <!-- En-tête avec les dates/mois -->
+    <div class="calendar-header-sticky">
+      <div
+        class="employee-column-header"
+        [style.width.px]="employeeColumnWidth"
+      >
+        <span>Employés</span>
+
+        <!-- Champ de recherche d'employés (conditionnel) -->
+        <div class="employee-search" *ngIf="config.showEmployeeSearch">
+          <div class="search-input-container">
+            <input
+              type="text"
+              [(ngModel)]="employeeSearchTerm"
+              (input)="onEmployeeSearch()"
+              placeholder="Rechercher un employé..."
+              class="employee-search-input"
+            />
+            <button
+              *ngIf="employeeSearchTerm"
+              (click)="clearEmployeeSearch()"
+              class="clear-search-btn"
+              title="Effacer la recherche"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Liste d'autocomplétion -->
+          <div class="autocomplete-list" *ngIf="filteredEmployees.length > 0">
+            <div
+              *ngFor="let employee of filteredEmployees"
+              class="autocomplete-item"
+              (click)="selectEmployee(employee)"
+            >
+              <div class="employee-info">
+                <span class="employee-name"
+                  >{{ employee.firstName }} {{ employee.lastName }}</span
+                >
+                <span class="employee-dept"
+                  >{{ employee.department }} - {{ employee.position }}</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dates-header-container" #datesHeaderContainer>
+        <!-- Contrôles de navigation pour vue année -->
+        <div class="scroll-controls-left" *ngIf="config.viewMode === 'year'">
+          <button
+            class="scroll-btn scroll-left"
+            (click)="scrollToPreviousMonth()"
+            [disabled]="!canScrollLeft"
+          >
+            ← {{ previousMonthName }}
+          </button>
+        </div>
+
+        <div class="scroll-controls-right" *ngIf="config.viewMode === 'year'">
+          <button
+            class="scroll-btn scroll-right"
+            (click)="scrollToNextMonth()"
+            [disabled]="!canScrollRight"
+          >
+            {{ nextMonthName }} →
+          </button>
+        </div>
+
+        <div
+          class="dates-header"
+          [style.transform]="
+            config.viewMode === 'year'
+              ? 'translateX(' + -scrollPosition + 'px)'
+              : 'none'
+          "
+        >
+          <!-- Cadre du mois en cours dans l'en-tête (vue année) -->
+          <div
+            class="month-frame-header"
+            *ngIf="config.viewMode === 'year'"
+            [style.left.px]="getMonthStartPosition(currentMonth)"
+            [style.width.px]="getMonthWidth(currentMonth)"
+          ></div>
+
+          <!-- En-tête des mois (vue année) -->
+          <div class="months-row" *ngIf="config.viewMode === 'year'">
+            <div
+              *ngFor="let month of months; let monthIndex = index"
+              class="month-header-cell"
+              [style.width.px]="getMonthWidth(monthIndex)"
+              [title]="'Aller au mois de ' + month"
+            >
+              {{ month }}
+            </div>
+          </div>
+
+          <!-- En-tête des noms des jours -->
+          <div class="weekdays-row">
+            <div
+              *ngFor="let day of getAllDaysOfYear(); let dayIndex = index"
+              [ngClass]="getWeekdayHeaderClass(dayIndex)"
+              [style.width.px]="cellWidth"
+            >
+              {{ weekDays[day.getDay()] }}
+            </div>
+          </div>
+
+          <!-- En-tête des jours -->
+          <div class="days-row">
+            <div
+              *ngFor="let day of getAllDaysOfYear(); let dayIndex = index"
+              [ngClass]="getDayHeaderClass(dayIndex)"
+              [style.width.px]="cellWidth"
+            >
+              {{ day.getDate() }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lignes des employés avec scroll synchronisé -->
+    <div class="employees-container">
+      <div
+        class="employee-row"
+        *ngFor="let empCalendar of employeeCalendars"
+        [ngClass]="getEmployeeRowClass(empCalendar.employee)"
+      >
+        <!-- Colonne employé (fixe) -->
+        <div class="employee-info-fixed" [style.width.px]="employeeColumnWidth">
+          <div class="employee-avatar">
+            <img
+              [src]="
+                empCalendar.employee.profilePicture ||
+                'assets/images/default-avatar.svg'
+              "
+              [alt]="
+                empCalendar.employee.firstName +
+                ' ' +
+                empCalendar.employee.lastName
+              "
+            />
+          </div>
+          <div class="employee-details">
+            <div class="employee-name">
+              {{ empCalendar.employee.firstName }}
+              {{ empCalendar.employee.lastName }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Cellules de jours (scroll synchronisé) -->
+        <div class="days-container-scrollable">
+          <div
+            class="days-wrapper"
+            [style.transform]="
+              config.viewMode === 'year'
+                ? 'translateX(' + -scrollPosition + 'px)'
+                : 'none'
+            "
+          >
+            <!-- Cadre du mois en cours pour cette ligne (vue année) -->
+            <div
+              class="month-frame-row"
+              *ngIf="config.viewMode === 'year'"
+              [style.left.px]="getMonthStartPosition(currentMonth)"
+              [style.width.px]="getMonthWidth(currentMonth)"
+            ></div>
+
+            <div
+              *ngFor="let day of empCalendar.days; let dayIndex = index"
+              [class]="getCellClass(day, empCalendar.employee, dayIndex)"
+              [style.width.px]="cellWidth"
+              [style.height.px]="cellHeight"
+              (click)="onCellClick(day, empCalendar.employee, $event)"
+              (dblclick)="
+                onCellDoubleClick(day, empCalendar.employee, dayIndex, $event)
+              "
+              (mousedown)="onCellMouseDown(day, empCalendar.employee, $event)"
+              (mouseenter)="onCellMouseEnter(day, empCalendar.employee)"
+              (mouseup)="onCellMouseUp(day, empCalendar.employee, $event)"
+            >
+              <!-- Contenu de la cellule selon le mode -->
+              <ng-container *ngIf="config.mode === 'leave-management'">
+                <span *ngIf="day.status === 'worked'" class="day-indicator"
+                  >1</span
+                >
+                <span
+                  *ngIf="day.status === 'approved'"
+                  class="approved-indicator"
+                  >✓</span
+                >
+                <span *ngIf="day.status === 'pending'" class="pending-indicator"
+                  >?</span
+                >
+                <span
+                  *ngIf="day.status === 'rejected'"
+                  class="rejected-indicator"
+                  >✗</span
+                >
+                <span *ngIf="day.status === 'rtt'" class="rtt-indicator"
+                  >R</span
+                >
+              </ng-container>
+
+              <ng-container *ngIf="config.mode === 'cra'">
+                <!-- Pour le CRA, afficher la valeur si elle existe -->
+                <span
+                  *ngIf="day.value !== undefined && day.value !== null"
+                  class="cra-value"
+                  >{{ day.value }}</span
+                >
+                <span *ngIf="day.status === 'holiday'" class="holiday-indicator"
+                  >F</span
+                >
+                <span *ngIf="day.status === 'weekend'" class="weekend-indicator"
+                  >-</span
+                >
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scrollbar personnalisée en bas (vue année) -->
+    <div class="custom-scrollbar" *ngIf="config.viewMode === 'year'">
+      <div
+        class="scrollbar-employee-placeholder"
+        [style.width.px]="employeeColumnWidth"
+      ></div>
+      <div class="scrollbar-track">
+        <div
+          class="scrollbar-thumb"
+          [style.width.%]="scrollThumbWidth"
+          [style.left.%]="scrollThumbPosition"
+          (mousedown)="onScrollbarMouseDown($event)"
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>

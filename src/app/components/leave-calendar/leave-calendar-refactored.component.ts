@@ -42,8 +42,8 @@ interface LeaveEmployeeCalendar extends GenericEmployeeCalendar {
   selector: 'app-leave-calendar',
   standalone: true,
   imports: [CommonModule, FormsModule, GenericCalendarComponent],
-  templateUrl: './leave-calendar.component.html',
-  styleUrls: ['./leave-calendar.component.scss'],
+  templateUrl: './leave-calendar-refactored.component.html',
+  styleUrls: ['./leave-calendar-refactored.component.scss'],
 })
 export class LeaveCalendarComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

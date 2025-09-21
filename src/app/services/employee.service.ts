@@ -16,6 +16,15 @@ export class EmployeeService {
     return of(this.getMockEmployees().find((emp) => emp.id === id));
   }
 
+  getCurrentEmployee(): Observable<Employee | null> {
+    // Pour la démo, retourner toujours le premier employé
+    // En production, cela devrait être récupéré depuis l'authentification
+    const currentEmployee = this.getMockEmployees().find(
+      (emp) => emp.id === '1'
+    );
+    return of(currentEmployee || null);
+  }
+
   private getMockEmployees(): Employee[] {
     return [
       {

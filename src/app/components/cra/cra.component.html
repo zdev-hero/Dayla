@@ -1,0 +1,178 @@
+<div class="cra-container">
+  <!-- En-tête avec navigation mois/année -->
+  <div class="cra-header">
+    <div class="header-top">
+      <h1 class="page-title">Compte Rendu d'Activité (CRA)</h1>
+
+      <div class="period-controls">
+        <div class="period-selector">
+          <label>Année</label>
+          <select
+            [(ngModel)]="selectedYear"
+            (change)="onYearChange(selectedYear)"
+          >
+            <option [value]="selectedYear - 1">{{ selectedYear - 1 }}</option>
+            <option [value]="selectedYear">{{ selectedYear }}</option>
+            <option [value]="selectedYear + 1">{{ selectedYear + 1 }}</option>
+          </select>
+        </div>
+
+        <div class="period-selector">
+          <label>Mois</label>
+          <select
+            [(ngModel)]="selectedMonth"
+            (change)="onMonthChange(selectedMonth)"
+          >
+            <option value="1">Janvier</option>
+            <option value="2">Février</option>
+            <option value="3">Mars</option>
+            <option value="4">Avril</option>
+            <option value="5">Mai</option>
+            <option value="6">Juin</option>
+            <option value="7">Juillet</option>
+            <option value="8">Août</option>
+            <option value="9">Septembre</option>
+            <option value="10">Octobre</option>
+            <option value="11">Novembre</option>
+            <option value="12">Décembre</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Informations de période et actions -->
+    <div class="period-info">
+      <div class="current-period">
+        <h2>{{ getMonthName(selectedMonth) }} {{ selectedYear }}</h2>
+        <div class="employee-info" *ngIf="currentEmployee">
+          <span class="employee-name"
+            >{{ currentEmployee.firstName }}
+            {{ currentEmployee.lastName }}</span
+          >
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" (click)="submitCra()">
+          Soumettre pour validation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message de feedback -->
+  <div
+    class="save-message"
+    *ngIf="saveMessage"
+    [class.error]="saveMessage.includes('Erreur')"
+  >
+    {{ saveMessage }}
+  </div>
+
+  <!-- Calendrier générique -->
+  <app-generic-calendar
+    [config]="calendarConfig"
+    [employees]="employees"
+    [employeeCalendars]="employeeCalendars"
+    [selectedYear]="selectedYear"
+    [selectedMonth]="selectedMonth"
+    (cellClick)="onCellClick($event)"
+    (yearChange)="onYearChange($event)"
+    (monthChange)="onMonthChange($event)"
+  >
+  </app-generic-calendar>
+
+  <!-- Modal d'édition d'entrée -->
+  <div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
+    <div class="edit-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Saisir l'activité</h3>
+        <button class="close-btn" (click)="closeEditModal()">&times;</button>
+      </div>
+
+      <div class="modal-body" *ngIf="editingEntry">
+        <div class="date-info">
+          <strong>{{
+            editingEntry.day.date | date : "EEEE d MMMM yyyy" : "" : "fr"
+          }}</strong>
+        </div>
+
+        <div class="value-type-selector">
+          <label>
+            <input
+              type="radio"
+              [(ngModel)]="isLeaveType"
+              [value]="false"
+              (change)="onValueTypeChange()"
+            />
+            Temps de travail
+          </label>
+          <label>
+            <input
+              type="radio"
+              [(ngModel)]="isLeaveType"
+              [value]="true"
+              (change)="onValueTypeChange()"
+            />
+            Congé / Absence
+          </label>
+        </div>
+
+        <!-- Sélection temps de travail -->
+        <div class="work-time-section" *ngIf="!isLeaveType">
+          <label for="workValue">Temps de travail :</label>
+          <select id="workValue" [(ngModel)]="editValue" class="form-control">
+            <option [value]="1">1 jour complet</option>
+            <option [value]="0.5">0.5 jour (demi-journée)</option>
+          </select>
+        </div>
+
+        <!-- Sélection type de congé -->
+        <div class="leave-type-section" *ngIf="isLeaveType">
+          <label for="leaveType">Type de congé :</label>
+          <select id="leaveType" [(ngModel)]="editValue" class="form-control">
+            <option *ngFor="let type of leaveTypes" [value]="type">
+              {{ getLeaveTypeLabel(type) }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Notes (optionnel) -->
+        <div class="notes-section">
+          <label for="notes">Notes (optionnel) :</label>
+          <textarea
+            id="notes"
+            [(ngModel)]="editNotes"
+            class="form-control"
+            rows="3"
+            placeholder="Ajoutez des commentaires si nécessaire..."
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="footer-actions">
+          <button
+            class="btn btn-danger"
+            *ngIf="editingEntry && editingEntry.day.data"
+            (click)="deleteEntry()"
+          >
+            Supprimer
+          </button>
+          <div class="primary-actions">
+            <button class="btn btn-secondary" (click)="closeEditModal()">
+              Annuler
+            </button>
+            <button
+              class="btn btn-primary"
+              (click)="saveEntry()"
+              [disabled]="isSaving"
+            >
+              {{ isSaving ? "Sauvegarde..." : "Sauvegarder" }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

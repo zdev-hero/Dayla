@@ -1,4 +1,4 @@
-<div class="leave-calendar-container">
+<div class="calendar-container">
   <!-- Header avec filtres -->
   <header class="calendar-header">
     <div class="header-top">
@@ -22,7 +22,7 @@
         <label>Année</label>
         <select
           [(ngModel)]="selectedYear"
-          (change)="onYearChange(selectedYear)"
+          (change)="onYearChange()"
           class="year-selector"
         >
           <option [value]="selectedYear - 1">{{ selectedYear - 1 }}</option>
@@ -93,25 +93,254 @@
 
     <!-- Légende -->
     <div class="legend">
-      <div class="legend-item" *ngFor="let legend of calendarConfig.legends">
-        <div class="legend-color" [style.background-color]="legend.color"></div>
-        <span>{{ legend.label }}</span>
+      <div class="legend-item">
+        <div class="legend-color status-worked"></div>
+        <span>Travaillé</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color status-approved"></div>
+        <span>Congé validé</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color status-pending"></div>
+        <span>En attente</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color status-rejected"></div>
+        <span>Refusé</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color status-rtt"></div>
+        <span>RTT</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color status-holiday"></div>
+        <span>Jour férié</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color status-weekend"></div>
+        <span>Week-end</span>
       </div>
     </div>
   </header>
 
-  <!-- Calendrier générique -->
-  <app-generic-calendar
-    [config]="calendarConfig"
-    [employees]="employees"
-    [employeeCalendars]="filteredEmployeeCalendars"
-    [selectedYear]="selectedYear"
-    [selectedMonth]="selectedMonth"
-    (cellClick)="onCellClick($event)"
-    (employeeSearch)="onEmployeeSearch($event)"
-    (yearChange)="onYearChange($event)"
-    (monthChange)="onMonthChange($event)">
-  </app-generic-calendar>
+  <!-- Barre d'outils pour la sélection multiple -->
+  <div class="selection-toolbar" *ngIf="isMultiSelectMode">
+    <div class="toolbar-info">
+      <span class="selection-count"
+        >{{ selectedCells.size }} cellule(s) sélectionnée(s)</span
+      >
+    </div>
+    <div class="toolbar-actions">
+      <button
+        class="btn btn-primary"
+        (click)="openBulkManagementPopup()"
+        [disabled]="selectedCells.size === 0"
+      >
+        <i class="icon-settings"></i> Gérer la sélection
+      </button>
+      <button class="btn btn-secondary" (click)="clearSelection()">
+        <i class="icon-clear"></i> Effacer la sélection
+      </button>
+    </div>
+  </div>
+
+  <!-- Tableau calendrier -->
+  <div class="calendar-table-wrapper">
+    <!-- En-tête avec les dates/mois -->
+    <div class="calendar-header-sticky">
+      <div class="employee-column-header">
+        <span>Employés</span>
+
+        <!-- Champ de recherche d'employés -->
+        <div class="employee-search">
+          <div class="search-input-container">
+            <input
+              type="text"
+              [(ngModel)]="employeeSearchTerm"
+              (input)="onEmployeeSearch()"
+              placeholder="Rechercher un employé..."
+              class="employee-search-input"
+            />
+            <button
+              *ngIf="employeeSearchTerm"
+              (click)="clearEmployeeSearch()"
+              class="clear-search-btn"
+              title="Effacer la recherche"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Liste d'autocomplétion -->
+          <div class="autocomplete-list" *ngIf="filteredEmployees.length > 0">
+            <div
+              *ngFor="let employee of filteredEmployees"
+              class="autocomplete-item"
+              (click)="selectEmployee(employee)"
+            >
+              <div class="employee-info">
+                <span class="employee-name"
+                  >{{ employee.firstName }} {{ employee.lastName }}</span
+                >
+                <span class="employee-dept"
+                  >{{ employee.department }} - {{ employee.position }}</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dates-header-container" #datesHeaderContainer>
+        <!-- Bouton mois précédent à gauche -->
+        <div class="scroll-controls-left">
+          <button
+            class="scroll-btn scroll-left"
+            (click)="scrollToPreviousMonth()"
+            [disabled]="!canScrollLeft"
+          >
+            ← {{ previousMonthName }}
+          </button>
+        </div>
+        <!-- Bouton mois suivant à droite -->
+        <div class="scroll-controls-right">
+          <button
+            class="scroll-btn scroll-right"
+            (click)="scrollToNextMonth()"
+            [disabled]="!canScrollRight"
+          >
+            {{ nextMonthName }} →
+          </button>
+        </div>
+        <div
+          class="dates-header"
+          [style.transform]="'translateX(' + -scrollPosition + 'px)'"
+        >
+          <!-- Cadre du mois en cours dans l'en-tête -->
+          <div
+            class="month-frame-header"
+            [style.left.px]="getMonthStartPosition(currentMonth)"
+            [style.width.px]="getMonthWidth(currentMonth)"
+          ></div>
+
+          <!-- En-tête des mois -->
+          <div class="months-row">
+            <div
+              *ngFor="let month of months; let monthIndex = index"
+              class="month-header-cell"
+              [style.width.px]="getMonthWidth(monthIndex)"
+              (click)="scrollToMonth(monthIndex)"
+              [title]="'Aller au mois de ' + month"
+            >
+              {{ month }}
+            </div>
+          </div>
+          <!-- En-tête des noms des jours -->
+          <div class="weekdays-row">
+            <div
+              *ngFor="let day of getAllDaysOfYear(); let dayIndex = index"
+              [ngClass]="getWeekdayHeaderClass(dayIndex)"
+            >
+              {{ weekDays[day.getDay()] }}
+            </div>
+          </div>
+          <!-- En-tête des jours -->
+          <div class="days-row">
+            <div
+              *ngFor="let day of getAllDaysOfYear(); let dayIndex = index"
+              [ngClass]="getDayHeaderClass(dayIndex)"
+            >
+              {{ day.getDate() }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lignes des employés avec scroll synchronisé -->
+    <div class="employees-container">
+      <div
+        class="employee-row"
+        *ngFor="let empCalendar of employeeCalendars"
+        [ngClass]="getEmployeeRowClass(empCalendar.employee)"
+      >
+        <!-- Colonne employé (fixe) -->
+        <div class="employee-info-fixed">
+          <div class="employee-avatar">
+            <img
+              [src]="
+                empCalendar.employee.profilePicture ||
+                'assets/images/default-avatar.svg'
+              "
+              [alt]="
+                empCalendar.employee.firstName +
+                ' ' +
+                empCalendar.employee.lastName
+              "
+            />
+          </div>
+          <div class="employee-details">
+            <div class="employee-name">
+              {{ empCalendar.employee.firstName }}
+              {{ empCalendar.employee.lastName }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Cellules de jours (scroll synchronisé) -->
+        <div class="days-container-scrollable">
+          <div
+            class="days-wrapper"
+            [style.transform]="'translateX(' + -scrollPosition + 'px)'"
+          >
+            <!-- Cadre du mois en cours pour cette ligne -->
+            <div
+              class="month-frame-row"
+              [style.left.px]="getMonthStartPosition(currentMonth)"
+              [style.width.px]="getMonthWidth(currentMonth)"
+            ></div>
+
+            <div
+              *ngFor="let day of empCalendar.days; let dayIndex = index"
+              [class]="getCellClass(day, empCalendar.employee, dayIndex)"
+              (click)="onCellClick(day, empCalendar.employee, $event)"
+              (mousedown)="onCellMouseDown(day, empCalendar.employee, $event)"
+              (mouseenter)="onCellMouseEnter(day, empCalendar.employee)"
+              (mouseup)="onCellMouseUp(day, empCalendar.employee, $event)"
+            >
+              <!-- Contenu de la cellule selon le statut -->
+              <span *ngIf="day.status === 'worked'" class="day-indicator"
+                >1</span
+              >
+              <span *ngIf="day.status === 'approved'" class="approved-indicator"
+                >✓</span
+              >
+              <span *ngIf="day.status === 'pending'" class="pending-indicator"
+                >?</span
+              >
+              <span *ngIf="day.status === 'rejected'" class="rejected-indicator"
+                >✗</span
+              >
+              <span *ngIf="day.status === 'rtt'" class="rtt-indicator">R</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scrollbar personnalisée en bas -->
+    <div class="custom-scrollbar">
+      <div class="scrollbar-employee-placeholder"></div>
+      <div class="scrollbar-track">
+        <div
+          class="scrollbar-thumb"
+          [style.width.%]="scrollThumbWidth"
+          [style.left.%]="scrollThumbPosition"
+          (mousedown)="onScrollbarMouseDown($event)"
+        ></div>
+      </div>
+    </div>
+  </div>
 
   <!-- Popup de gestion groupée -->
   <div
@@ -187,6 +416,96 @@
             ></textarea>
           </div>
         </div>
+
+        <!-- Actions pour congés validés -->
+        <div
+          class="action-group"
+          *ngIf="getStatusCount('approved') > 0 || getStatusCount('rtt') > 0"
+        >
+          <h4>Modifier les congés validés</h4>
+
+          <div class="selected-dates-info">
+            <strong>Dates concernées :</strong> {{ getSelectedDatesText() }}
+          </div>
+
+          <div class="form-group">
+            <label for="bulkLeaveType">Type de congé :</label>
+            <select
+              id="bulkLeaveType"
+              [(ngModel)]="bulkLeaveType"
+              class="form-control"
+            >
+              <option *ngFor="let type of leaveTypes" [value]="type">
+                {{ getLeaveTypeLabel(type) }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="bulkReason">Motif :</label>
+            <textarea
+              id="bulkReason"
+              [(ngModel)]="bulkReason"
+              placeholder="Nouveau motif..."
+              rows="2"
+              class="form-control"
+            ></textarea>
+          </div>
+          <button class="btn btn-primary" (click)="bulkModify()">
+            ✏️ Modifier tous ({{
+              getStatusCount("approved") + getStatusCount("rtt")
+            }})
+          </button>
+        </div>
+
+        <!-- Actions pour cellules libres -->
+        <div class="action-group" *ngIf="getStatusCount('worked') > 0">
+          <h4>Affecter des congés</h4>
+
+          <div class="selected-dates-info">
+            <strong>Dates concernées :</strong> {{ getSelectedDatesText() }}
+          </div>
+
+          <div class="form-group">
+            <label for="assignLeaveType">Type de congé :</label>
+            <select
+              id="assignLeaveType"
+              [(ngModel)]="bulkLeaveType"
+              class="form-control"
+            >
+              <option *ngFor="let type of leaveTypes" [value]="type">
+                {{ getLeaveTypeLabel(type) }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="assignReason">Motif :</label>
+            <textarea
+              id="assignReason"
+              [(ngModel)]="bulkReason"
+              placeholder="Motif des congés..."
+              rows="2"
+              class="form-control"
+            ></textarea>
+          </div>
+
+          <div class="action-buttons">
+            <button
+              class="btn btn-success"
+              (click)="bulkAssign()"
+              [disabled]="!bulkReason.trim()"
+            >
+              ✓ Valider et affecter ({{ getStatusCount("worked") }} cellules)
+            </button>
+            <button
+              class="btn btn-warning"
+              (click)="bulkCreatePending()"
+              [disabled]="!bulkReason.trim()"
+            >
+              📝 Créer demande en attente ({{ getStatusCount("worked") }}
+              cellules)
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="popup-footer">
@@ -197,7 +516,7 @@
     </div>
   </div>
 
-  <!-- Popup de détails pour les demandes -->
+  <!-- Popup de détails pour les demandes en attente -->
   <div
     class="popup-overlay"
     *ngIf="showDetailsPopup"
