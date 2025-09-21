@@ -48,6 +48,9 @@ export class CraComponent implements OnInit, OnDestroy {
   selectedYear = new Date().getFullYear();
   selectedMonth = new Date().getMonth() + 1;
 
+  // Cache pour les jours fériés par année
+  private holidaysCache = new Map<number, Date[]>();
+
   // UI State
   showEditModal = false;
   editingEntry?: { day: CalendarDay; employee: Employee; dayIndex: number };
@@ -140,11 +143,11 @@ export class CraComponent implements OnInit, OnDestroy {
       let value: any = undefined;
       let isEditable = true;
 
-      if (isWeekend) {
-        status = 'weekend';
-        isEditable = false;
-      } else if (isHoliday) {
+      if (isHoliday) {
         status = 'holiday';
+        isEditable = false;
+      } else if (isWeekend) {
+        status = 'weekend';
         isEditable = false;
       } else if (entry) {
         if (entry.isLeaveType) {
@@ -187,27 +190,70 @@ export class CraComponent implements OnInit, OnDestroy {
   }
 
   private isHoliday(date: Date): boolean {
-    // Jours fériés français 2025 (simplifié)
-    const holidays2025 = [
-      new Date(2025, 0, 1), // Nouvel An
-      new Date(2025, 3, 21), // Lundi de Pâques
-      new Date(2025, 4, 1), // Fête du travail
-      new Date(2025, 4, 8), // Victoire 1945
-      new Date(2025, 4, 29), // Ascension
-      new Date(2025, 5, 9), // Lundi de Pentecôte
-      new Date(2025, 6, 14), // Fête nationale
-      new Date(2025, 7, 15), // Assomption
-      new Date(2025, 10, 1), // Toussaint
-      new Date(2025, 10, 11), // Armistice
-      new Date(2025, 11, 25), // Noël
-    ];
+    const year = date.getFullYear();
+    const holidays = this.getHolidaysForYear(year);
 
-    return holidays2025.some(
+    return holidays.some(
       (holiday) =>
         holiday.getDate() === date.getDate() &&
         holiday.getMonth() === date.getMonth() &&
         holiday.getFullYear() === date.getFullYear()
     );
+  }
+
+  /**
+   * Calcule les jours fériés français pour une année donnée
+   */
+  private getHolidaysForYear(year: number): Date[] {
+    // Vérifier le cache d'abord
+    if (this.holidaysCache.has(year)) {
+      return this.holidaysCache.get(year)!;
+    }
+
+    const holidays: Date[] = [];
+
+    // Jours fériés fixes
+    holidays.push(new Date(year, 0, 1)); // Nouvel An
+    holidays.push(new Date(year, 4, 1)); // Fête du travail
+    holidays.push(new Date(year, 4, 8)); // Victoire 1945
+    holidays.push(new Date(year, 6, 14)); // Fête nationale
+    holidays.push(new Date(year, 7, 15)); // Assomption
+    holidays.push(new Date(year, 10, 1)); // Toussaint
+    holidays.push(new Date(year, 10, 11)); // Armistice
+    holidays.push(new Date(year, 11, 25)); // Noël
+
+    // Calcul de Pâques et jours fériés mobiles
+    const easter = this.calculateEaster(year);
+    holidays.push(new Date(easter.getTime() + 24 * 60 * 60 * 1000)); // Lundi de Pâques
+    holidays.push(new Date(easter.getTime() + 39 * 24 * 60 * 60 * 1000)); // Ascension
+    holidays.push(new Date(easter.getTime() + 50 * 24 * 60 * 60 * 1000)); // Lundi de Pentecôte
+
+    // Mettre en cache et retourner
+    this.holidaysCache.set(year, holidays);
+    return holidays;
+  }
+
+  /**
+   * Calcule la date de Pâques pour une année donnée
+   * Utilise l'algorithme de calcul de Pâques
+   */
+  private calculateEaster(year: number): Date {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31) - 1; // -1 car les mois sont indexés à partir de 0
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+
+    return new Date(year, month, day);
   }
 
   // Événements du calendrier
