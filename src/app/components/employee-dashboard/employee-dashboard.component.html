@@ -74,7 +74,8 @@
                   />
                   <div class="suggestion-info">
                     <span class="suggestion-name"
-                      >{{ suggestion.firstName }} {{ suggestion.lastName }}</span
+                      >{{ suggestion.firstName }}
+                      {{ suggestion.lastName }}</span
                     >
                     <span class="suggestion-department">{{
                       suggestion.department
@@ -136,10 +137,21 @@
         <div *ngIf="showFilters" class="filters-panel">
           <div class="filters-header">
             <h3>Filtres</h3>
-            <button class="close-filters-btn" (click)="closeFilters()" title="Fermer les filtres">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
+            <button
+              class="close-filters-btn"
+              (click)="closeFilters()"
+              title="Fermer les filtres"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
           </div>
@@ -572,11 +584,27 @@
 
       <!-- Footer avec pagination -->
       <div *ngIf="!loading" class="table-footer">
-        <div class="table-info">
-          Affichage de {{ (currentPage - 1) * pageSize + 1 }}–{{
-            Math.min(currentPage * pageSize, totalEmployees)
-          }}
-          sur {{ totalEmployees }} employés
+        <div class="table-controls">
+          <div class="table-info">
+            Affichage de {{ (currentPage - 1) * pageSize + 1 }}–{{
+              Math.min(currentPage * pageSize, totalEmployees)
+            }}
+            sur {{ totalEmployees }} employés
+          </div>
+
+          <div class="page-size-selector" *ngIf="availablePageSizes.length > 1">
+            <label for="pageSize" class="form-label">Afficher :</label>
+            <select
+              id="pageSize"
+              [(ngModel)]="pageSize"
+              (change)="onPageSizeChange()"
+              class="form-select form-select-sm page-size-select"
+            >
+              <option *ngFor="let size of availablePageSizes" [value]="size">
+                {{ size }} par page
+              </option>
+            </select>
+          </div>
         </div>
 
         <div class="pagination" *ngIf="totalPages > 1">

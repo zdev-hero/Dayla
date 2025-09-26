@@ -36,6 +36,8 @@ export class EmployeeDashboardComponent implements OnInit {
   totalPages: number = 0;
   pages: number[] = [];
   loading: boolean = false;
+  availablePageSizes: number[] = [];
+  defaultPageSizes: number[] = [5, 10, 15, 20];
 
   // Recherche et auto-complétion
   searchQuery: string = '';
@@ -92,6 +94,7 @@ export class EmployeeDashboardComponent implements OnInit {
               this.totalEmployees = response.total;
               this.totalPages = Math.ceil(this.totalEmployees / this.pageSize);
               this.filteredEmployeesCount = this.totalEmployees;
+              this.calculateAvailablePageSizes();
               this.updatePageNumbers();
               this.loading = false;
               this.selectedRows.clear();
@@ -116,6 +119,70 @@ export class EmployeeDashboardComponent implements OnInit {
     this.pages = [];
     for (let i = 1; i <= this.totalPages; i++) {
       this.pages.push(i);
+    }
+  }
+
+  calculateAvailablePageSizes(): void {
+    this.availablePageSizes = [];
+
+    // Toujours inclure la taille actuelle si elle n'est pas dans les défauts
+    const sizesToCheck = [...this.defaultPageSizes];
+    if (!sizesToCheck.includes(this.pageSize)) {
+      sizesToCheck.push(this.pageSize);
+      sizesToCheck.sort((a, b) => a - b);
+    }
+
+    for (const size of sizesToCheck) {
+      // Inclure la taille si :
+      // 1. Il y a au moins 'size' employés, OU
+      // 2. C'est la taille actuelle (pour éviter de la supprimer en cours d'utilisation), OU
+      // 3. Il y a au moins 1 employé et la taille est la plus petite disponible
+      if (
+        this.totalEmployees >= size ||
+        size === this.pageSize ||
+        (this.totalEmployees > 0 && size === Math.min(...sizesToCheck))
+      ) {
+        this.availablePageSizes.push(size);
+      }
+    }
+
+    // Si nous avons exactement le nombre total d'employés, l'ajouter comme option
+    if (
+      this.totalEmployees > 0 &&
+      this.totalEmployees <= 50 && // Limiter pour éviter des pages trop grandes
+      !this.availablePageSizes.includes(this.totalEmployees) &&
+      this.totalEmployees !== this.pageSize
+    ) {
+      this.availablePageSizes.push(this.totalEmployees);
+      this.availablePageSizes.sort((a, b) => a - b);
+    }
+
+    // S'assurer qu'il y a au moins une option
+    if (this.availablePageSizes.length === 0) {
+      this.availablePageSizes = [Math.min(5, this.totalEmployees || 5)];
+    }
+  }
+
+  onPageSizeChange(): void {
+    // Calculer la nouvelle page pour garder approximativement le même élément visible
+    const firstItemIndex = (this.currentPage - 1) * this.pageSize;
+    this.currentPage = Math.floor(firstItemIndex / this.pageSize) + 1;
+
+    // Recalculer la pagination
+    this.totalPages = Math.ceil(this.totalEmployees / this.pageSize);
+
+    // S'assurer que la page courante est valide
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = Math.max(1, this.totalPages);
+    }
+
+    this.updatePageNumbers();
+
+    // Recharger les données avec la nouvelle taille de page
+    if (this.searchQuery || this.activeFiltersCount > 0) {
+      this.applySearchAndFilters();
+    } else {
+      this.loadEmployees();
     }
   }
 
@@ -615,6 +682,7 @@ export class EmployeeDashboardComponent implements OnInit {
     // Simuler la pagination avec les résultats filtrés
     this.totalEmployees = filteredEmployees.length;
     this.totalPages = Math.ceil(this.totalEmployees / this.pageSize);
+    this.calculateAvailablePageSizes();
 
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
