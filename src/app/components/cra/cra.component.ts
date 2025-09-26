@@ -52,6 +52,7 @@ export class CraComponent implements OnInit, OnDestroy, OnChanges {
   // Configuration du calendrier
   calendarConfig: CalendarConfig = {
     ...CRA_CALENDAR_CONFIG,
+    showExportButtons: false, // Pas de boutons d'export dans CRA-component
   };
 
   // Données
@@ -105,6 +106,7 @@ export class CraComponent implements OnInit, OnDestroy, OnChanges {
     this.calendarConfig = {
       ...CRA_CALENDAR_CONFIG,
       viewMode: 'month',
+      showExportButtons: false, // Pas de boutons d'export dans CRA-component
     };
     this.loadData();
   }

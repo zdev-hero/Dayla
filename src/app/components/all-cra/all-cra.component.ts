@@ -29,6 +29,7 @@ export class AllCraComponent implements OnInit {
   calendarConfig: CalendarConfig = {
     ...CRA_CALENDAR_CONFIG,
     viewMode: 'month',
+    showExportButtons: true,
   };
 
   // Données des employés et leurs calendriers

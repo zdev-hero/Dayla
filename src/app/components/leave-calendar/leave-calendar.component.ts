@@ -58,6 +58,7 @@ export class LeaveCalendarComponent implements OnInit, OnDestroy {
   // Configuration du calendrier générique
   calendarConfig: CalendarConfig = {
     ...LEAVE_CALENDAR_CONFIG,
+    showExportButtons: false, // Pas de boutons d'export dans leave-calendar
   };
 
   // Données
@@ -139,6 +140,7 @@ export class LeaveCalendarComponent implements OnInit, OnDestroy {
     this.calendarConfig = {
       ...LEAVE_CALENDAR_CONFIG,
       viewMode: this.viewMode as 'year' | 'month',
+      showExportButtons: false, // Pas de boutons d'export dans leave-calendar
     };
   }
 

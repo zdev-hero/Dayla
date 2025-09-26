@@ -142,6 +142,11 @@
           </div>
         </div>
       </div>
+
+      <!-- En-tête colonne d'exportation (conditionnel) -->
+      <div class="export-column-header" *ngIf="config.showExportButtons">
+        <!-- Pas de texte pour une apparence plus discrète -->
+      </div>
     </div>
 
     <!-- Lignes des employés avec scroll synchronisé -->
@@ -245,6 +250,28 @@
             </div>
           </div>
         </div>
+
+        <!-- Colonne d'exportation (fixe à droite) - conditionnel -->
+        <div class="export-column-fixed" *ngIf="config.showExportButtons">
+          <button
+            class="btn-export"
+            (click)="openExportModal(empCalendar.employee, $event)"
+            title="Exporter"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7,10 12,15 17,10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -262,6 +289,190 @@
           (mousedown)="onScrollbarMouseDown($event)"
         ></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal d'exportation -->
+<div
+  class="export-modal-overlay"
+  *ngIf="showExportModal"
+  (click)="closeExportModal()"
+>
+  <div class="export-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Exporter le CRA</h3>
+      <button class="close-btn" (click)="closeExportModal()" title="Fermer">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="employee-info-export" *ngIf="selectedEmployeeForExport">
+        <div class="export-employee-avatar">
+          <img
+            [src]="
+              selectedEmployeeForExport.profilePicture ||
+              'assets/images/default-avatar.svg'
+            "
+            [alt]="
+              selectedEmployeeForExport.firstName +
+              ' ' +
+              selectedEmployeeForExport.lastName
+            "
+          />
+        </div>
+        <div class="export-employee-details">
+          <h4>
+            {{ selectedEmployeeForExport.firstName }}
+            {{ selectedEmployeeForExport.lastName }}
+          </h4>
+          <p class="employee-department">
+            {{ selectedEmployeeForExport.department }}
+          </p>
+          <p class="export-period">
+            Période: {{ getMonthName(selectedMonth) }} {{ selectedYear }}
+          </p>
+        </div>
+      </div>
+
+      <div class="export-options">
+        <h4>Choisissez le format d'exportation :</h4>
+
+        <div class="export-format-grid">
+          <button
+            class="export-format-btn excel"
+            (click)="exportEmployee('excel')"
+          >
+            <div class="format-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <rect
+                  x="3"
+                  y="3"
+                  width="18"
+                  height="18"
+                  rx="2"
+                  ry="2"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <line
+                  x1="9"
+                  y1="9"
+                  x2="15"
+                  y2="15"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+                <line
+                  x1="15"
+                  y1="9"
+                  x2="9"
+                  y2="15"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+              </svg>
+            </div>
+            <div class="format-info">
+              <span class="format-name">Excel (.xlsx)</span>
+              <span class="format-description"
+                >Tableau détaillé avec calculs</span
+              >
+            </div>
+          </button>
+
+          <button class="export-format-btn pdf" (click)="exportEmployee('pdf')">
+            <div class="format-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+            <div class="format-info">
+              <span class="format-name">PDF</span>
+              <span class="format-description">Document prêt à imprimer</span>
+            </div>
+          </button>
+
+          <button class="export-format-btn csv" (click)="exportEmployee('csv')">
+            <div class="format-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                />
+                <polyline
+                  points="9,13 9,17"
+                  stroke="currentColor"
+                  stroke-width="1"
+                />
+                <polyline
+                  points="11,13 11,17"
+                  stroke="currentColor"
+                  stroke-width="1"
+                />
+                <polyline
+                  points="13,13 13,17"
+                  stroke="currentColor"
+                  stroke-width="1"
+                />
+              </svg>
+            </div>
+            <div class="format-info">
+              <span class="format-name">CSV</span>
+              <span class="format-description">Données tabulaires simples</span>
+            </div>
+          </button>
+
+          <button
+            class="export-format-btn json"
+            (click)="exportEmployee('json')"
+          >
+            <div class="format-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M5 3h14c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  fill="none"
+                />
+                <path
+                  d="M8 8h8M8 12h8M8 16h4"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+              </svg>
+            </div>
+            <div class="format-info">
+              <span class="format-name">JSON</span>
+              <span class="format-description"
+                >Format de données structurées</span
+              >
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeExportModal()">
+        Annuler
+      </button>
     </div>
   </div>
 </div>

@@ -25,6 +25,7 @@ export interface CalendarConfig {
   showFilters?: boolean;
   showLegend?: boolean;
   showMultiSelection?: boolean;
+  showExportButtons?: boolean;
 
   // Configuration du mode
   mode: 'leave-management' | 'cra';
@@ -170,6 +171,10 @@ export class GenericCalendarComponent
 
   // Cache pour les jours fériés par année
   private holidaysCache = new Map<number, Date[]>();
+
+  // Propriétés pour l'exportation
+  showExportModal = false;
+  selectedEmployeeForExport: Employee | null = null;
 
   // Propriétés calculées
   get canScrollLeft(): boolean {
@@ -896,5 +901,296 @@ export class GenericCalendarComponent
   // Méthode utilitaire pour formater les dates
   formatDate(date: Date): string {
     return date.toLocaleDateString('fr-FR');
+  }
+
+  // Méthodes pour l'exportation
+  openExportModal(employee: Employee, event: MouseEvent): void {
+    event.stopPropagation();
+    this.selectedEmployeeForExport = employee;
+    this.showExportModal = true;
+  }
+
+  closeExportModal(): void {
+    this.showExportModal = false;
+    this.selectedEmployeeForExport = null;
+  }
+
+  exportEmployee(format: 'excel' | 'pdf' | 'csv' | 'json'): void {
+    if (!this.selectedEmployeeForExport) return;
+
+    const employee = this.selectedEmployeeForExport;
+    const employeeCalendar = this.employeeCalendars.find(
+      (cal) => cal.employee.id === employee.id
+    );
+
+    if (!employeeCalendar) {
+      console.error("Calendrier introuvable pour l'employé:", employee);
+      return;
+    }
+
+    switch (format) {
+      case 'excel':
+        this.exportToExcel(employee, employeeCalendar);
+        break;
+      case 'pdf':
+        this.exportToPdf(employee, employeeCalendar);
+        break;
+      case 'csv':
+        this.exportToCsv(employee, employeeCalendar);
+        break;
+      case 'json':
+        this.exportToJson(employee, employeeCalendar);
+        break;
+    }
+
+    this.closeExportModal();
+  }
+
+  private exportToExcel(employee: Employee, calendar: EmployeeCalendar): void {
+    // Préparer les données pour Excel
+    const data: any[] = [];
+
+    // En-tête
+    data.push(['Date', 'Jour', 'Statut', 'Valeur', 'Type de jour']);
+
+    // Données des jours
+    calendar.days.forEach((day) => {
+      const dayType = day.isHoliday
+        ? 'Férié'
+        : day.isWeekend
+        ? 'Week-end'
+        : 'Ouvré';
+
+      data.push([
+        this.formatDate(day.date),
+        this.weekDays[day.dayOfWeek],
+        day.status,
+        day.value || '',
+        dayType,
+      ]);
+    });
+
+    // Créer et télécharger le fichier Excel
+    this.downloadExcelFile(data, employee);
+  }
+
+  private exportToPdf(employee: Employee, calendar: EmployeeCalendar): void {
+    // Créer le contenu HTML pour le PDF
+    const htmlContent = this.generatePdfContent(employee, calendar);
+
+    // Ouvrir dans une nouvelle fenêtre pour impression/sauvegarde
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      printWindow.focus();
+
+      // Déclencher l'impression après un court délai
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+    }
+  }
+
+  private exportToCsv(employee: Employee, calendar: EmployeeCalendar): void {
+    const csvContent: string[] = [];
+
+    // En-tête CSV
+    csvContent.push('Date,Jour,Statut,Valeur,Type de jour');
+
+    // Données
+    calendar.days.forEach((day) => {
+      const dayType = day.isHoliday
+        ? 'Férié'
+        : day.isWeekend
+        ? 'Week-end'
+        : 'Ouvré';
+
+      csvContent.push(
+        [
+          this.formatDate(day.date),
+          this.weekDays[day.dayOfWeek],
+          day.status,
+          day.value || '',
+          dayType,
+        ]
+          .map((field) => `"${field}"`)
+          .join(',')
+      );
+    });
+
+    // Télécharger le fichier CSV
+    this.downloadFile(
+      csvContent.join('\n'),
+      `CRA_${employee.firstName}_${employee.lastName}_${this.getMonthName(
+        this.selectedMonth
+      )}_${this.selectedYear}.csv`,
+      'text/csv'
+    );
+  }
+
+  private exportToJson(employee: Employee, calendar: EmployeeCalendar): void {
+    const jsonData = {
+      employee: {
+        id: employee.id,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        email: employee.email,
+        department: employee.department,
+        position: employee.position,
+      },
+      period: {
+        year: this.selectedYear,
+        month: this.selectedMonth,
+        monthName: this.getMonthName(this.selectedMonth),
+      },
+      exportDate: new Date().toISOString(),
+      days: calendar.days.map((day) => ({
+        date: day.date.toISOString(),
+        dayOfWeek: day.dayOfWeek,
+        dayName: this.weekDays[day.dayOfWeek],
+        isWeekend: day.isWeekend,
+        isHoliday: day.isHoliday,
+        status: day.status,
+        value: day.value,
+        isEditable: day.isEditable,
+        data: day.data,
+      })),
+    };
+
+    // Télécharger le fichier JSON
+    this.downloadFile(
+      JSON.stringify(jsonData, null, 2),
+      `CRA_${employee.firstName}_${employee.lastName}_${this.getMonthName(
+        this.selectedMonth
+      )}_${this.selectedYear}.json`,
+      'application/json'
+    );
+  }
+
+  private downloadExcelFile(data: any[][], employee: Employee): void {
+    // Créer un tableau HTML pour simuler un fichier Excel
+    let htmlContent = '<table border="1">';
+
+    data.forEach((row, index) => {
+      htmlContent += '<tr>';
+      row.forEach((cell) => {
+        const tag = index === 0 ? 'th' : 'td';
+        htmlContent += `<${tag}>${cell}</${tag}>`;
+      });
+      htmlContent += '</tr>';
+    });
+
+    htmlContent += '</table>';
+
+    // Créer et télécharger le fichier
+    const fileName = `CRA_${employee.firstName}_${
+      employee.lastName
+    }_${this.getMonthName(this.selectedMonth)}_${this.selectedYear}.xls`;
+    this.downloadFile(htmlContent, fileName, 'application/vnd.ms-excel');
+  }
+
+  private generatePdfContent(
+    employee: Employee,
+    calendar: EmployeeCalendar
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>CRA - ${employee.firstName} ${employee.lastName}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          .header { text-align: center; margin-bottom: 30px; }
+          .employee-info { margin-bottom: 20px; }
+          .table { width: 100%; border-collapse: collapse; }
+          .table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          .table th { background-color: #f2f2f2; }
+          .weekend { background-color: #ffe6e6; }
+          .holiday { background-color: #fff2cc; }
+          .footer { margin-top: 30px; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Compte Rendu d'Activité</h1>
+          <h2>${this.getMonthName(this.selectedMonth)} ${this.selectedYear}</h2>
+        </div>
+        
+        <div class="employee-info">
+          <h3>Employé: ${employee.firstName} ${employee.lastName}</h3>
+          <p>Email: ${employee.email}</p>
+          <p>Département: ${employee.department}</p>
+          <p>Poste: ${employee.position}</p>
+        </div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Jour</th>
+              <th>Statut</th>
+              <th>Valeur</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${calendar.days
+              .map((day) => {
+                const dayType = day.isHoliday
+                  ? 'Férié'
+                  : day.isWeekend
+                  ? 'Week-end'
+                  : 'Ouvré';
+                const cssClass = day.isHoliday
+                  ? 'holiday'
+                  : day.isWeekend
+                  ? 'weekend'
+                  : '';
+
+                return `
+                <tr class="${cssClass}">
+                  <td>${this.formatDate(day.date)}</td>
+                  <td>${this.weekDays[day.dayOfWeek]}</td>
+                  <td>${day.status}</td>
+                  <td>${day.value || ''}</td>
+                  <td>${dayType}</td>
+                </tr>
+              `;
+              })
+              .join('')}
+          </tbody>
+        </table>
+
+        <div class="footer">
+          <p>Généré le ${new Date().toLocaleDateString(
+            'fr-FR'
+          )} à ${new Date().toLocaleTimeString('fr-FR')}</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private downloadFile(
+    content: string,
+    fileName: string,
+    mimeType: string
+  ): void {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  }
+
+  getMonthName(month: number): string {
+    return this.months[month - 1] || month.toString();
   }
 }
