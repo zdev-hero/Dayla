@@ -1,0 +1,96 @@
+<div class="employee-profile-card">
+  <!-- Message si aucun employé sélectionné -->
+  <div
+    class="no-employee-message"
+    *ngIf="!employee"
+    style="text-align: center; padding: 2rem"
+  >
+    <p>Sélectionnez un employé dans la liste pour voir son profil</p>
+  </div>
+
+  <!-- Contenu du profil -->
+  <div *ngIf="employee">
+    <!-- Badge de statut -->
+    <!-- <div class="status-badge">
+      <span class="status-chip leave-status">En congé payé</span>
+      <span class="return-date">Retour: 21/07/2025</span>
+    </div> -->
+
+    <!-- Section principale avec avatar et infos -->
+    <div class="profile-main pt-3">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="profile-container">
+            <div class="profile-identity">
+              <div class="profile-avatar-section">
+                <div class="user-avatar user-absent">
+                  <img
+                    [src]="getProfilePicture()"
+                    [alt]="'Avatar de ' + getFullName()"
+                    class="avatar-image"
+                  />
+                </div>
+                <h3 class="profile-name" id="profil-salarie">
+                  {{ getFullName() }}
+                </h3>
+              </div>
+              <button class="btn btn-secondary modify-btn">
+                Modifier le Profil
+              </button>
+            </div>
+            <div class="status-info">
+              <div class="status-text">
+                <div class="cube-icon"></div>
+                <span>En congé payé</span>
+              </div>
+              <div class="return-text">Retour: {{ returnDate }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <ul>
+            <li>
+              <div class="icon">
+                <img src="assets/icons/email.svg" alt="email" class="icon" />
+              </div>
+              <div class="contact-details">
+                <div class="contact-label">Email</div>
+                <div class="contact-value">{{ employee.email || "N/A" }}</div>
+              </div>
+            </li>
+
+            <li>
+              <div class="icon">
+                <img src="assets/icons/phone.svg" alt="position" class="icon" />
+              </div>
+              <div class="contact-details">
+                <div class="contact-label">Poste</div>
+                <div class="contact-value">
+                  {{ employee.position || "N/A" }}
+                </div>
+              </div>
+            </li>
+
+            <li>
+              <div class="icon">
+                <img
+                  src="assets/icons/address.svg"
+                  alt="department"
+                  class="icon"
+                />
+              </div>
+              <div class="contact-details">
+                <div class="contact-label">Département</div>
+                <div class="contact-value">
+                  {{ employee.department || "N/A" }}
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Informations de contact -->
+    </div>
+  </div>
+</div>

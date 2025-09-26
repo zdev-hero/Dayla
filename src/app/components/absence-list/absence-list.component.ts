@@ -10,13 +10,13 @@ import {
 } from '../../models/absence.model';
 import { Employee } from '../../models/employee.model';
 import { AbsenceService } from '../../services/absence.service';
-import { EmployeeDashboardComponent } from '../employee-dashboard/employee-dashboard.component';
+import { EmployeeProfileComponent } from '../employee-profile/employee-profile.component';
 import { LeaveAnalyticsComponent } from '../leave-analytics/leave-analytics.component';
 import { EditEmployeeModalComponent } from '../edit-employee-modal/edit-employee-modal.component';
 
 @Component({
   selector: 'app-absence-list',
-  imports: [CommonModule, EmployeeDashboardComponent, LeaveAnalyticsComponent],
+  imports: [CommonModule, EmployeeProfileComponent, LeaveAnalyticsComponent],
   templateUrl: './absence-list.component.html',
   styleUrl: './absence-list.component.scss',
 })

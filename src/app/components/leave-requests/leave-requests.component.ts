@@ -10,14 +10,14 @@ import {
 } from '../../models/leave-request.model';
 import { Employee, ContractType } from '../../models/employee.model';
 import { LeaveManagementService } from '../../services/leave-management.service';
-import { EmployeeDashboardComponent } from '../employee-dashboard/employee-dashboard.component';
+import { EmployeeProfileComponent } from '../employee-profile/employee-profile.component';
 import { LeaveAnalyticsComponent } from '../leave-analytics/leave-analytics.component';
 import { EditEmployeeModalComponent } from '../edit-employee-modal/edit-employee-modal.component';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-leave-requests',
-  imports: [CommonModule, EmployeeDashboardComponent, LeaveAnalyticsComponent],
+  imports: [CommonModule, EmployeeProfileComponent, LeaveAnalyticsComponent],
   templateUrl: './leave-requests.component.html',
   styleUrl: './leave-requests.component.scss',
 })
