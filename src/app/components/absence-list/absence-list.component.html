@@ -1,17 +1,44 @@
-<div class="leave-table-card">
-  <!-- <div class="card-header">
-    <h2 class="card-title" id="titre-demandes">Demandes de congés</h2>
-  </div> -->
+<div class="absence-table-card">
+  <div class="card-header">
+    <div class="filters">
+      <select
+        class="filter-select"
+        (change)="onTypeFilterChange($any($event.target).value)"
+        [value]="selectedType"
+      >
+        <option value="all">Tous les types</option>
+        <option value="vacation">Congé payé</option>
+        <option value="sick_leave">Arrêt maladie</option>
+        <option value="rtt">RTT</option>
+        <option value="unpaid_leave">Congé sans solde</option>
+        <option value="maternity">Congé maternité</option>
+        <option value="paternity">Congé paternité</option>
+        <option value="training">Formation</option>
+        <option value="other">Autre</option>
+      </select>
+
+      <select
+        class="filter-select"
+        (change)="onStatusFilterChange($any($event.target).value)"
+        [value]="selectedStatus"
+      >
+        <option value="all">Tous les statuts</option>
+        <option value="current">En cours</option>
+        <option value="ending_soon">Fin prochaine</option>
+        <option value="starting_soon">Début prochain</option>
+      </select>
+    </div>
+  </div>
 
   <!-- Indicateur de chargement -->
   <div *ngIf="loading" class="loading-indicator">
     <div class="spinner"></div>
-    <p>Chargement des demandes...</p>
+    <p>Chargement des absences...</p>
   </div>
 
   <!-- Contenu principal -->
   <div *ngIf="!loading" class="table-container">
-    <table class="leave-table">
+    <table class="absence-table">
       <thead>
         <tr>
           <th class="col-select">
@@ -24,20 +51,22 @@
               <div class="vertical-line"></div>
             </div> -->
           </th>
-          <th class="col-user">User</th>
-          <th class="col-type">Type de congé</th>
-          <th class="col-date">Date de départ</th>
+          <th class="col-user">Employé</th>
+          <th class="col-type">Type d'absence</th>
+          <th class="col-date-start">Date de début</th>
+          <th class="col-date-end">Date de fin</th>
           <th class="col-duration">Durée</th>
-          <th class="col-status">Status</th>
+          <th class="col-remaining">Jours restants</th>
+          <th class="col-status">Statut</th>
           <th class="col-action">Action</th>
         </tr>
       </thead>
       <tbody>
         <ng-container
           *ngFor="
-            let request of leaveRequests;
+            let absence of absences;
             let i = index;
-            trackBy: trackByRequestId
+            trackBy: trackByAbsenceId
           "
         >
           <!-- Ligne principale -->
@@ -56,40 +85,63 @@
               <div class="user-info" (click)="onUserClick(i, $event)">
                 <div
                   class="min-user-avatar"
-                  [class]="getUserAvatarClass(request)"
+                  [class]="getUserAvatarClass(absence)"
                 >
                   <img
                     [src]="
-                      request.employee?.profilePicture ||
+                      absence.employee.profilePicture ||
                       'assets/images/default-avatar.svg'
                     "
-                    [alt]="'Avatar de ' + getFullName(request)"
+                    [alt]="'Avatar de ' + getFullName(absence)"
                     class="avatar-image"
                     (error)="handleImageError($event)"
                   />
                 </div>
                 <div class="user-details">
-                  <div class="user-name">{{ getFullName(request) }}</div>
+                  <div class="user-name">{{ getFullName(absence) }}</div>
                   <div class="user-email">
-                    {{ request.employee?.email || "N/A" }}
+                    {{ absence.employee.email || "N/A" }}
+                  </div>
+                  <div class="user-department">
+                    {{ absence.employee.department || "N/A" }}
                   </div>
                 </div>
               </div>
             </td>
-            <td>{{ LEAVE_TYPE_LABELS[request.leaveType] }}</td>
-            <td>{{ formatDate(request.startDate) }}</td>
-            <td>{{ getDurationText(request.totalDays) }}</td>
+            <td class="type-cell">
+              <div class="type-info">
+                <img
+                  [src]="getTypeIcon(absence.type)"
+                  [alt]="ABSENCE_TYPE_LABELS[absence.type]"
+                  class="type-icon"
+                />
+                <span class="type-label" [class]="getTypeClass(absence.type)">
+                  {{ ABSENCE_TYPE_LABELS[absence.type] }}
+                </span>
+              </div>
+            </td>
+            <td>{{ formatDate(absence.startDate) }}</td>
+            <td>{{ formatDate(absence.endDate) }}</td>
+            <td>{{ getDurationText(absence.totalDays) }}</td>
+            <td class="remaining-cell">
+              <span
+                class="remaining-days"
+                [class]="getRemainingDaysClass(absence)"
+              >
+                {{ getRemainingDaysText(absence) }}
+              </span>
+            </td>
             <td>
               <span
                 class="status-chip d-flex align-items-center justify-content-center"
-                [class]="getStatusClass(request.status)"
+                [class]="getStatusClass(absence.status)"
               >
                 <img
-                  [src]="getStatusIcon(request.status)"
-                  [alt]="LEAVE_STATUS_LABELS[request.status]"
+                  [src]="getStatusIcon(absence.status)"
+                  [alt]="ABSENCE_STATUS_LABELS[absence.status]"
                   class="status-icon"
                 />
-                {{ LEAVE_STATUS_LABELS[request.status] }}
+                {{ ABSENCE_STATUS_LABELS[absence.status] }}
               </span>
             </td>
             <td>
@@ -97,7 +149,7 @@
                 <button
                   class="action-btn edit"
                   title="Modifier l'employé"
-                  (click)="openEditModal(request.employee!)"
+                  (click)="openEditModal(absence.employee!)"
                 >
                   <svg
                     width="16"
@@ -129,9 +181,9 @@
             </td>
           </tr>
 
-          <!-- Ligne étendue avec nom d'utilisateur -->
+          <!-- Ligne étendue avec informations d'employé -->
           <tr *ngIf="isRowExpanded(i)" class="expanded-row">
-            <td colspan="7" class="expanded-content">
+            <td colspan="9" class="expanded-content">
               <div class="row">
                 <div class="col-lg-8 border-end-section">
                   <app-employee-dashboard
@@ -150,9 +202,9 @@
       </tbody>
     </table>
 
-    <!-- Message si aucune demande -->
-    <div *ngIf="leaveRequests.length === 0" class="no-requests">
-      <p>Aucune demande de congé trouvée.</p>
+    <!-- Message si aucune absence -->
+    <div *ngIf="absences.length === 0" class="no-absences">
+      <p>Aucune absence trouvée.</p>
     </div>
   </div>
 
@@ -160,9 +212,9 @@
   <div *ngIf="!loading" class="table-footer">
     <div class="table-info">
       Affichage de {{ (currentPage - 1) * pageSize + 1 }}–{{
-        Math.min(currentPage * pageSize, totalRequests)
+        Math.min(currentPage * pageSize, totalAbsences)
       }}
-      sur {{ totalRequests }} demandes
+      sur {{ totalAbsences }} absences
     </div>
 
     <div class="pagination" *ngIf="totalPages > 1">

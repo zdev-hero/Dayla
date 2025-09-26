@@ -20,9 +20,9 @@ export const routes: Routes = [
   {
     path: 'leave-requests',
     loadComponent: () =>
-      import('./components/leave-requests/leave-requests.component').then(
-        (m) => m.LeaveRequestsComponent
-      ),
+      import(
+        './components/leave-management-tabs/leave-management-tabs.component'
+      ).then((m) => m.LeaveManagementTabsComponent),
   },
   { path: 'leave-calendar', component: LeaveCalendarComponent },
   {

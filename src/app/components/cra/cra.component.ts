@@ -58,6 +58,14 @@ export class CraComponent implements OnInit, OnDestroy {
   editNotes = '';
   isLeaveType = false;
 
+  // État pour la sélection multiple
+  isBulkEdit = false;
+  selectedBulkData: {
+    employee: Employee;
+    day: CalendarDay;
+    dayIndex: number;
+  }[] = [];
+
   // Types de congé disponibles
   leaveTypes = Object.values(CraLeaveType);
   leaveTypeLabels = CRA_LEAVE_TYPE_LABELS;
@@ -299,12 +307,50 @@ export class CraComponent implements OnInit, OnDestroy {
     selectedCells: Set<string>;
     selectedData: { employee: Employee; day: CalendarDay; dayIndex: number }[];
   }) {
-    // Pour le CRA, on peut implémenter une gestion groupée si nécessaire
-    // Pour l'instant, on affiche juste un message ou on ouvre une modal de saisie groupée
-    console.log('Gestion de sélection CRA:', event);
+    // Si des cellules sont sélectionnées, ouvrir la popup de saisie d'activité
+    if (event.selectedData && event.selectedData.length > 0) {
+      // Prendre la première cellule sélectionnée pour initialiser la popup
+      // En mode CRA, il n'y a qu'un seul employé donc on prend le premier élément
+      const firstSelection = event.selectedData[0];
 
-    // Exemple : ouvrir une modal pour saisir des valeurs en lot
-    // this.openBulkEditModal(event.selectedData);
+      // Vérifier que la cellule est éditable
+      if (!firstSelection.day.isEditable) {
+        this.saveMessage =
+          'Impossible de modifier des jours non travaillés (week-ends, jours fériés)';
+        setTimeout(() => {
+          this.saveMessage = '';
+        }, 3000);
+        return;
+      }
+
+      // Configurer la popup pour la sélection multiple
+      this.editingEntry = {
+        day: firstSelection.day,
+        employee: firstSelection.employee,
+        dayIndex: firstSelection.dayIndex,
+      };
+
+      // Stocker toutes les données sélectionnées pour la sauvegarde groupée
+      this.selectedBulkData = event.selectedData.filter(
+        (item) => item.day.isEditable
+      );
+
+      // Initialiser les valeurs d'édition avec les valeurs de la première cellule
+      if (firstSelection.day.data) {
+        const entry = firstSelection.day.data as CraEntry;
+        this.editValue = entry.value;
+        this.editNotes = entry.notes || '';
+        this.isLeaveType = entry.isLeaveType || false;
+      } else {
+        this.editValue = 1;
+        this.editNotes = '';
+        this.isLeaveType = false;
+      }
+
+      // Marquer que nous sommes en mode sélection multiple
+      this.isBulkEdit = true;
+      this.showEditModal = true;
+    }
   }
 
   // Gestion du modal d'édition
@@ -314,6 +360,10 @@ export class CraComponent implements OnInit, OnDestroy {
     this.editValue = 1;
     this.editNotes = '';
     this.isLeaveType = false;
+
+    // Réinitialiser les variables de sélection multiple
+    this.isBulkEdit = false;
+    this.selectedBulkData = [];
   }
 
   onValueTypeChange() {
@@ -328,6 +378,14 @@ export class CraComponent implements OnInit, OnDestroy {
     if (!this.editingEntry || !this.currentEmployee) return;
 
     this.isSaving = true;
+
+    // Si on est en mode sélection multiple, sauvegarder toutes les entrées sélectionnées
+    if (this.isBulkEdit && this.selectedBulkData.length > 0) {
+      this.saveBulkEntries();
+      return;
+    }
+
+    // Sinon, sauvegarder une seule entrée
     const { day, employee } = this.editingEntry;
 
     const entryData: Partial<CraEntry> = {
@@ -367,8 +425,67 @@ export class CraComponent implements OnInit, OnDestroy {
       });
   }
 
+  private saveBulkEntries() {
+    if (!this.currentEmployee || this.selectedBulkData.length === 0) {
+      this.isSaving = false;
+      return;
+    }
+
+    const entryPromises = this.selectedBulkData.map((selection) => {
+      const entryData: Partial<CraEntry> = {
+        id: selection.day.data?.id,
+        employeeId: selection.employee.id,
+        date: selection.day.date,
+        value: this.editValue,
+        isLeaveType: this.isLeaveType,
+        notes: this.editNotes,
+        status: 'draft',
+      };
+
+      return this.craService
+        .saveCraEntry(entryData)
+        .pipe(takeUntil(this.destroy$));
+    });
+
+    // Utiliser combineLatest pour attendre que toutes les sauvegardes soient terminées
+    combineLatest(entryPromises).subscribe({
+      next: (savedEntries) => {
+        const count = savedEntries.length;
+        this.saveMessage = `${count} entrée${count > 1 ? 's' : ''} sauvegardée${
+          count > 1 ? 's' : ''
+        } avec succès`;
+        this.closeEditModal();
+        this.generateEmployeeCalendar();
+
+        // Masquer le message après 3 secondes
+        setTimeout(() => {
+          this.saveMessage = '';
+        }, 3000);
+      },
+      error: (error) => {
+        console.error('Erreur lors de la sauvegarde en lot:', error);
+        this.saveMessage = 'Erreur lors de la sauvegarde des entrées';
+        setTimeout(() => {
+          this.saveMessage = '';
+        }, 3000);
+      },
+      complete: () => {
+        this.isSaving = false;
+      },
+    });
+  }
+
   deleteEntry() {
-    if (!this.editingEntry || !this.editingEntry.day.data) return;
+    if (!this.editingEntry) return;
+
+    // Si on est en mode sélection multiple, supprimer toutes les entrées sélectionnées
+    if (this.isBulkEdit && this.selectedBulkData.length > 0) {
+      this.deleteBulkEntries();
+      return;
+    }
+
+    // Sinon, supprimer une seule entrée
+    if (!this.editingEntry.day.data) return;
 
     const entry = this.editingEntry.day.data as CraEntry;
 
@@ -393,6 +510,65 @@ export class CraComponent implements OnInit, OnDestroy {
           }, 3000);
         },
       });
+  }
+
+  private deleteBulkEntries() {
+    if (!this.currentEmployee || this.selectedBulkData.length === 0) {
+      return;
+    }
+
+    // Filtrer seulement les entrées qui ont des données (qui existent dans la base)
+    const entriesToDelete = this.selectedBulkData.filter(
+      (selection) => selection.day.data
+    );
+
+    if (entriesToDelete.length === 0) {
+      this.saveMessage = 'Aucune entrée à supprimer';
+      setTimeout(() => {
+        this.saveMessage = '';
+      }, 3000);
+      this.closeEditModal();
+      return;
+    }
+
+    const confirmDelete = confirm(
+      `Êtes-vous sûr de vouloir supprimer ${entriesToDelete.length} entrée${
+        entriesToDelete.length > 1 ? 's' : ''
+      } ?`
+    );
+
+    if (!confirmDelete) return;
+
+    const deletePromises = entriesToDelete.map((selection) => {
+      const entry = selection.day.data as CraEntry;
+      return this.craService
+        .deleteCraEntry(entry.id)
+        .pipe(takeUntil(this.destroy$));
+    });
+
+    // Utiliser combineLatest pour attendre que toutes les suppressions soient terminées
+    combineLatest(deletePromises).subscribe({
+      next: (deletedEntries) => {
+        const count = deletedEntries.length;
+        this.saveMessage = `${count} entrée${count > 1 ? 's' : ''} supprimée${
+          count > 1 ? 's' : ''
+        } avec succès`;
+        this.closeEditModal();
+        this.generateEmployeeCalendar();
+
+        // Masquer le message après 3 secondes
+        setTimeout(() => {
+          this.saveMessage = '';
+        }, 3000);
+      },
+      error: (error) => {
+        console.error('Erreur lors de la suppression en lot:', error);
+        this.saveMessage = 'Erreur lors de la suppression des entrées';
+        setTimeout(() => {
+          this.saveMessage = '';
+        }, 3000);
+      },
+    });
   }
 
   // Soumission du CRA pour validation
@@ -459,5 +635,27 @@ export class CraComponent implements OnInit, OnDestroy {
   // Validation des valeurs numériques
   isValidNumericValue(value: any): boolean {
     return typeof value === 'number' && (value === 0.5 || value === 1);
+  }
+
+  // Méthodes pour les conditions du template
+  shouldShowDeleteButton(): boolean {
+    if (!this.editingEntry) return false;
+
+    if (this.isBulkEdit) {
+      return this.selectedBulkData.some((item) => item.day.data);
+    }
+
+    return !!this.editingEntry.day.data;
+  }
+
+  getDeleteButtonText(): string {
+    if (this.isBulkEdit && this.selectedBulkData.length > 1) {
+      const countWithData = this.selectedBulkData.filter(
+        (item) => item.day.data
+      ).length;
+      return `Supprimer (${countWithData})`;
+    }
+
+    return 'Supprimer';
   }
 }

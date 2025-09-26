@@ -213,7 +213,7 @@ export class GenericCalendarComponent
   }
 
   get employeeColumnWidth(): number {
-    return this.config.employeeColumnWidth || 300;
+    return this.config.employeeColumnWidth || 200;
   }
 
   get cellWidth(): number {
@@ -308,7 +308,7 @@ export class GenericCalendarComponent
   isHoliday(date: Date): boolean {
     const year = date.getFullYear();
     const holidays = this.getHolidaysForYear(year);
-    
+
     return holidays.some(
       (holiday) =>
         holiday.getDate() === date.getDate() &&
@@ -329,18 +329,18 @@ export class GenericCalendarComponent
     const holidays: Date[] = [];
 
     // Jours fériés fixes
-    holidays.push(new Date(year, 0, 1));   // Nouvel An
-    holidays.push(new Date(year, 4, 1));   // Fête du travail
-    holidays.push(new Date(year, 4, 8));   // Victoire 1945
-    holidays.push(new Date(year, 6, 14));  // Fête nationale
-    holidays.push(new Date(year, 7, 15));  // Assomption
-    holidays.push(new Date(year, 10, 1));  // Toussaint
+    holidays.push(new Date(year, 0, 1)); // Nouvel An
+    holidays.push(new Date(year, 4, 1)); // Fête du travail
+    holidays.push(new Date(year, 4, 8)); // Victoire 1945
+    holidays.push(new Date(year, 6, 14)); // Fête nationale
+    holidays.push(new Date(year, 7, 15)); // Assomption
+    holidays.push(new Date(year, 10, 1)); // Toussaint
     holidays.push(new Date(year, 10, 11)); // Armistice
     holidays.push(new Date(year, 11, 25)); // Noël
 
     // Calcul de Pâques et jours fériés mobiles
     const easter = this.calculateEaster(year);
-    holidays.push(new Date(easter.getTime() + 24 * 60 * 60 * 1000));  // Lundi de Pâques
+    holidays.push(new Date(easter.getTime() + 24 * 60 * 60 * 1000)); // Lundi de Pâques
     holidays.push(new Date(easter.getTime() + 39 * 24 * 60 * 60 * 1000)); // Ascension
     holidays.push(new Date(easter.getTime() + 50 * 24 * 60 * 60 * 1000)); // Lundi de Pentecôte
 
@@ -368,7 +368,7 @@ export class GenericCalendarComponent
     const m = Math.floor((a + 11 * h + 22 * l) / 451);
     const month = Math.floor((h + l - 7 * m + 114) / 31) - 1; // -1 car les mois sont indexés à partir de 0
     const day = ((h + l - 7 * m + 114) % 31) + 1;
-    
+
     return new Date(year, month, day);
   }
 
