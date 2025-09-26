@@ -301,4 +301,61 @@ export class EmployeeDashboardComponent implements OnInit {
   isRowExpanded(index: number): boolean {
     return this.expandedRows.has(index);
   }
+
+  // Ajouter un nouvel employé
+  addNewEmployee(): void {
+    // Créer un employé vide pour le modal de création
+    const newEmployee: Employee = {
+      id: '', // L'ID sera généré par le service
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      position: '',
+      department: '',
+      workSector: WorkSector.IT,
+      contractType: ContractType.CDI,
+      hireDate: new Date(),
+      profilePicture: '',
+      salary: 0,
+      isActive: true,
+      leaveBalance: {
+        vacation: 25,
+        sick: 10,
+        personal: 5,
+        totalDaysUsed: 0,
+        totalDaysRemaining: 40,
+      },
+      documents: [],
+    };
+
+    const dialogRef = this.dialog.open(EditEmployeeModalComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      data: {
+        employee: newEmployee,
+        isNewEmployee: true,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Générer un nouvel ID
+        const newId = 'emp-' + Date.now();
+        result.id = newId;
+
+        // Ajouter l'employé à la liste locale (simulation)
+        this.employees.unshift(result);
+        this.totalEmployees++;
+
+        // Recharger la première page pour voir le nouvel employé
+        if (this.currentPage !== 1) {
+          this.currentPage = 1;
+        }
+        this.loadEmployees();
+
+        console.log('Nouvel employé ajouté:', result);
+      }
+    });
+  }
 }

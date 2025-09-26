@@ -60,6 +60,15 @@ export class EmployeeService {
     return of(employee);
   }
 
+  addEmployee(employee: Employee): Observable<Employee> {
+    // Simulation d'un ajout - en production, cela ferait un appel API
+    const newEmployee = {
+      ...employee,
+      id: 'emp-' + Date.now().toString(),
+    };
+    return of(newEmployee);
+  }
+
   private getMockEmployees(): Employee[] {
     return [
       {
