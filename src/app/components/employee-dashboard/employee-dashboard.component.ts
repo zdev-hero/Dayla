@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import {
   Employee,
@@ -16,14 +17,16 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 
 @Component({
   selector: 'app-employee-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './employee-dashboard.component.html',
   styleUrl: './employee-dashboard.component.scss',
 })
 export class EmployeeDashboardComponent implements OnInit {
   employees: Employee[] = [];
+  originalEmployees: Employee[] = []; // Liste complète non filtrée
   selectedRows: Set<number> = new Set();
   expandedRows: Set<number> = new Set();
+  expandedActionRows: Set<number> = new Set();
   selectedEmployee: Employee | null = null;
 
   // Pagination
@@ -33,6 +36,30 @@ export class EmployeeDashboardComponent implements OnInit {
   totalPages: number = 0;
   pages: number[] = [];
   loading: boolean = false;
+
+  // Recherche et auto-complétion
+  searchQuery: string = '';
+  showSearchSuggestions: boolean = false;
+  searchSuggestions: Employee[] = [];
+
+  // Filtres
+  showFilters: boolean = false;
+  selectedFilters = {
+    departments: [] as string[],
+    contractTypes: [] as ContractType[],
+    workSectors: [] as WorkSector[],
+    activeOnly: false,
+    contractExpiringSoon: false,
+  };
+
+  // Options de filtrage disponibles
+  availableDepartments: string[] = [];
+  availableContractTypes: ContractType[] = Object.values(ContractType);
+  availableWorkSectors: WorkSector[] = Object.values(WorkSector);
+
+  // Compteurs
+  activeFiltersCount: number = 0;
+  filteredEmployeesCount: number = 0;
 
   // Références pour les templates
   ContractType = ContractType;
@@ -49,24 +76,40 @@ export class EmployeeDashboardComponent implements OnInit {
 
   loadEmployees(): void {
     this.loading = true;
-    this.employeeService
-      .getEmployeesWithPagination(this.currentPage, this.pageSize)
-      .subscribe({
-        next: (response: EmployeePaginationResponse) => {
-          this.employees = response.employees;
-          this.totalEmployees = response.total;
-          this.totalPages = Math.ceil(this.totalEmployees / this.pageSize);
-          this.updatePageNumbers();
-          this.loading = false;
-          this.selectedRows.clear();
-          this.expandedRows.clear();
-          this.selectedEmployee = null;
-        },
-        error: (error) => {
-          console.error('Erreur lors du chargement des employés:', error);
-          this.loading = false;
-        },
-      });
+
+    // Charger tous les employés pour les filtres et la recherche
+    this.employeeService.getEmployeesWithPagination(1, 1000).subscribe({
+      next: (allEmployeesResponse: EmployeePaginationResponse) => {
+        this.originalEmployees = allEmployeesResponse.employees;
+        this.loadAvailableFilterOptions();
+
+        // Charger la page courante
+        this.employeeService
+          .getEmployeesWithPagination(this.currentPage, this.pageSize)
+          .subscribe({
+            next: (response: EmployeePaginationResponse) => {
+              this.employees = response.employees;
+              this.totalEmployees = response.total;
+              this.totalPages = Math.ceil(this.totalEmployees / this.pageSize);
+              this.filteredEmployeesCount = this.totalEmployees;
+              this.updatePageNumbers();
+              this.loading = false;
+              this.selectedRows.clear();
+              this.expandedRows.clear();
+              this.expandedActionRows.clear();
+              this.selectedEmployee = null;
+            },
+            error: (error) => {
+              console.error('Erreur lors du chargement des employés:', error);
+              this.loading = false;
+            },
+          });
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement de tous les employés:', error);
+        this.loading = false;
+      },
+    });
   }
 
   updatePageNumbers(): void {
@@ -189,6 +232,7 @@ export class EmployeeDashboardComponent implements OnInit {
 
     this.selectedRows.clear();
     this.expandedRows.clear();
+    this.expandedActionRows.clear();
 
     allCheckboxes.forEach((cb, index) => {
       cb.checked = false;
@@ -277,6 +321,19 @@ export class EmployeeDashboardComponent implements OnInit {
     alert(`${this.getFullName(employee)} a ${totalDocs} document(s)`);
   }
 
+  toggleActionMenu(index: number, event: Event): void {
+    event.stopPropagation();
+
+    if (this.expandedActionRows.has(index)) {
+      this.expandedActionRows.delete(index);
+    } else {
+      // Fermer tous les autres menus d'actions ouverts
+      this.expandedActionRows.clear();
+      // Ouvrir le menu pour cette ligne
+      this.expandedActionRows.add(index);
+    }
+  }
+
   // Méthodes trackBy pour optimiser les performances
   trackByEmployeeId(index: number, employee: Employee): string {
     return employee.id;
@@ -357,5 +414,240 @@ export class EmployeeDashboardComponent implements OnInit {
         console.log('Nouvel employé ajouté:', result);
       }
     });
+  }
+
+  // ============= MÉTHODES DE RECHERCHE ET AUTO-COMPLÉTION =============
+
+  onSearchInput(event: any): void {
+    const query = event.target.value;
+    const queryLowerCase = query.toLowerCase();
+    this.searchQuery = query;
+
+    if (query.length >= 2) {
+      this.searchSuggestions = this.originalEmployees
+        .filter(
+          (employee) =>
+            `${employee.firstName} ${employee.lastName}`
+              .toLowerCase()
+              .includes(queryLowerCase) ||
+            employee.email.toLowerCase().includes(queryLowerCase) ||
+            employee.department.toLowerCase().includes(queryLowerCase) ||
+            employee.position.toLowerCase().includes(queryLowerCase)
+        )
+        .slice(0, 5); // Limiter à 5 suggestions
+      this.showSearchSuggestions = true;
+    } else {
+      this.searchSuggestions = [];
+      this.showSearchSuggestions = false;
+      if (query.length === 0) {
+        this.applyFilters(); // Réappliquer les filtres quand on efface la recherche
+      }
+    }
+  }
+
+  selectSuggestion(employee: Employee): void {
+    this.searchQuery = `${employee.firstName} ${employee.lastName}`;
+    this.showSearchSuggestions = false;
+    this.applySearchAndFilters();
+  }
+
+  hideSearchSuggestions(): void {
+    // Délai pour permettre au clic sur une suggestion de fonctionner
+    setTimeout(() => {
+      this.showSearchSuggestions = false;
+    }, 200);
+  }
+
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.searchSuggestions = [];
+    this.showSearchSuggestions = false;
+    this.applyFilters();
+  }
+
+  // ============= MÉTHODES DE FILTRAGE =============
+
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
+  }
+
+  closeFilters(): void {
+    this.showFilters = false;
+  }
+
+  onDepartmentFilterChange(department: string, event: any): void {
+    if (event.target.checked) {
+      this.selectedFilters.departments.push(department);
+    } else {
+      const index = this.selectedFilters.departments.indexOf(department);
+      if (index > -1) {
+        this.selectedFilters.departments.splice(index, 1);
+      }
+    }
+    this.updateActiveFiltersCount();
+  }
+
+  onContractTypeFilterChange(contractType: ContractType, event: any): void {
+    if (event.target.checked) {
+      this.selectedFilters.contractTypes.push(contractType);
+    } else {
+      const index = this.selectedFilters.contractTypes.indexOf(contractType);
+      if (index > -1) {
+        this.selectedFilters.contractTypes.splice(index, 1);
+      }
+    }
+    this.updateActiveFiltersCount();
+  }
+
+  onWorkSectorFilterChange(workSector: WorkSector, event: any): void {
+    if (event.target.checked) {
+      this.selectedFilters.workSectors.push(workSector);
+    } else {
+      const index = this.selectedFilters.workSectors.indexOf(workSector);
+      if (index > -1) {
+        this.selectedFilters.workSectors.splice(index, 1);
+      }
+    }
+    this.updateActiveFiltersCount();
+  }
+
+  onActiveFilterChange(event: any): void {
+    this.selectedFilters.activeOnly = event.target.checked;
+    this.updateActiveFiltersCount();
+  }
+
+  onExpiringContractFilterChange(event: any): void {
+    this.selectedFilters.contractExpiringSoon = event.target.checked;
+    this.updateActiveFiltersCount();
+  }
+
+  updateActiveFiltersCount(): void {
+    this.activeFiltersCount =
+      this.selectedFilters.departments.length +
+      this.selectedFilters.contractTypes.length +
+      this.selectedFilters.workSectors.length +
+      (this.selectedFilters.activeOnly ? 1 : 0) +
+      (this.selectedFilters.contractExpiringSoon ? 1 : 0);
+  }
+
+  clearAllFilters(): void {
+    this.selectedFilters = {
+      departments: [],
+      contractTypes: [],
+      workSectors: [],
+      activeOnly: false,
+      contractExpiringSoon: false,
+    };
+    this.activeFiltersCount = 0;
+    this.applyFilters();
+  }
+
+  applyFilters(): void {
+    this.applySearchAndFilters();
+    // Fermer le panneau de filtres après application
+    this.showFilters = false;
+  }
+
+  private applySearchAndFilters(): void {
+    let filteredEmployees = [...this.originalEmployees];
+
+    // Appliquer la recherche
+    if (this.searchQuery.trim()) {
+      const query = this.searchQuery.toLowerCase();
+      filteredEmployees = filteredEmployees.filter(
+        (employee) =>
+          `${employee.firstName} ${employee.lastName}`
+            .toLowerCase()
+            .includes(query) ||
+          employee.email.toLowerCase().includes(query) ||
+          employee.department.toLowerCase().includes(query) ||
+          employee.position.toLowerCase().includes(query)
+      );
+    }
+
+    // Appliquer les filtres de département
+    if (this.selectedFilters.departments.length > 0) {
+      filteredEmployees = filteredEmployees.filter((employee) =>
+        this.selectedFilters.departments.includes(employee.department)
+      );
+    }
+
+    // Appliquer les filtres de type de contrat
+    if (this.selectedFilters.contractTypes.length > 0) {
+      filteredEmployees = filteredEmployees.filter(
+        (employee) =>
+          employee.contractType &&
+          this.selectedFilters.contractTypes.includes(employee.contractType)
+      );
+    }
+
+    // Appliquer les filtres de secteur d'activité
+    if (this.selectedFilters.workSectors.length > 0) {
+      filteredEmployees = filteredEmployees.filter(
+        (employee) =>
+          employee.workSector &&
+          this.selectedFilters.workSectors.includes(employee.workSector)
+      );
+    }
+
+    // Appliquer le filtre employés actifs
+    if (this.selectedFilters.activeOnly) {
+      filteredEmployees = filteredEmployees.filter(
+        (employee) => employee.isActive
+      );
+    }
+
+    // Appliquer le filtre contrats expirant bientôt
+    if (this.selectedFilters.contractExpiringSoon) {
+      const threeMonthsFromNow = new Date();
+      threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+
+      filteredEmployees = filteredEmployees.filter(
+        (employee) =>
+          employee.contractEndDate &&
+          new Date(employee.contractEndDate) <= threeMonthsFromNow
+      );
+    }
+
+    // Mettre à jour les résultats
+    this.filteredEmployeesCount = filteredEmployees.length;
+
+    // Simuler la pagination avec les résultats filtrés
+    this.totalEmployees = filteredEmployees.length;
+    this.totalPages = Math.ceil(this.totalEmployees / this.pageSize);
+
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.employees = filteredEmployees.slice(startIndex, endIndex);
+
+    this.updatePageNumbers();
+
+    // Réinitialiser les sélections
+    this.selectedRows.clear();
+    this.expandedRows.clear();
+    this.expandedActionRows.clear();
+  }
+
+  private loadAvailableFilterOptions(): void {
+    // Extraire les départements uniques
+    this.availableDepartments = [
+      ...new Set(this.originalEmployees.map((emp) => emp.department)),
+    ];
+  }
+
+  getWorkSectorDisplayName(sector: WorkSector): string {
+    const sectorNames: { [key in WorkSector]: string } = {
+      [WorkSector.IT]: 'Informatique',
+      [WorkSector.RH]: 'Ressources Humaines',
+      [WorkSector.FINANCE]: 'Finance',
+      [WorkSector.MARKETING]: 'Marketing',
+      [WorkSector.VENTE]: 'Vente',
+      [WorkSector.PRODUCTION]: 'Production',
+      [WorkSector.QUALITE]: 'Qualité',
+      [WorkSector.LOGISTIQUE]: 'Logistique',
+      [WorkSector.JURIDIQUE]: 'Juridique',
+      [WorkSector.DIRECTION]: 'Direction',
+    };
+    return sectorNames[sector] || sector;
   }
 }
