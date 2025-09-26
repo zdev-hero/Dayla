@@ -31,6 +31,13 @@ export const routes: Routes = [
       import('./components/cra/cra.component').then((m) => m.CraComponent),
   },
   {
+    path: 'all-cra',
+    loadComponent: () =>
+      import('./components/all-cra/all-cra.component').then(
+        (m) => m.AllCraComponent
+      ),
+  },
+  {
     path: 'history',
     loadComponent: () =>
       import('./components/leave-analytics/leave-analytics.component').then(

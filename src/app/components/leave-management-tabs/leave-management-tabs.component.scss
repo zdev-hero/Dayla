@@ -59,6 +59,23 @@
             transform: scale(1.1);
           }
 
+          &::after {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 3px;
+            background: linear-gradient(
+              90deg,
+              var(--color-primary) 0%,
+              #60a5fa 100%
+            );
+            border-radius: 2px;
+            z-index: 10;
+          }
+
           &::before {
             content: "";
             position: absolute;
@@ -162,11 +179,8 @@
   transform: translateY(0) scale(0.98);
 }
 
-/* Force la bordure bleue à rester visible pour l'onglet actif dans tous les états */
-.tab-btn.active::after,
-.tab-btn.active:hover::after,
-.tab-btn.active:focus::after,
-.tab-btn.active:active::after {
+/* Force la bordure bleue à rester visible pour l'onglet actif */
+.tab-btn.active::after {
   content: "" !important;
   position: absolute !important;
   bottom: -6px !important;

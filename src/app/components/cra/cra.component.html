@@ -1,6 +1,6 @@
 <div class="cra-container">
-  <!-- En-tête avec navigation mois/année -->
-  <div class="cra-header">
+  <!-- En-tête avec navigation mois/année (masqué en mode lecture seule) -->
+  <div class="cra-header" *ngIf="!readOnly">
     <div class="header-top">
       <h1 class="page-title">Compte Rendu d'Activité (CRA)</h1>
 
@@ -50,7 +50,7 @@
         </div>
       </div>
 
-      <div class="actions">
+      <div class="actions" *ngIf="!readOnly">
         <button class="btn btn-primary" (click)="submitCra()">
           Soumettre pour validation
         </button>
@@ -58,10 +58,10 @@
     </div>
   </div>
 
-  <!-- Message de feedback -->
+  <!-- Message de feedback (masqué en mode lecture seule) -->
   <div
     class="save-message"
-    *ngIf="saveMessage"
+    *ngIf="saveMessage && !readOnly"
     [class.error]="saveMessage.includes('Erreur')"
   >
     {{ saveMessage }}
@@ -81,8 +81,12 @@
   >
   </app-generic-calendar>
 
-  <!-- Modal d'édition d'entrée -->
-  <div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
+  <!-- Modal d'édition d'entrée (masqué en mode lecture seule) -->
+  <div
+    class="modal-overlay"
+    *ngIf="showEditModal && !readOnly"
+    (click)="closeEditModal()"
+  >
     <div class="edit-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>

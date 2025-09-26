@@ -1,4 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  Input,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, combineLatest } from 'rxjs';
@@ -33,8 +40,14 @@ import { CRA_CALENDAR_CONFIG } from '../../config/calendar-configs';
   templateUrl: './cra.component.html',
   styleUrls: ['./cra.component.scss'],
 })
-export class CraComponent implements OnInit, OnDestroy {
+export class CraComponent implements OnInit, OnDestroy, OnChanges {
   private destroy$ = new Subject<void>();
+
+  // Inputs pour le mode intégration
+  @Input() employeeId?: string;
+  @Input() year?: number;
+  @Input() month?: number;
+  @Input() readOnly: boolean = false;
 
   // Configuration du calendrier
   calendarConfig: CalendarConfig = {
@@ -80,6 +93,14 @@ export class CraComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Initialiser les valeurs à partir des inputs si disponibles
+    if (this.year) {
+      this.selectedYear = this.year;
+    }
+    if (this.month) {
+      this.selectedMonth = this.month;
+    }
+
     // Mise à jour de la configuration pour s'assurer du mode mensuel
     this.calendarConfig = {
       ...CRA_CALENDAR_CONFIG,
@@ -88,23 +109,56 @@ export class CraComponent implements OnInit, OnDestroy {
     this.loadData();
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    // Réagir aux changements d'inputs
+    if (changes['year'] && changes['year'].currentValue) {
+      this.selectedYear = changes['year'].currentValue;
+    }
+    if (changes['month'] && changes['month'].currentValue) {
+      this.selectedMonth = changes['month'].currentValue;
+    }
+    if (changes['employeeId'] && changes['employeeId'].currentValue) {
+      // Recharger les données si l'employé change
+      this.loadData();
+    } else if (changes['year'] || changes['month']) {
+      // Recharger juste le calendrier si seule la période change
+      if (this.currentEmployee || this.employeeId) {
+        this.generateEmployeeCalendar();
+      }
+    }
+  }
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   private loadData() {
-    // Charger uniquement l'employé connecté pour le CRA
-    this.employeeService
-      .getCurrentEmployee()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((employee: Employee | null) => {
-        if (employee) {
-          this.currentEmployee = employee;
-          this.employees = [employee];
-          this.generateEmployeeCalendar();
-        }
-      });
+    if (this.employeeId) {
+      // Mode intégration : charger un employé spécifique
+      this.employeeService
+        .getEmployeeById(this.employeeId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((employee: Employee | undefined) => {
+          if (employee) {
+            this.currentEmployee = employee;
+            this.employees = [employee];
+            this.generateEmployeeCalendar();
+          }
+        });
+    } else {
+      // Mode normal : charger l'employé connecté
+      this.employeeService
+        .getCurrentEmployee()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((employee: Employee | null) => {
+          if (employee) {
+            this.currentEmployee = employee;
+            this.employees = [employee];
+            this.generateEmployeeCalendar();
+          }
+        });
+    }
   }
 
   private generateEmployeeCalendar() {
@@ -266,7 +320,7 @@ export class CraComponent implements OnInit, OnDestroy {
 
   // Événements du calendrier
   onCellClick(event: CalendarCellClickEvent) {
-    if (!event.day.isEditable) return;
+    if (!event.day.isEditable || this.readOnly) return;
 
     this.editingEntry = {
       day: event.day,
@@ -307,6 +361,9 @@ export class CraComponent implements OnInit, OnDestroy {
     selectedCells: Set<string>;
     selectedData: { employee: Employee; day: CalendarDay; dayIndex: number }[];
   }) {
+    // Ne pas permettre la sélection en mode lecture seule
+    if (this.readOnly) return;
+
     // Si des cellules sont sélectionnées, ouvrir la popup de saisie d'activité
     if (event.selectedData && event.selectedData.length > 0) {
       // Prendre la première cellule sélectionnée pour initialiser la popup

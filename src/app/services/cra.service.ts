@@ -8,6 +8,13 @@ import {
   CraValidationRule,
 } from '../models/cra.model';
 
+export interface CraPaginationResponse {
+  craMonths: CraMonth[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -24,10 +31,100 @@ export class CraService {
   }
 
   private initializeMockData() {
-    // Initialiser avec des données vides pour le moment
-    // Les vraies données seront chargées depuis l'API
+    // Générer des données d'exemple
+    this.generateMockData();
     this.craEntriesSubject.next(this.mockCraEntries);
     this.craMonthsSubject.next(this.mockCraMonths);
+  }
+
+  private generateMockData() {
+    const employeeIds = [
+      'emp-1',
+      'emp-2',
+      'emp-3',
+      'emp-4',
+      'emp-5',
+      'emp-6',
+      'emp-7',
+      'emp-8',
+    ];
+    const statuses: ('draft' | 'submitted' | 'validated' | 'rejected')[] = [
+      'draft',
+      'submitted',
+      'validated',
+      'rejected',
+    ];
+
+    // Générer des CRA pour les 12 derniers mois
+    const currentDate = new Date();
+    for (let monthOffset = 0; monthOffset < 12; monthOffset++) {
+      const date = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() - monthOffset,
+        1
+      );
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+
+      employeeIds.forEach((employeeId) => {
+        const randomStatus =
+          statuses[Math.floor(Math.random() * statuses.length)];
+        const entries: CraEntry[] = [];
+
+        // Générer quelques entrées par mois
+        const daysInMonth = new Date(year, month, 0).getDate();
+        const workingDays = Math.floor(daysInMonth * 0.7); // Environ 70% de jours travaillés
+
+        for (let day = 1; day <= workingDays; day++) {
+          const entryDate = new Date(year, month - 1, day);
+          const dayOfWeek = entryDate.getDay();
+
+          // Ignorer les week-ends
+          if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+
+          const entry: CraEntry = {
+            id: this.generateId(),
+            employeeId,
+            date: entryDate,
+            value:
+              Math.random() > 0.1
+                ? 1
+                : Math.random() > 0.5
+                ? 0.5
+                : CraLeaveType.VACATION,
+            isLeaveType: Math.random() > 0.8,
+            notes: Math.random() > 0.7 ? "Note d'exemple" : '',
+            status: randomStatus,
+            createdAt: new Date(
+              entryDate.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000
+            ),
+            updatedAt: new Date(),
+          };
+
+          entries.push(entry);
+          this.mockCraEntries.push(entry);
+        }
+
+        const craMonth: CraMonth = {
+          employeeId,
+          year,
+          month,
+          entries,
+          totalDays: entries.length,
+          status: randomStatus,
+          submittedAt:
+            randomStatus !== 'draft'
+              ? new Date(year, month - 1, Math.floor(Math.random() * 28) + 1)
+              : undefined,
+          validatedAt:
+            randomStatus === 'validated'
+              ? new Date(year, month - 1, Math.floor(Math.random() * 28) + 1)
+              : undefined,
+        };
+
+        this.mockCraMonths.push(craMonth);
+      });
+    }
   }
 
   // Récupérer les entrées CRA pour un employé et une période
@@ -299,6 +396,68 @@ export class CraService {
   private isValidHalfDay(date: Date): boolean {
     const dayOfWeek = date.getDay();
     return dayOfWeek >= 1 && dayOfWeek <= 5; // Lundi à vendredi seulement
+  }
+
+  // Méthodes pour la pagination des CRA
+  getCraMonthsWithPagination(
+    page: number = 1,
+    pageSize: number = 10,
+    filters?: {
+      employeeIds?: string[];
+      statuses?: string[];
+      year?: number;
+      month?: number;
+    }
+  ): Observable<CraPaginationResponse> {
+    let filteredCras = [...this.mockCraMonths];
+
+    // Appliquer les filtres
+    if (filters) {
+      if (filters.employeeIds && filters.employeeIds.length > 0) {
+        filteredCras = filteredCras.filter((cra) =>
+          filters.employeeIds!.includes(cra.employeeId)
+        );
+      }
+
+      if (filters.statuses && filters.statuses.length > 0) {
+        filteredCras = filteredCras.filter((cra) =>
+          filters.statuses!.includes(cra.status)
+        );
+      }
+
+      if (filters.year) {
+        filteredCras = filteredCras.filter((cra) => cra.year === filters.year);
+      }
+
+      if (filters.month) {
+        filteredCras = filteredCras.filter(
+          (cra) => cra.month === filters.month
+        );
+      }
+    }
+
+    // Trier par date décroissante (plus récent en premier)
+    filteredCras.sort((a, b) => {
+      const dateA = new Date(a.year, a.month - 1);
+      const dateB = new Date(b.year, b.month - 1);
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    const total = filteredCras.length;
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedCras = filteredCras.slice(startIndex, endIndex);
+
+    return of({
+      craMonths: paginatedCras,
+      total,
+      page,
+      pageSize,
+    });
+  }
+
+  getAllCraMonths(): Observable<CraMonth[]> {
+    return of([...this.mockCraMonths]);
   }
 
   // Générer un ID unique
