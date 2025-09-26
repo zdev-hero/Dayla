@@ -47,10 +47,6 @@
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.unified-frame:hover {
-  box-shadow: var(--shadow-card-hover);
-}
-
 /* Améliorations responsive */
 @media (max-width: 768px) {
   .app-wrapper {
