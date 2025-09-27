@@ -1,0 +1,207 @@
+<div class="employee-statistics">
+  <div class="statistics-grid">
+    <!-- Graphique 1: Employés par tranche d'âge -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>Employés par tranche d'âge</h3>
+      </div>
+      <div class="chart-container">
+        <div class="donut-chart">
+          <svg width="120" height="120" viewBox="0 0 160 160">
+            <!-- Cercle de fond -->
+            <circle
+              cx="80"
+              cy="80"
+              r="72"
+              stroke="#F1F5F9"
+              stroke-width="16"
+              fill="none"
+            />
+            <!-- Arc pour chaque tranche d'âge -->
+            <circle
+              *ngFor="let group of ageGroups; let i = index"
+              cx="80"
+              cy="80"
+              r="72"
+              [attr.stroke]="group.color"
+              stroke-width="16"
+              fill="none"
+              [attr.stroke-dasharray]="getStrokeDasharray(group.percentage, 72)"
+              [attr.stroke-dashoffset]="getStrokeDashoffset(ageGroups, i, 72)"
+              transform="rotate(-90 80 80)"
+              stroke-linecap="round"
+            />
+          </svg>
+          <div class="donut-center">
+            <div class="donut-value">{{ getTotalAgeGroups() }}</div>
+            <div class="donut-label">Total</div>
+          </div>
+        </div>
+        <div class="legend">
+          <div *ngFor="let group of ageGroups" class="legend-item">
+            <div
+              class="legend-color"
+              [style.background-color]="group.color"
+            ></div>
+            <span class="legend-label">{{ group.label }}</span>
+            <span class="legend-value">{{ group.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphique 2: Employés par catégories -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>Employés par catégories</h3>
+      </div>
+      <div class="chart-container">
+        <div class="donut-chart">
+          <svg width="120" height="120" viewBox="0 0 160 160">
+            <!-- Cercle de fond -->
+            <circle
+              cx="80"
+              cy="80"
+              r="72"
+              stroke="#F1F5F9"
+              stroke-width="16"
+              fill="none"
+            />
+            <!-- Arc pour chaque catégorie -->
+            <circle
+              *ngFor="let category of categories; let i = index"
+              cx="80"
+              cy="80"
+              r="72"
+              [attr.stroke]="category.color"
+              stroke-width="16"
+              fill="none"
+              [attr.stroke-dasharray]="
+                getStrokeDasharray(category.percentage, 72)
+              "
+              [attr.stroke-dashoffset]="getStrokeDashoffset(categories, i, 72)"
+              transform="rotate(-90 80 80)"
+              stroke-linecap="round"
+            />
+          </svg>
+          <div class="donut-center">
+            <div class="donut-value">{{ getTotalCategories() }}</div>
+            <div class="donut-label">Total</div>
+          </div>
+        </div>
+        <div class="legend">
+          <div *ngFor="let category of categories" class="legend-item">
+            <div
+              class="legend-color"
+              [style.background-color]="category.color"
+            ></div>
+            <span class="legend-label">{{ category.label }}</span>
+            <span class="legend-value">{{ category.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphique 3: Employés par départements -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>Employés par départements</h3>
+      </div>
+      <div class="chart-container">
+        <div class="donut-chart">
+          <svg width="120" height="120" viewBox="0 0 160 160">
+            <!-- Cercle de fond -->
+            <circle
+              cx="80"
+              cy="80"
+              r="72"
+              stroke="#F1F5F9"
+              stroke-width="16"
+              fill="none"
+            />
+            <!-- Arc pour chaque département -->
+            <circle
+              *ngFor="let dept of departments; let i = index"
+              cx="80"
+              cy="80"
+              r="72"
+              [attr.stroke]="dept.color"
+              stroke-width="16"
+              fill="none"
+              [attr.stroke-dasharray]="getStrokeDasharray(dept.percentage, 72)"
+              [attr.stroke-dashoffset]="getStrokeDashoffset(departments, i, 72)"
+              transform="rotate(-90 80 80)"
+              stroke-linecap="round"
+            />
+          </svg>
+          <div class="donut-center">
+            <div class="donut-value">{{ getTotalDepartments() }}</div>
+            <div class="donut-label">Total</div>
+          </div>
+        </div>
+        <div class="legend">
+          <div *ngFor="let dept of departments" class="legend-item">
+            <div
+              class="legend-color"
+              [style.background-color]="dept.color"
+            ></div>
+            <span class="legend-label">{{ dept.label }}</span>
+            <span class="legend-value">{{ dept.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphique 4: Employés par type de contrat -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>Types de contrats</h3>
+      </div>
+      <div class="chart-container">
+        <div class="donut-chart">
+          <svg width="120" height="120" viewBox="0 0 160 160">
+            <!-- Cercle de fond -->
+            <circle
+              cx="80"
+              cy="80"
+              r="72"
+              stroke="#F1F5F9"
+              stroke-width="16"
+              fill="none"
+            />
+            <!-- Arc pour chaque type de contrat -->
+            <circle
+              *ngFor="let contract of contracts; let i = index"
+              cx="80"
+              cy="80"
+              r="72"
+              [attr.stroke]="contract.color"
+              stroke-width="16"
+              fill="none"
+              [attr.stroke-dasharray]="
+                getStrokeDasharray(contract.percentage, 72)
+              "
+              [attr.stroke-dashoffset]="getStrokeDashoffset(contracts, i, 72)"
+              transform="rotate(-90 80 80)"
+              stroke-linecap="round"
+            />
+          </svg>
+          <div class="donut-center">
+            <div class="donut-value">{{ getTotalContracts() }}</div>
+            <div class="donut-label">Total</div>
+          </div>
+        </div>
+        <div class="legend">
+          <div *ngFor="let contract of contracts" class="legend-item">
+            <div
+              class="legend-color"
+              [style.background-color]="contract.color"
+            ></div>
+            <span class="legend-label">{{ contract.label }}</span>
+            <span class="legend-value">{{ contract.value }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

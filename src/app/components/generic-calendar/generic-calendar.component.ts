@@ -217,12 +217,12 @@ export class GenericCalendarComponent
     return (this.scrollPosition / this.maxScrollPosition) * (100 - thumbWidth);
   }
 
-  get employeeColumnWidth(): number {
-    return this.config.employeeColumnWidth || 200;
-  }
-
   get cellWidth(): number {
     return this.config.cellWidth || 24;
+  }
+
+  get employeeColumnWidth(): number {
+    return this.config.employeeColumnWidth || 300;
   }
 
   get cellHeight(): number {

@@ -46,6 +46,29 @@
         </svg>
         Liste d'absences
       </button>
+
+      <button
+        class="tab-btn"
+        [class.active]="isActiveTab('employee-statistics')"
+        (click)="setActiveTab('employee-statistics')"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M3 3v18h18" />
+          <path d="M7 12l4-4 4 4 4-2" />
+          <circle cx="7" cy="12" r="1" />
+          <circle cx="11" cy="8" r="1" />
+          <circle cx="15" cy="12" r="1" />
+          <circle cx="19" cy="10" r="1" />
+        </svg>
+        Statistiques employés
+      </button>
     </div>
   </div>
 
@@ -58,6 +81,14 @@
 
         <div *ngIf="isActiveTab('absence-list')" class="tab-pane" [@fadeIn]>
           <app-absence-list></app-absence-list>
+        </div>
+
+        <div
+          *ngIf="isActiveTab('employee-statistics')"
+          class="tab-pane"
+          [@fadeIn]
+        >
+          <app-employee-statistics></app-employee-statistics>
         </div>
       </div>
     </section>

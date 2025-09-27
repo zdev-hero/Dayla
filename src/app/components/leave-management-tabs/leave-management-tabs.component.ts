@@ -9,10 +9,16 @@ import {
 } from '@angular/animations';
 import { LeaveRequestsComponent } from '../leave-requests/leave-requests.component';
 import { AbsenceListComponent } from '../absence-list/absence-list.component';
+import { EmployeeStatisticsComponent } from '../employee-statistics/employee-statistics.component';
 
 @Component({
   selector: 'app-leave-management-tabs',
-  imports: [CommonModule, LeaveRequestsComponent, AbsenceListComponent],
+  imports: [
+    CommonModule,
+    LeaveRequestsComponent,
+    AbsenceListComponent,
+    EmployeeStatisticsComponent,
+  ],
   templateUrl: './leave-management-tabs.component.html',
   styleUrl: './leave-management-tabs.component.scss',
   animations: [
@@ -29,7 +35,8 @@ import { AbsenceListComponent } from '../absence-list/absence-list.component';
 })
 export class LeaveManagementTabsComponent implements OnInit {
   // Gestion des onglets
-  activeTab: 'leave-requests' | 'absence-list' = 'leave-requests';
+  activeTab: 'leave-requests' | 'absence-list' | 'employee-statistics' =
+    'leave-requests';
 
   constructor() {}
 
@@ -39,7 +46,9 @@ export class LeaveManagementTabsComponent implements OnInit {
    * Change l'onglet actif
    * @param tab - L'onglet à activer
    */
-  setActiveTab(tab: 'leave-requests' | 'absence-list'): void {
+  setActiveTab(
+    tab: 'leave-requests' | 'absence-list' | 'employee-statistics'
+  ): void {
     this.activeTab = tab;
     console.log('Onglet activé:', tab);
   }
@@ -49,7 +58,9 @@ export class LeaveManagementTabsComponent implements OnInit {
    * @param tab - L'onglet à vérifier
    * @returns true si l'onglet est actif
    */
-  isActiveTab(tab: 'leave-requests' | 'absence-list'): boolean {
+  isActiveTab(
+    tab: 'leave-requests' | 'absence-list' | 'employee-statistics'
+  ): boolean {
     return this.activeTab === tab;
   }
 }
